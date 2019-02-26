@@ -1,0 +1,147 @@
+<div class="card-panel">
+  <div class="row">
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s3">
+          <i class="material-icons prefix">font_download</i>
+          <input id="CLAVE_OPERACION" type="text" class="validate">
+          <label for="CLAVE_OPERACION">Clave</label>
+        </div>
+        <div class="input-field col s3">
+          <i class="material-icons prefix">account_box</i>
+          <input id="DESCRIPCION_OPERACION" type="text" class="validate">
+          <label for="DESCRIPCION_OPERACION">Nombre</label>
+        </div>
+        <div class="col s6" style="text-align: right">
+          <button (click)="GetAreaConfeccion()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar las áreas de confección" type="button" name="btnSearchAreaConfeccion">Buscar
+            <i class="material-icons right">search</i>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <table id="tlbAreaConfeccion" class="row-border hover">
+          <thead>
+            <th></th>
+            <th>Clave Area</th>
+            <th>Descripción Area</th>
+            <th>Estatus</th>
+            <th></th>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <br />
+      <div class="row" style="text-align: right">
+        <div class="col s12">
+          <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+            <i class="material-icons left">arrow_back</i>
+          </button>
+          &nbsp;&nbsp;
+          <button (click)="DisposeNewAreaConfeccion()" class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega una nueva área" data-target="modalNewAreaConfeccion" type="button" name="btnAddAreaConfeccion">Agregar
+            <i class="material-icons right">send</i>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Update Enabled Cortador -->
+<div id="modalEnableAreaConfeccion" class="modal">
+  <div class="modal-content">
+    <div style="text-align: center">
+      <p>¿Realmente deseas activar o desactivar el área de confección?</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="GetEnabledArea();" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalNewAreaConfeccion" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Nueva Area Confección</h4>
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CLAVE_NEW_OPERACION" maxlength="10" type="text" class="validate">
+          <label for="CLAVE_NEW_OPERACION">Clave</label>
+        </div>
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_circle</i>
+          <input id="DESCRIPCION_NEW_OPERACION" maxlength="150" type="text" class="validate">
+          <label for="DESCRIPCION_NEW_OPERACION">Nombre:</label>
+        </div>
+      </div>
+      <div class="row">
+        <table id="tlbOperacionDefecto" class="row-border hover">
+          <thead>
+            <th></th>
+            <th>No.</th>
+            <th>Clave Área Operación</th>
+            <th>Nombre Área Operación</th>
+          </thead>
+          <tbody id="tdby_Posicion"></tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="NewAreaConfeccion()" onclick="javascript: GetCheckPosicion()" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalEditAreaConfeccion" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Edita el área de la confección</h4>
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_EDT_AREA" name="CVE_EDT_AREA" maxlength="10" type="text" class="validate">
+          <label class="active" for="CVE_EDT_AREA">Clave</label>
+        </div>
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_circle</i>
+          <input id="NOMBRE_EDT_AREA" name="NOMBRE_EDT_AREA" maxlength="150" type="text" class="validate">
+          <label class="active" for="NOMBRE_EDT_AREA">Nombre:</label>
+        </div>
+      </div>
+      <div class="row">
+        <table id="tlbOperacionEdtDefecto" class="row-border hover">
+          <thead>
+            <th>No.</th>
+            <th>Clave Área</th>
+            <th>Nombre Área</th>
+          </thead>
+          <tbody id="tdby_edt_Posicion"></tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (ckick)="EditAreaConfeccion()" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>

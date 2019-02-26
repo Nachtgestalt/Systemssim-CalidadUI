@@ -1,0 +1,41 @@
+<div class="card-panel">
+    <div class="row">
+        <form class="col s12">
+            <div class="row">
+                <div class="input-field col s3">
+                    <i class="material-icons prefix">date_range</i>
+                    <input id="FECHA_INICIAL" type="text" class="datepicker">
+                    <label for="FECHA_INICIAL">FECHA INICIAL</label>
+                </div>
+                <div class="input-field col s3">
+                    <i class="material-icons prefix">date_range</i>
+                    <input id="FECHA_FINAL" type="text" class="datepicker">
+                    <label for="FECHA_FINAL">FECHA FINAL</label>
+                </div>
+                <div class="input-field col s3">
+                    <select id="ddlCliente">
+                        <option value="0" disabled selected>TODOS...</option>
+                    </select>
+                    <label>CLIENTE:</label>
+                </div>
+                <div class="input-field col s3">
+                    <i class="material-icons prefix">filter_1</i>
+                    <input id="NUM_PO" type="text" class="validate">
+                    <label for="NUM_PO">PO</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="input-field col s3">
+                    
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="col s3">
+    <button (click)="ExportaReporte()" class="btn tooltipped waves-effect waves-light" type="button" data-tooltip="Filtra el reporte" name="btnSearchCortadores">Buscar
+        <i class="material-icons right">search</i>
+    </button>
+</div>

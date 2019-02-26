@@ -1,0 +1,150 @@
+<div class="card-panel">
+  <div class="row" style="text-align: right">
+    <div class="col s12">
+      <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+        <i class="material-icons left">arrow_back</i>
+      </button>
+      &nbsp;&nbsp;
+      <button (click)="DisposeNewTendido()" class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega un nuevo tendido" data-target="modalNewTendido" type="button" name="btnAddTendido">Agregar
+        <i class="material-icons right">send</i>
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s3">
+          <i class="material-icons prefix">font_download</i>
+          <input id="CLAVE_CORTADOR" type="text" class="validate">
+          <label for="CLAVE_CORTADOR">Clave</label>
+        </div>
+        <div class="input-field col s3">
+          <i class="material-icons prefix">account_box</i>
+          <input id="NOMBRE_CORTADOR" type="text" class="validate">
+          <label for="NOMBRE_CORTADOR">Nombre</label>
+        </div>
+        <div class="col s6" style="text-align: right">
+          <button (click)="GetTendido()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar los tendidos por filtro seleccionado" type="button" name="btnSearchTendido">Buscar
+            <i class="material-icons right">search</i>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <table id="tlbTendido" class="row-border hover">
+          <thead>
+            <th></th>
+            <th>Clave Tendido</th>
+            <th>Nombre Tendido</th>
+            <th>Estatus</th>
+            <th></th>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <br />
+    </form>
+  </div>
+</div>
+
+<div id="modalNewTendido" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Nuevo Tendido</h4>
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate">
+          <label for="CVE_NEW_CORTADOR">Clave</label>
+        </div>
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_circle</i>
+          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate">
+          <label for="NOMBRE_NEW_CORTADOR">Nombre:</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="10" type="text" class="validate">
+          <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>
+        </div>
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate">
+          <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="NewTendido()" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalEditTendido" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Edita el Tendido</h4>
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_EDT_TENDIDO" maxlength="10" type="text" class="validate">
+          <label class="active" for="CVE_EDT_TENDIDO">Clave</label>
+        </div>
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_circle</i>
+          <input id="NOMBRE_EDT_TENDIDO" maxlength="150" type="text" class="validate">
+          <label class="active" for="NOMBRE_EDT_TENDIDO">Nombre:</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="OBSERVACIONES_EDT_TENDIDO" maxlength="500" type="text" class="validate">
+          <label class="active" for="OBSERVACIONES_EDT_TENDIDO">Obs.:</label>
+        </div>
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="DESCRIPCION_EDT_TENDIDO" maxlength="250" type="text" class="validate">
+          <label class="active" for="DESCRIPCION_EDT_TENDIDO">Descripcion:</label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Update Enabled Cortador -->
+<div id="modalEnableTendido" class="modal">
+  <div class="modal-content">
+    <div style="text-align: center">
+      <p>¿Realmente deseas activar o desactivar el tendido?</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="GetEnabledTendido();" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>

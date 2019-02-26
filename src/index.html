@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>RioSulApp</title>
+  <base href="/">
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script type="text/html" src="../node_modules/materialize-css/dist/js/materialize.min.js"></script>
+  <link type="text/html" rel="stylesheet" href="../node_modules/materialize-css/dist/css/materialize.min.css"  media="screen,projection"/>
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link rel="stylesheet" type="text/html" href="../node_modules/ladda/dist/ladda.min.css">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script> -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script type="text/html" src="GlobalJS.js "></script>
+  <script>
+    const Key = 'YWJjZGVmZ2hpamtsbW5vcHFycw==';
+    // DESARROLLO
+    const UriRioSulApi = 'http://localhost:60958/api/';
+    // PRODUCCION
+    // const UriRioSulApi = 'http://192.168.7.196:99/api/';
+
+    function OnClickIdTable(Id){
+      for(var i = 0; i < $("#tlbClientes tbody tr").length; i++){
+        if(Id == i) {
+          var TableRow = $("#tlbClientes tbody tr")[i];
+          if ($("#" + TableRow.id).hasClass('selected')) {
+            $("#" + TableRow.id).removeClass('selected');
+          } else {
+            $("#" + TableRow.id).addClass('selected');
+          }
+        }
+      }
+    }
+
+    function ValidateRowsSelectTable() {
+      var _IndexRow = 0;
+      for(var i = 0; i < $("#tlbClientes tbody tr").length; i++){
+        var TableRow = $("#tlbClientes tbody tr")[i];
+        if ($("#" + TableRow.id).hasClass('selected')) {
+          _IndexRow ++;
+        }
+      }
+      $("#HDN_VALIDATE").val(_IndexRow);
+    }
+
+    function SetId(Id) {
+      $('#HDN_ID').val(Id);
+    }
+    
+    function GetClientsTable() {
+      //debugger;
+      var Tbody = document.getElementById("tbdy_Clientes_Ref");
+      var TbodyClientesRef = [];
+      for (let i = 0; i < Tbody.getElementsByTagName("tr").length; i++) {
+        TbodyClientesRef.push({
+          'Cve_Cliente': Tbody.rows[i].cells[0].innerText,
+          'Nom_Cliente': Tbody.rows[i].cells[1].innerText,
+          'Nom_Corto': Tbody.rows[i].cells[2].innerText,
+          'Num_Rfc': Tbody.rows[i].cells[3].innerText,
+          'Nom_Estatus': Tbody.rows[i].cells[4].innerText,
+          'Num_CP': Tbody.rows[i].cells[5].innerText,
+          'Nom_Contacto': Tbody.rows[i].cells[6].innerText
+        });
+      }
+      $("#HDN_ARR").val(JSON.stringify(TbodyClientesRef));
+    }
+
+    function GetAuditoriaCorte() {
+      var Det =[];
+      var bdy = $('#bdyCorteAuditoria');
+      for (let j = 0; j < document.getElementById('bdyCorteAuditoria').getElementsByTagName('tr').length; j++) {
+        Det.push({
+          'IdCortador': bdy[0].rows[j].cells[1].innerText,
+          'Serie': bdy[0].rows[j].cells[3].innerText,
+          'Bulto': bdy[0].rows[j].cells[4].innerText,
+          'IdPosicion': bdy[0].rows[j].cells[5].innerText,
+          'IdDefecto': bdy[0].rows[j].cells[7].innerText,
+          'IdCortado': bdy[0].rows[j].cells[9].innerText,
+          'Cantidad': bdy[0].rows[j].cells[11].innerText,
+          'Imagen': bdy[0].rows[j].cells[12].innerText
+        });
+      }
+      $("#HDN_ARR").val(JSON.stringify(Det));
+    }
+
+    function GetAuditoriaConfeccion() {
+      var Det =[];
+      var bdy = $('#bdyConfeccionAuditoria');
+      for (let j = 0; j < document.getElementById('bdyCorteAuditoria').getElementsByTagName('tr').length; j++) {
+        Det.push({
+          'IdArea': bdy[0].rows[j].cells[1].innerText,
+          'IdOperacion': bdy[0].rows[j].cells[3].innerText,
+          'IdDefecto': bdy[0].rows[j].cells[5].innerText,
+          'Cantidad': bdy[0].rows[j].cells[7].innerText
+        });
+      }
+      $("#HDN_ARR").val(JSON.stringify(Det));
+    }
+
+    function GetAuditoriaProcEsp() {
+      var Det =  [];
+      var bdy = $('#bdyProcEspAuditoria');
+      for (let j = 0; j < document.getElementById('bdyProcEspAuditoria').getElementsByTagName('tr').length; j++) {
+        Det.push({
+          'IdPosicion': bdy[0].rows[j].cells[1].innerText,
+          'IdOperacion': bdy[0].rows[j].cells[3].innerText,
+          'IdDefecto': bdy[0].rows[j].cells[5].innerText,
+          'Cantidad': bdy[0].rows[j].cells[7].innerText,
+          'Imagen': bdy[0].rows[j].cells[8].innerText,
+        });
+      }
+      $("#HDN_ARR").val(JSON.stringify(Det));
+    }
+
+    function GetAuditoriaTendido() {
+      var Det =[];
+      var bdy = $('#bdyCorteAuditoria');
+      for (let j = 0; j < document.getElementById('bdyCorteAuditoria').getElementsByTagName('tr').length; j++) {
+        Det.push({
+          'Serie': bdy[0].rows[j].cells[1].innerText,
+          'Bulto': bdy[0].rows[j].cells[2].innerText,
+          'IdTendido': bdy[0].rows[j].cells[3].innerText,
+          'IdTipoTendido': bdy[0].rows[j].cells[5].innerText,
+          'IdPosicion': bdy[0].rows[j].cells[7].innerText,
+          'IdDefecto': bdy[0].rows[j].cells[9].innerText,
+          'IdMesa': bdy[0].rows[j].cells[11].innerText,
+          'Cantidad': bdy[0].rows[j].cells[13].innerText,
+          'Imagen': bdy[0].rows[j].cells[14].innerText
+        });
+      }
+      $("#HDN_ARR").val(JSON.stringify(Det));
+    }
+
+    function GetCheckPosicion() {
+      var Tbody = document.getElementById("tdby_Posicion");
+      var TbodyDetalle = [];
+      for (let i = 0; i < Tbody.getElementsByTagName("tr").length; i++) {
+        var IdPos = Tbody.rows[i].getElementsByTagName("td")[0].getElementsByTagName("input")[0].id.toString().split('_');
+        var IdPosCheckBox = Tbody.rows[i].getElementsByTagName("td")[0].getElementsByTagName("input")[0].id;
+        if ($("#" + IdPosCheckBox).prop('checked')) {
+          TbodyDetalle.push({
+            'IdDefecto': IdPos[1]
+          });
+        }
+      }
+      $("#HDN_ARR").val(JSON.stringify(TbodyDetalle));
+    }
+
+    function GetPerNewUser() {
+      var TBody = document.getElementById('tbodyMenu');
+      var TBdyDetalle = [];
+      for(var i = 0; i < TBody.getElementsByTagName('tr').length; i++) {
+        var _Mod = TBody.rows[i].id;
+        TBdyDetalle.push({
+            'PANTALLA_ID': TBody.rows[i].id,
+            'PER_CONSULTAR': ($('#' + _Mod + "_" + 1).prop('checked')),
+            'PER_EDITAR': ($('#' + _Mod + "_" + 2).prop('checked')),
+            'PER_REGISTRAR': ($('#' + _Mod + "_" + 3).prop('checked')),
+            'PER_PROCESAR': ($('#' + _Mod + "_" + 4).prop('checked')),
+            'PER_CANCELAR': ($('#' + _Mod + "_" + 5).prop('checked')),
+            'PER_ACTIVAR': ($('#' + _Mod + "_" + 6).prop('checked'))
+          });
+      }
+      $("#HDN_ARR").val(JSON.stringify(TBdyDetalle));
+    }
+
+    function GetPerNewUserEdit() {
+      var TBody = document.getElementById('tbodyMenuEdt');
+      var TBdyDetalle = [];
+      for(var i = 0; i < TBody.getElementsByTagName('tr').length; i++) {
+        var _Mod = TBody.rows[i].id;
+        TBdyDetalle.push({
+            'PANTALLA_ID': TBody.rows[i].id,
+            'PER_CONSULTAR': ($('#' + _Mod + "_" + 1).prop('checked')),
+            'PER_EDITAR': ($('#' + _Mod + "_" + 2).prop('checked')),
+            'PER_REGISTRAR': ($('#' + _Mod + "_" + 3).prop('checked')),
+            'PER_PROCESAR': ($('#' + _Mod + "_" + 4).prop('checked')),
+            'PER_CANCELAR': ($('#' + _Mod + "_" + 5).prop('checked')),
+            'PER_ACTIVAR': ($('#' + _Mod + "_" + 6).prop('checked'))
+          });
+      }
+      $("#HDN_ARR").val(JSON.stringify(TBdyDetalle));
+    }
+
+    function ObtieneReferenciasPorCliente() {
+      // debugger;
+      $.ajax({
+        url: UriRioSulApi + 'Cliente/ObtieneReferenciasPorCliente?IdCliente=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            $("#tlbClientesRefDetails").html("");
+            var sOptions = ""; var _iindex = 1;
+            document.getElementById("lblCliente").innerText = json.HEAD_CLIENTE;
+            for (let i = 0; i < json.Clientes.length; i++) {
+              sOptions += '<tr>';
+              sOptions += '<td>' + _iindex + '</td>'
+              sOptions += '<td>' + json.Clientes[i].cve_cliente + '</td>'
+              sOptions += '<td>' + json.Clientes[i].nom_cliente + '</td>'
+              sOptions += '<td>' + json.Clientes[i].nom_corto + '</td>'
+              sOptions += '</tr>';
+
+              _iindex++;
+            }
+            $("#tlbClientesRefDetails").append('<thead><tr><th>No.</th><th>Clave</th><th>Nombre</th><th>Nombre Corto</th></tr></thead><tbody>' + sOptions + '</tbody>');
+            $('#tlbClientesRefDetails').DataTable({
+              sorting: true,
+              bDestroy: true,
+              ordering: true,
+              bPaginate: true,
+              pageLength: 6,
+              bInfo: true,
+              dom: 'Bfrtip',
+              processing: true,
+              buttons: [
+                'copyHtml5',
+                'excelHtml5',
+                'csvHtml5',
+                'pdfHtml5'
+              ]
+            });
+            $('.tooltipped').tooltip();
+          }
+        }, 
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function GetPermits() {
+      $.ajax({
+        url: UriRioSulApi + 'Usuario/GetPermitsByUser?Key=' + atob(Key) + '&USU_ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            $('#USU_NOMBRE_EDT').val(json.Usuario.Nombre);
+            $('#USU_USERNAME_EDT').val(json.Usuario.Usuario);
+            $('#USU_EMAIL_EDT').val(json.Usuario.Email);
+            $('#USU_PASSWORD_EDT').val(json.Usuario.Contraseña);
+            $('#USU_PASSWORD_VERIFICA_EDT').val(json.Usuario.Contraseña);
+            GetEditMenus();
+            for (let index = 0; index < json.Menu.length; index++) {
+              if (json.Menu[index].PER_CONSULTAR == true)
+                $("#" + json.Menu[index].PANTALLA_ID + "_1").prop('checked', true);
+              if (json.Menu[index].PER_EDITAR == true)
+                $("#" + json.Menu[index].PANTALLA_ID + "_2").prop('checked', true);
+              if (json.Menu[index].PER_REGISTRAR == true)
+                $("#" + json.Menu[index].PANTALLA_ID + "_3").prop('checked', true);
+              if (json.Menu[index].PER_PROCESAR == true)
+                $("#" + json.Menu[index].PANTALLA_ID + "_4").prop('checked', true);
+              if (json.Menu[index].PER_CANCELAR == true)
+                $("#" + json.Menu[index].PANTALLA_ID + "_5").prop('checked', true);
+              if (json.Menu[index].PER_ACTIVAR == true)
+                $("#" + json.Menu[index].PANTALLA_ID + "_6").prop('checked', true);
+            }
+          }
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function GetEditMenus() {
+      $.ajax({
+        url: UriRioSulApi + 'Usuario/GetMenus?Key=' + atob(Key),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          let sOptions = ''; var i; let Modulo = '';
+          for (i = 0; i < json.Menus.length; i ++) {
+            Modulo = (json.Menus[i].Pantalla === null ? json.Menus[i].SubMenu : json.Menus[i].Pantalla);
+            sOptions += '<tr id="' + json.Menus[i].ID + '">';
+            sOptions += '<td>' + Modulo + '</td>';
+            // tslint:disable-next-line:max-line-length
+            sOptions += '<td style="text-align: center"><label><input id="' + json.Menus[i].ID + '_1" type="checkbox" class="filled-in"><span></span></label></td>';
+            // tslint:disable-next-line:max-line-length
+            sOptions += '<td style="text-align: center"><label><input id="' + json.Menus[i].ID + '_2" type="checkbox" class="filled-in"><span></span></label></td>';
+            // tslint:disable-next-line:max-line-length
+            sOptions += '<td style="text-align: center"><label><input id="' + json.Menus[i].ID + '_3" type="checkbox" class="filled-in"><span></span></label></td>';
+            // tslint:disable-next-line:max-line-length
+            sOptions += '<td style="text-align: center"><label><input id="' + json.Menus[i].ID + '_4" type="checkbox" class="filled-in"><span></span></label></td>';
+            // tslint:disable-next-line:max-line-length
+            sOptions += '<td style="text-align: center"><label><input id="' + json.Menus[i].ID + '_5" type="checkbox" class="filled-in"><span></span></label></td>';
+            // tslint:disable-next-line:max-line-length
+            sOptions += '<td style="text-align: center"><label><input id="' + json.Menus[i].ID + '_6" type="checkbox" class="filled-in"><span></span></label></td>';
+            sOptions += '</tr>';
+          }
+          $('#tbodyMenuEdt').html('');
+          $('#tbodyMenuEdt').html(sOptions);
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function DisposeCheckPerCorreo() {
+      $('#Corte_New_Mail').prop('checked', false);
+      $('#Confeccion_New_Mail').prop('checked', false);
+      $('#Lavanderia_New_Mail').prop('checked', false);
+      $('#Terminado_New_Mail').prop('checked', false);
+      $('#ProcEsp_New_Mail').prop('checked', false);
+    }
+
+    function DisposeCheckPerCorreo_Edt() {
+      $('#Corte_Edt_Mail').prop('checked', false);
+      $('#Confeccion_Edt_Mail').prop('checked', false);
+      $('#Lavanderia_Edt_Mail').prop('checked', false);
+      $('#Terminado_Edt_Mail').prop('checked', false);
+      $('#ProcEsp_Edt_Mail').prop('checked', false);
+    }
+
+    function EditAlertasCierreAuditoriaUsu() {
+      DisposeCheckPerCorreo_Edt();
+      $.ajax({
+        url: UriRioSulApi + 'CorreosElectronicos/EditaAlertasPorUsuario?USU_ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            $('#Corte_Edt_Mail').prop('checked', json.Corte);
+            $('#Confeccion_Edt_Mail').prop('checked', json.Confeccion);
+            $('#Lavanderia_Edt_Mail').prop('checked', json.Lavanderia);
+            $('#Terminado_Edt_Mail').prop('checked', json.Terminado);
+            $('#ProcEsp_Edt_Mail').prop('checked', json.ProcesosEspeciales);
+          }
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión con la base de datos');
+        }
+      });
+    }
+
+    function DisposeCatSegundas() {
+      $('#SEG_TELA').val('');
+      $('#SEG_CORTE').val('');
+      $('#SEG_CONFECCION').val('');
+      $('#SEG_LAVANDERIA').val('');
+      $('#SEG_PROC_ESP').val('');
+      $('#SEG_TERMINADO').val('');
+      $('#SEG_COSTO_ESTILO').val('');
+      $('#SEG_SEGUNDA').val('');
+    }
+
+    function GetSegundaById() {
+      $.ajax({
+        url: UriRioSulApi + 'CatalogoSegundas/GetSegundaById?IdSegunda=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          $('#SEG_EDT_TELA').val(json.Porcentaje_Tela);
+          $('#SEG_EDT_CORTE').val(json.Porcentaje_Corte);
+          $('#SEG_EDT_CONFECCION').val(json.Porcentaje_Confeccion);
+          $('#SEG_EDT_LAVANDERIA').val(json.Porcentaje_Lavanderia);
+          $('#SEG_EDT_PROC_ESP').val(json.Porcentaje_ProcesosEspeciales);
+          $('#SEG_EDT_TERMINADO').val(json.Porcentaje_Terminado);
+          $('#SEG_EDT_COSTO_ESTILO').val(json.Costo_Estilo);
+          $('#SEG_EDT_SEGUNDA').val(json.Costo_Segunda);
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function GetInfoCortador() {
+      $.ajax({
+        url: UriRioSulApi + 'Cortadores/ObtieneInfoCortador?ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            $('#CVE_EDT_CORTADOR').val(json.Vst_Cortador.Clave);
+            $('#NOMBRE_EDT_CORTADOR').val(json.Vst_Cortador.Nombre);
+            $('#OBSERVACIONES_EDT_CORTADOR').val(json.Vst_Cortador.Observaciones);
+            $('#DESCRIPCION_EDT_CORTADOR').val(json.Vst_Cortador.Descripcion);
+          }
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      })
+    }
+
+    function GetInfoTendido() {
+      $.ajax({
+        url: UriRioSulApi + 'Cortadores/ObtieneInfoTendido?ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            $('#CVE_EDT_TENDIDO').val(json.Vst_Cortador.Clave);
+            $('#NOMBRE_EDT_TENDIDO').val(json.Vst_Cortador.Nombre);
+            $('#OBSERVACIONES_EDT_TENDIDO').val(json.Vst_Cortador.Observaciones);
+            $('#DESCRIPCION_EDT_TENDIDO').val(json.Vst_Cortador.Descripcion);
+          }
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function GetInfoTipoTendido() {
+      $.ajax({
+        url: UriRioSulApi + 'Cortadores/ObtieneInfoTipoTendido?ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            $('#CVE_EDT_TIPO_TENDIDO').val(json.Vst_Cortador.Clave);
+            $('#NOMBRE_EDT_TIPO_TENDIDO').val(json.Vst_Cortador.Nombre);
+            $('#OBSERVACIONES_EDT_TIPO_TENDIDO').val(json.Vst_Cortador.Observaciones);
+            $('#DESCRIPCION_EDT_TIPO_TENDIDO').val(json.Vst_Cortador.Descripcion);
+          }
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function GetInfoOperacionConfeccion() {
+      $.ajax({
+        url: UriRioSulApi + 'Confeccion/ObtieneInfoOperacionConfeccion?ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            var sOptions = ''; var Index = 1;
+            $('#CVE_EDT_OPERACION').val(json.Vst_Confeccion.Clave);
+            $('#NOMBRE_EDT_OPERACION').val(json.Vst_Confeccion.Nombre);
+            for (let i = 0; i < json.Vst_Oper_Conf.length; i++) {
+              sOptions += '<tr>';
+              sOptions += '<td>' + Index + '</td>';
+              sOptions += '<td>' + json.Vst_Oper_Conf[i].Clave + '</td>';
+              sOptions += '<td>' + json.Vst_Oper_Conf[i].Nombre + '</td>';
+              sOptions += '</tr>';
+              Index++;
+            }            
+            $('#tlbOperacionEdtDefecto').html('');
+            $('#tlbOperacionEdtDefecto').html('<tbody id="tdby_edt_Posicion">' + sOptions + '</tbody>');
+            $('#tlbOperacionEdtDefecto').append('<thead><th>No.</th><th>Clave Operación</th><th>Nombre Operación</th></thead>');
+            $('#tlbOperacionEdtDefecto').DataTable({
+              sorting: true,
+              bDestroy: true,
+              ordering: true,
+              bPaginate: true,
+              pageLength: 6,
+              bInfo: true,
+              dom: 'Bfrtip',
+              processing: true,
+              buttons: [
+                'copyHtml5',
+                'excelHtml5',
+                'csvHtml5',
+                'pdfHtml5'
+              ]
+            });
+            $('.tooltipped').tooltip();
+          }
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function GetInfoOperacionProcesosEspeciales() {
+      $.ajax({
+        url: UriRioSulApi + 'ProcesosEspeciales/ObtieneInfoOperacionProcesosEspeciales?ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            var sOptions = ''; var Index = 1;
+            $('#CVE_EDT_OPERACION').val(json.Vst_ProcesosEsp.Clave);
+            $('#NOMBRE_EDT_OPERACION').val(json.Vst_ProcesosEsp.Nombre);
+            for (let i = 0; i < json.Vst_Oper_Conf.length; i++) {
+              sOptions += '<tr>';
+              sOptions += '<td>' + Index + '</td>';
+              sOptions += '<td>' + json.Vst_Oper_Conf[i].Clave + '</td>';
+              sOptions += '<td>' + json.Vst_Oper_Conf[i].Nombre + '</td>';
+              sOptions += '</tr>';
+              Index++;
+            }            
+            $('#tlbOperacionEdtDefecto').html('');
+            $('#tlbOperacionEdtDefecto').html('<tbody id="tdby_edt_Posicion">' + sOptions + '</tbody>');
+            $('#tlbOperacionEdtDefecto').append('<thead><th>No.</th><th>Clave Defecto</th><th>Nombre Defecto</th></thead>');
+            $('#tlbOperacionEdtDefecto').DataTable({
+              sorting: true,
+              bDestroy: true,
+              ordering: true,
+              bPaginate: true,
+              pageLength: 6,
+              bInfo: true,
+              dom: 'Bfrtip',
+              processing: true,
+              buttons: [
+                'copyHtml5',
+                'excelHtml5',
+                'csvHtml5',
+                'pdfHtml5'
+              ]
+            });
+            $('.tooltipped').tooltip();
+          }
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function GetInfoAreaConfeccion() {
+      $.ajax({
+        url: UriRioSulApi + 'Confeccion/ObtieneInfoAreaConfeccion?ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            var sOptions = ''; var Index = 1;
+            $('#CVE_EDT_AREA').val(json.Vst_Confeccion.Clave);
+            $('#NOMBRE_EDT_AREA').val(json.Vst_Confeccion.Nombre);
+            for (let i = 0; i < json.Vst_Oper_Conf.length; i++) {
+              sOptions += '<tr>';
+              sOptions += '<td>' + Index + '</td>';
+              sOptions += '<td>' + json.Vst_Oper_Conf[i].Clave + '</td>';
+              sOptions += '<td>' + json.Vst_Oper_Conf[i].Nombre + '</td>';
+              sOptions += '</tr>';
+              Index++;
+            }            
+            $('#tlbOperacionEdtDefecto').html('');
+            $('#tlbOperacionEdtDefecto').html('<tbody id="tdby_edt_Posicion">' + sOptions + '</tbody>');
+            $('#tlbOperacionEdtDefecto').append('<thead><th>No.</th><th>Clave Defecto</th><th>Nombre Defecto</th></thead>');
+            $('#tlbOperacionEdtDefecto').DataTable({
+              sorting: true,
+              bDestroy: true,
+              ordering: true,
+              bPaginate: true,
+              pageLength: 6,
+              bInfo: true,
+              dom: 'Bfrtip',
+              processing: true,
+              buttons: [
+                'copyHtml5',
+                'excelHtml5',
+                'csvHtml5',
+                'pdfHtml5'
+              ]
+            });
+            $('.tooltipped').tooltip();
+        }
+      },
+      error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function GetInfoMesa() {
+      $.ajax({
+        url: UriRioSulApi + 'Cortadores/ObtieneInfoMesa?ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            $('#CVE_EDT_MESA').val(json.Vst_Cortador.Clave);
+            $('#NOMBRE_EDT_MESA').val(json.Vst_Cortador.Nombre);
+            $('#OBSERVACIONES_EDT_MESA').val(json.Vst_Cortador.Observaciones);
+            $('#DESCRIPCION_EDT_MESA').val(json.Vst_Cortador.Descripcion);
+          }
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function GetInfoDefecto() {
+      // debugger;
+      $.ajax({
+        url: UriRioSulApi + 'Cortadores/ObtieneInfoDefecto?ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            $('#CVE_EDT_DEFECTO').val(json.Vst_Cortador.Clave);
+            $('#NOMBRE_EDT_DEFECTO').val(json.Vst_Cortador.Nombre);
+            $('#OBSERVACIONES_EDT_DEFECTO').val(json.Vst_Cortador.Observaciones);
+            $('#DESCRIPCION_EDT_DEFECTO').val(json.Vst_Cortador.Descripcion);
+            if (json.Vst_Cortador.Imagen != null && json.Vst_Cortador.Imagen != "") {
+              $("#divImagen").append('<img id="blah" src="' + json.Vst_Cortador.Imagen + '" alt="your image" />');
+            } else {
+              $("#divImagen").append('<img id="blah" src="http://placehold.it/180" alt="your image" />');
+            }
+          }
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function GetInfoDefectoLavanderia() {
+      $.ajax({
+        url: UriRioSulApi + 'Cortadores/ObtieneInfoDefecto?ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            $('#CVE_EDT_DEFECTO').val(json.Vst_Cortador.Clave);
+            $('#NOMBRE_EDT_DEFECTO').val(json.Vst_Cortador.Nombre);
+            $('#OBSERVACIONES_EDT_DEFECTO').val(json.Vst_Cortador.Observaciones);
+            $('#DESCRIPCION_EDT_DEFECTO').val(json.Vst_Cortador.Descripcion);
+            if (json.Vst_Cortador.Imagen != null && json.Vst_Cortador.Imagen != "") {
+              $("#divImagen").append('<img id="blah" src="' + json.Vst_Cortador.Imagen + '" alt="your image" />');
+            } else {
+              $("#divImagen").append('<img id="blah" src="http://placehold.it/180" alt="your image" />');
+            }
+          }
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function GetInfoPosicion() {
+      $.ajax({
+        url: UriRioSulApi + 'Cortadores/ObtieneInfoPosicion?ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            var sOptions = ''; var Index = 1;
+            $('#CVE_EDT_POSICION').val(json.Vst_Cortador.Clave);
+            $('#NOMBRE_EDT_POSICION').val(json.Vst_Cortador.Nombre);
+            $('#OBSERVACIONES_EDT_POSICION').val(json.Vst_Cortador.Observaciones);
+            $('#DESCRIPCION_EDT_POSICION').val(json.Vst_Cortador.Descripcion);
+            for (let i = 0; i < json.Vst_Posicion.length; i++) {
+              sOptions += '<tr>';
+              sOptions += '<td>' + Index + '</td>';
+              sOptions += '<td>' + json.Vst_Posicion[i].Clave + '</td>';
+              sOptions += '<td>' + json.Vst_Posicion[i].Nombre + '</td>';
+              sOptions += '</tr>';
+              Index++;
+            }
+            $('#tlbPosicionEdtDefecto').html('');
+            $('#tlbPosicionEdtDefecto').html('<tbody id="tdby_edt_Posicion">' + sOptions + '</tbody>');
+            $('#tlbPosicionEdtDefecto').append('<thead><th>No.</th><th>Clave Defecto</th><th>Nombre Defecto</th></thead>');
+            $('#tlbPosicionEdtDefecto').DataTable({
+              sorting: true,
+              bDestroy: true,
+              ordering: true,
+              bPaginate: true,
+              pageLength: 6,
+              bInfo: true,
+              dom: 'Bfrtip',
+              processing: true,
+              buttons: [
+                'copyHtml5',
+                'excelHtml5',
+                'csvHtml5',
+                'pdfHtml5'
+              ]
+            });
+            $('.tooltipped').tooltip();
+          }
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function GetInfoProcesosEspeciales() {
+      $.ajax({
+        url: UriRioSulApi + 'ProcesosEspeciales/ObtieneInfoDefectoProcesoEspeciales?ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            var sOptions = ''; var Index = 1;
+            $('#CVE_EDT_DEFECTO_PROC_ESP').val(json.Vst_ProcesosEsp.Clave);
+            $('#NOMBRE_EDT_DEFECTO_PROC_ESP').val(json.Vst_ProcesosEsp.Nombre);
+            $('#OBSERVACIONES_EDT_DEFECTO_PROC_ESP').val(json.Vst_ProcesosEsp.Observaciones);
+            $('#DESCRIPCION_EDT_DEFECTO_PROC_ESP').val(json.Vst_ProcesosEsp.Descripcion);
+            $('.tooltipped').tooltip();
+          }
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function GetInfoDefectoConfeccion() {
+      $.ajax({
+        url: UriRioSulApi + 'Confeccion/ObtieneInfoDefectoConfeccion?ID=' + $('#HDN_ID').val(),
+        dataType: 'json',
+        contents: 'application/json; charset=utf-8',
+        method: 'get',
+        async: false,
+        success: function (json) {
+          if (json.Message.IsSuccessStatusCode) {
+            $('#CVE_EDT_DEFECTO_CONFECCION').val(json.Vst_Confeccion.Clave);
+            $('#NOMBRE_EDT_DEFECTO_CONFECCION').val(json.Vst_Confeccion.Nombre);
+            $('#OBSERVACIONES_EDT_DEFECTO_CONFECCION').val(json.Vst_Confeccion.Observaciones);
+            $('#DESCRIPCION_EDT_DEFECTO_CONFECCION').val(json.Vst_Confeccion.Descripcion);
+            if (json.Vst_Confeccion.Imagen != null && json.Vst_Confeccion.Imagen != "") {
+              $("#divImagen").append('<img id="blah" src="' + json.Vst_Confeccion.Imagen + '" alt="your image" />');
+            } else {
+              $("#divImagen").append('<img id="blah" src="http://placehold.it/180" alt="your image" />');
+            }
+          }
+        },
+        error: function () {
+          console.log('No se pudo establecer conexión a la base de datos');
+        }
+      });
+    }
+
+    function DisposeEditCortadores() {
+      $('#CVE_EDT_CORTADOR').val('');
+      $('#NOMBRE_EDT_CORTADOR').val('');
+      $('#OBSERVACIONES_EDT_CORTADOR').val('');
+      $('#DESCRIPCION_EDT_CORTADOR').val('');
+    }
+
+    function DisposeEditTendido() {
+      $('#CVE_EDT_TENDIDO').val('');
+      $('#NOMBRE_EDT_TENDIDO').val('');
+      $('#OBSERVACIONES_EDT_TENDIDO').val('');
+      $('#DESCRIPCION_EDT_TENDIDO').val('');
+    }
+
+    function DisposeEditTipoTendido() {
+      $('#CVE_EDT_TIPO_TENDIDO').val('');
+      $('#NOMBRE_EDT_TIPO_TENDIDO').val('');
+      $('#OBSERVACIONES_EDT_TIPO_TENDIDO').val('');
+      $('#DESCRIPCION_EDT_TIPO_TENDIDO').val('');
+    }
+
+    function DisposeEditMesa() {
+      $('#CVE_EDT_MESA').val('');
+      $('#NOMBRE_EDT_MESA').val('');
+      $('#OBSERVACIONES_EDT_MESA').val('');
+      $('#DESCRIPCION_EDT_MESA').val('');
+    }
+
+    function DisposeEditMesa() {
+      $('#CVE_EDT_POSICION').val('');
+      $('#NOMBRE_EDT_POSICION').val('');
+      $('#OBSERVACIONES_EDT_POSICION').val('');
+      $('#DESCRIPCION_EDT_POSICION').val('');
+    }
+
+    function DisposeEditDefectoCortador() {
+      $('#CVE_EDT_DEFECTO').val('');
+      $('#NOMBRE_EDT_DEFECTO').val('');
+      $('#OBSERVACIONES_EDT_DEFECTO').val('');
+      $('#DESCRIPCION_EDT_DEFECTO').val('');
+    }
+
+    function DisposeEditDefectoProcesosEspeciales(){
+      $('#CVE_EDT_DEFECTO_PROC_ESP').val('');
+      $("#NOMBRE_EDT_DEFECTO_PROC_ESP").val('');
+      $("#OBSERVACIONES_EDT_DEFECTO_PROC_ESP").val();
+      $("#DESCRIPCION_EDT_DEFECTO_PROC_ESP").val();
+    }
+
+    function DisposeEditDefectoConfeccion() {
+      $('#CVE_EDT_DEFECTO_CONFECCION').val('');
+      $('#NOMBRE_EDT_DEFECTO_CONFECCION').val('');
+      $('#OBSERVACIONES_EDT_DEFECTO_CONFECCION').val('');
+      $('#DESCRIPCION_EDT_DEFECTO_CONFECCION').val('');
+    }
+
+    function DisposeEditPosicionCortador() {
+      $('#CVE_EDT_POSICION').val('');
+      $('#NOMBRE_EDT_POSICION').val('');
+      $('#OBSERVACIONES_EDT_POSICION').val('');
+      $('#DESCRIPCION_EDT_POSICION').val('');
+    }
+
+    function DisposeEditOperaciones() {
+      $('#CVE_EDT_OPERACION').val('');
+      $('#NOMBRE_EDT_OPERACION').val('')
+    }
+
+    function DisposeEditArea() {
+      $('#CVE_EDT_OPERACION').val('');
+      $('#NOMBRE_EDT_OPERACION').val('')
+    }
+
+    function readURL(input) {
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+          reader.onload = function (e) {
+            $('#blah')
+                .attr('src', e.target.result);
+          };
+          reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function OnChangeClientOT(IdClienteRef) {
+      // debugger;
+      var sOptions = "";  
+      var DDl = $("#ddlOT");
+      if (IdClienteRef != "0") {
+        $.ajax({
+          url: UriRioSulApi + 'AuditoriaCorte/ObtieneOrdenesTrabajoDynamics?IdClienteRef=' + IdClienteRef,
+          dataType: 'json',
+          contents: 'application/json; charset=utf-8',
+          method: 'get',
+          async: false,
+          success: function (json) {
+            if (json.Message.IsSuccessStatusCode) {
+              $("#ddlOT").empty();
+              for (let index = 0; index < json.OrdenTrabajo.length; index++) {
+                if (index === 0) {
+                  $(DDl).append($("<option disabled selected></option>").attr("value", "0").text("SELECCIONE..."));
+                  $(DDl).append($("<option></option>").attr("value", json.OrdenTrabajo[index].OrdenVenta).text(json.OrdenTrabajo[index].OrdenVenta));
+                } else {
+                  $(DDl).append($("<option></option>").attr("value", json.OrdenTrabajo[index].OrdenVenta).text(json.OrdenTrabajo[index].OrdenVenta));
+                }
+              }
+              $(DDl).formSelect();
+            }
+          },
+          error: function () {
+            console.log('No se ha podido establecer conexión');
+          }
+        }); 
+      }
+    }
+
+    function OnChangeOT() {
+      // debugger
+      let ot = $('#ddlOT').val();
+      if (ot != "0" || ot != "") {
+        $.ajax({
+        url: UriRioSulApi + 'AuditoriaCorte/ObtieneDatosGeneralesOrdenTrabajo?OrdenTrabajo=' + ot + '&CLI_ID=' + $('#ddlCliente').val(),
+          dataType: 'json',
+          contents: 'application/json; charset=utf-8',
+          method: 'get',
+          async: false,
+          success: function (json) {
+            console.log(json);
+            if (json.Message.IsSuccessStatusCode) {
+              if (json.OT.EtapaProceso != null) {
+                switch (json.OT.EtapaProceso.toUpperCase()) {
+                  case "C":
+                    document.getElementById("lblEstado").innerText = "CERRADA";
+                    break;
+                  case "P":
+                    document.getElementById("lblEstado").innerText = "PLANEADA";
+                    break;
+                  case "F":
+                    document.getElementById("lblEstado").innerText = "FIRME";
+                    break;
+                  case "O":
+                    document.getElementById("lblEstado").innerText = "CERRADA OPER";
+                    break;
+                  default:
+                    document.getElementById("lblEstado").innerText = json.OT.EtapaProceso.toUpperCase();
+                    break;
+                }
+                document.getElementById("lblCliente").innerText = json.OT.NombreCorto.toUpperCase();
+                document.getElementById("lblPO").innerText = json.OT.PO.toUpperCase();
+                document.getElementById("lblTela").innerText = json.OT.NoAlterno.toUpperCase();
+                document.getElementById("lblMarca").innerText = json.OT.Marca.toUpperCase();
+                document.getElementById("lblNoCortada").innerText = json.OT.Fab_Original.toUpperCase();
+                document.getElementById("lblLavado").innerText = json.OT.Lavado.toUpperCase();
+                document.getElementById("lblEstilo").innerText = json.OT.NoArticulo.toUpperCase();
+                document.getElementById("lblPlanta").innerText = json.OT.Planta.toUpperCase();
+                document.getElementById("lblRuta").innerText = json.OT.PlantaDescripcion.toUpperCase();
+                document.getElementById("ddlCliente").value = json.OT.ClientId;
+                console.log(json.OT.Bulto);
+                let ddlNoBulto = $("#ddlNoBulto");
+                for (let index = 0; index < json.OT.Bulto; index++) {
+                  if (index === 0) {
+                    // $(DDl).append($("<option disabled selected></option>").attr("value", "0").text("SELECCIONE..."));
+                    $(ddlNoBulto).append($("<option></option>").attr("value", index + 1).text(index + 1));
+                  } else {
+                    $(ddlNoBulto).append($("<option></option>").attr("value", index + 1).text(index + 1));
+                  }
+              }
+              $(ddlNoBulto).formSelect();
+              }
+            }
+          },
+          error: function () {
+            console.log('No se ha podido establecer conexión');
+          }
+      }); 
+      }
+    }
+
+    function GetToleranciaById() {
+      $.ajax({
+        url: UriRioSulApi + 'Cortadores/ObtieneToleranciaPorId?IdTolerancia=' + $('#HDN_ID').val(),
+          dataType: 'json',
+          contents: 'application/json; charset=utf-8',
+          method: 'get',
+          async: false,
+          success: function (json) {
+            $("#TOL_EDT_NUMERADOR").val(json.Numerador);
+            $("#TOL_EDT_DENOMINADOR").val(json.Denominador);
+            if (json.ToleranciaPositiva) {
+                $("#TOL_EDT_POSITIVA").prop('checked', true);
+            } else {
+              $("#TOL_EDT_POSITIVA").prop('checked', false);
+            }
+            if (ToleranciaNegativa) {
+              $("#TOL_EDT_NEGATIVA").prop('checked', true);
+            } else {
+              $("#TOL_EDT_NEGATIVA").prop('checked', false);
+            }
+          },
+          error: function () {
+            console.log('No se ha podido establecer conexión');
+          }
+      });
+    }
+  
+    function GetAuditoriaCortePorId(IdAuditoriaCorte) {
+      $.ajax({
+        url: UriRioSulApi + 'Cortadores/AuditoriaCorte/ObtieneAuditoriaCortePorId?IdAuditoria=' + IdAuditoriaCorte,
+          dataType: 'json',
+          contents: 'application/json; charset=utf-8',
+          method: 'get',
+          async: false,
+          success: function (json) {
+            if (json.Message.IsSuccessStatusCode) {
+              
+            }
+          },
+          error: function () {
+            console.log('No se ha podido establecer conexión');
+          }
+      })
+    }
+
+  </script>
+</head>
+<body>
+  <style>
+    @media only screen and (min-width: 993px){
+      #toast-container {
+        top: -3%;
+        right: 1%;
+        max-width: 86%;
+      }
+    }
+    @media only screen and (max-width: 600px){
+      #toast-container {
+        min-width: 0%;
+        bottom: 95%;
+      }
+    }
+    nav {
+      background-color: #013179;
+    }
+
+    .sidenav .collapsible-body {
+      padding: 0px 55px;
+    }
+
+    .sidenav .collapsible-header {
+      padding: 0px 28px;
+    }
+  </style>
+  <input type="hidden" id="HDN_ID" name="HDN_ID">
+  <input type="hidden" id="HDN_ARR" name="HDN_ARR">
+  <input type="hidden" id="HDN_VALIDATE" name="HDN_VALIDATE">
+  <app-root></app-root>
+</body>
+</html>

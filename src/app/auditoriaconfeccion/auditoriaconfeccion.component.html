@@ -1,0 +1,213 @@
+<div class="card-panel">
+  <div class="row">
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s3">
+          <i class="material-icons prefix">font_download</i>
+          <input id="CLAVE_CORTADOR" type="text" class="validate">
+          <label for="CLAVE_CORTADOR">Clave</label>
+        </div>
+        <div class="col s9" style="text-align: right">
+          <button (click)="GetAuditoriaCorte()" class="btn tooltipped waves-effect waves-light" type="button" name="btnSearchCortadores">Buscar
+            <i class="material-icons right">search</i>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <table id="tlbAuditoriaCorte" class="row-border hover">
+          <thead>
+            <th></th>
+            <th>No.</th>
+            <th>Cliente</th>
+            <th>Orden Trabajo</th>
+            <th>PO</th>
+            <th>Tela</th>
+            <th>Marca</th>
+            <th>NumCortada</th>
+            <th>Lavado</th>
+            <th>Estilo</th>
+            <th>Planta</th>
+          </thead>
+        </table>
+      </div>
+      <div class="row">
+        <div class="row" style="text-align: right">
+          <div class="col s12">
+            <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+              <i class="material-icons left">arrow_back</i>
+            </button>
+            &nbsp;&nbsp;
+            <button class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega una nueva auditoria de corte" data-target="modalNewAuditoria" type="button" name="btnAddAuditoria">Agregar
+              <i class="material-icons right">send</i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- MODAL NUEVA AUDITORÍA -->
+<div style="width: 80%" id="modalNewAuditoria" class="modal modal-fixed-footer modal-lg">
+  <div class="modal-content">
+    <h4>Nuevo Auditoría Corte</h4>
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s4">
+            <select id="ddlCliente">
+              <option value="0" disabled selected>SELECCIONE...</option>
+            </select>
+          <label>CLIENTE:</label>
+        </div>
+        <div class="input-field col s4">
+          <i class="material-icons prefix">details</i>
+          <input id="ddlOT" name="ddlOT" type="text" class="validate">
+          <label for="ddlOT">Orden Trabajo</label>
+        </div>
+        <div class="col s2">
+          <div class="col s6" style="text-align: right">
+            <button onclick="OnChangeOT();" class="btn tooltipped waves-effect waves-light" type="button" name="btnSearchCortadores" data-position="bottom" data-tooltip="Busca si existe la orden de trabajo">
+              <i class="material-icons right">search</i>
+            </button>
+          </div>
+        </div>
+        <div class="col s2" style="text-align:right">
+          <label style="font-size: 1.2rem">STATUS:   </label>
+          <label style="font-size: 1.2rem" id="lblEstado"></label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s4">
+          <label style="font-size: 1.2rem">CLIENTE: </label>
+          <label id="lblCliente" style="font-size: 1.2rem"></label>
+        </div>
+        <div class="col s4">
+          <label style="font-size: 1.2rem">PO: </label>
+          <label style="font-size: 1.2rem" id="lblPO"></label>
+        </div>
+        <div class="col s4">
+          <label style="font-size: 1.2rem">TELA: </label>
+          <label style="font-size: 1.2rem" id="lblTela"></label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s4">
+          <label style="font-size: 1.2rem">MARCA: </label>
+          <label style="font-size: 1.2rem" id="lblMarca"></label>
+        </div>
+        <div class="col s4">
+          <label style="font-size: 1.2rem">#CORTADA: </label>
+          <label style="font-size: 1.2rem" id="lblNoCortada"></label>
+        </div>
+        <div class="col s4">
+          <label style="font-size: 1.2rem">LAVADO: </label>
+          <label style="font-size: 1.2rem" id="lblLavado"></label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s4">
+          <label style="font-size: 1.2rem">ESTILO: </label>
+          <label style="font-size: 1.2rem" id="lblEstilo"></label>
+        </div>
+        <div class="col s4">
+          <label style="font-size: 1.2rem">PLANTA: </label>
+          <label style="font-size: 1.2rem" id="lblPlanta"></label>
+        </div>
+        <div class="col s4">
+          <label style="font-size: 1.2rem">RUTA: </label>
+          <label style="font-size: 1.2rem" id="lblRuta"></label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s4">
+          <select id="ddlArea">
+            <option value="0" disabled selected>SELECCIONE...</option>
+          </select>
+          <label>ÁREA:</label>
+        </div>
+        <div class="input-field col s4">
+          <select id="ddlOperacion">
+            <option value="0" disabled selected>SELECCIONE...</option>
+          </select>
+          <label>OPERACIÓN:</label>
+        </div>
+        <div class="input-field col s4">
+          <select id="ddlDefecto">
+            <option value="0" disabled selected>SELECCIONE...</option>
+          </select>
+          <label>DEFECTO:</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s4">
+          <i class="material-icons prefix">filter_1</i>
+          <input id="AUDIT_CANTIDAD" name="AUDIT_CANTIDAD" maxlength="10" type="number" class="validate">
+          <label for="AUDIT_CANTIDAD">Cantidad</label>
+        </div>
+        <div class="col s6">
+          <label>Imagen Defecto</label>
+          <div class="file-field input-field">
+            <div class="btn">
+              <span>Buscar</span>
+              <input id="ImageDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
+            </div>
+            <div class="file-path-wrapper">
+              <input class="file-path validate" type="text" placeholder="Carga Archivo" />
+            </div>
+            <img id="blah" src="http://placehold.it/180" alt="your image" />
+          </div>
+        </div>
+        <div style="text-align: right">
+          <div class="col s2">
+            <button (click)="ValidateAddConfeccionAuditoria()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Agrega un nuevo corte auditoría" type="button" name="btnAddCortador">Agregar
+              <i class="material-icons right">send</i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <table id="tlbConfeccionAuditoria" class="row-border">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th style="display:none"></th>
+              <th>Área</th>
+              <th style="display:none"></th>
+              <th>Operación</th>
+              <th style="display:none"></th>
+              <th>Defecto</th>
+              <th>Cantidad</th>
+            </tr>
+          </thead>
+          <tbody id="bdyConfeccionAuditoria"></tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="ValidateSave()" onclick="javascript: GetAuditoriaConfeccion();" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETAILS AUDITORIA -->
+<div style="width: 80%" id="modalDetailsAuditoria" class="modal modal-fixed-footer modal-lg">
+  <div class="modal-content">
+    <h4>Detalles Auditoría Corte</h4>
+    <form class="col s12">
+
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s12" style="text-align: right">
+        <a class="modal-close waves-effect waves-green btn-flat">Cerrar</a>
+      </div>
+    </div>
+  </div>
+</div>

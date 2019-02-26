@@ -1,0 +1,176 @@
+<div class="card-panel">
+  <div class="row">
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s3">
+          <i class="material-icons prefix">font_download</i>
+          <input id="CLAVE_CORTADOR" type="text" class="validate">
+          <label for="CLAVE_CORTADOR">Clave</label>
+        </div>
+        <div class="input-field col s3">
+          <i class="material-icons prefix">account_box</i>
+          <input id="NOMBRE_CORTADOR" type="text" class="validate">
+          <label for="NOMBRE_CORTADOR">Nombre</label>
+        </div>
+        <div class="col s6" style="text-align: right">
+          <button (click)="GetDefectosConfeccion()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar los defectos por confección por filtro seleccionado" type="button" name="btnSearchDefectoConfeccion">Buscar
+            <i class="material-icons right">search</i>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <table id="tlbDefectoConfeccion" class="row-border hover">
+          <thead>
+            <th></th>
+            <th>Clave Defectos</th>
+            <th>Nombre Defectos</th>
+            <th>Estatus</th>
+            <th></th>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <br />
+      <div class="row" style="text-align: right">
+        <div class="col s12">
+          <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+            <i class="material-icons left">arrow_back</i>
+          </button>
+          &nbsp;&nbsp;
+          <button (click)="DisposeNewDefectoConfeccion()" class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega un nuevo defecto confección" data-target="modalNewDefectoConfeccion" type="button" name="btnAddDefectoConfeccion">Agregar
+            <i class="material-icons right">send</i>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div style="width: 80%" id="modalNewDefectoConfeccion" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Nuevo Defecto Confección</h4>
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate">
+          <label for="CVE_NEW_CORTADOR">Clave</label>
+        </div>
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_circle</i>
+          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate">
+          <label for="NOMBRE_NEW_CORTADOR">Nombre:</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate">
+          <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>
+        </div>
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate">
+          <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>
+        </div>
+      </div>
+      <div class = "row">
+        <label>Imagen Defecto</label>
+        <div class="file-field input-field">
+           <div class="btn">
+              <span>Buscar</span>
+              <input id="ImageDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
+           </div>
+           <div class="file-path-wrapper">
+              <input class="file-path validate" type="text" placeholder="Carga Archivo" />
+           </div>
+           <img id="blah" src="http://placehold.it/180" alt="your image" />
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="NewDefectoConfeccion()" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="width: 80%" id="modalEditDefectoConfeccion" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Edita el Defecto en Confección</h4>
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_EDT_DEFECTO_CONFECCION" name="CVE_EDT_DEFECTO_CONFECCION" maxlength="10" type="text" class="validate">
+          <label class="active" for="CVE_EDT_DEFECTO_CONFECCION">Clave</label>
+        </div>
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_circle</i>
+          <input id="NOMBRE_EDT_DEFECTO_CONFECCION" name="NOMBRE_EDT_DEFECTO_CONFECCION" maxlength="150" type="text" class="validate">
+          <label class="active" for="NOMBRE_EDT_DEFECTO_CONFECCION">Nombre:</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="OBSERVACIONES_EDT_DEFECTO_CONFECCION" name="OBSERVACIONES_EDT_DEFECTO_CONFECCION" maxlength="10" type="text" class="validate">
+          <label class="active" for="OBSERVACIONES_EDT_DEFECTO_CONFECCION">Obs.:</label>
+        </div>
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="DESCRIPCION_EDT_DEFECTO_CONFECCION" name="DESCRIPCION_EDT_DEFECTO_CONFECCION" maxlength="250" type="text" class="validate">
+          <label class="active" for="DESCRIPCION_EDT_DEFECTO_CONFECCION">Descripcion:</label>
+        </div>
+      </div>
+      <div class = "row">
+        <label>Imagen Defecto</label>
+        <div class="file-field input-field">
+           <div class="btn">
+              <span>Buscar</span>
+              <input id="ImageDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
+           </div>
+           <div class="file-path-wrapper">
+              <input class="file-path validate" type="text" placeholder="Carga Archivo" />
+           </div>
+           <img id="blah" src="http://placehold.it/180" alt="your image" />
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (ckick)="EditDefectoConfeccion()" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Update Enabled Cortador -->
+<div id="modalEnableDefectoConfeccion" class="modal">
+  <div class="modal-content">
+    <div style="text-align: center">
+      <p>¿Realmente deseas activar o desactivar el defecto confección?</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="GetEnabledDefectoConfeccion();" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>

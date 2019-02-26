@@ -1,0 +1,175 @@
+<div class="navbar-fixed">
+  <nav>
+    <div class="nav-wrapper">
+      <a class="brand-logo" routerLink="/home"><i class="material-icons">home</i></a>
+      <div id="formLogOut">
+        <ul class="brand-logo center">
+          <li id="lblModulo">Inicio</li>
+        </ul>
+        <ul class="right hide-on-med-and-down">
+          <li><a class="tooltipped" data-position="bottom" data-tooltip="Cerrar sesión" href="#" (click)='LogOut()'><i class="material-icons">exit_to_app</i></a></li>
+        </ul>
+      </div>
+      <ul class="right hide-on-med-and-down">
+        <li><a href="" data-target="slide-out" class="sidenav-trigger"><i class="material-icons">menu</i></a></li>
+      </ul>
+    </div>
+  </nav>
+</div>
+
+<ul id="slide-out" class="sidenav collapsible">
+  <li>
+    <div class="user-view">
+      <div class="background"><img src="../../assets/BackgroundSideNav.jpg"></div><a><i class="material-icons">supervisor_account</i></a><a><span class="white-text name" id="USU_SPN_NOMBRE"></span></a>
+  <a><span id="USU_SPN_CORREO" class="white-text email"></span></a></div></li>
+  <li><a [routerLink]="['/home']"><i class="material-icons">home</i>Inicio</a></li>
+  <li>
+    <div class="collapsible-header" id="menu_1" style="display: none">
+      <a><i class="material-icons">work</i>&nbsp;&nbsp;&nbsp;Cátalogos</a>
+    </div>
+    <div class="collapsible-body" id="menu_5" style="display: none">
+      <a [routerLink]="['/clientes']"><i class=material-icons>assignment_ind</i>&nbsp;&nbsp;&nbsp;Clientes</a>
+    </div>
+    <div class="collapsible-body" id="menu_4" style="display: none">
+      <a [routerLink]="['/correoselectronicos']"><i class=material-icons>email</i>&nbsp;&nbsp;&nbsp;Correos</a>
+    </div>
+    <div class="collapsible-body" id="menu_3" style="display: none">
+      <a [routerLink]="['/segundas']"><i class=material-icons>chevron_right</i>&nbsp;&nbsp;&nbsp;2DAS</a>
+    </div>
+    <div class="collapsible-body" id="menu_2" style="display: none">
+      <a [routerLink]="['/usuarios']"><i class=material-icons>person_add</i>&nbsp;&nbsp;&nbsp;Usuarios</a>
+    </div>
+</li>
+<li>
+  <div class="collapsible-header" id="menu_6" style="display: none">
+    <a><i class="material-icons">burst_mode</i>&nbsp;&nbsp;&nbsp;Confección</a>
+  </div>
+  <div class="collapsible-body" id="menu_7" style="display: none">
+      <a [routerLink]="['/areaconfeccion']"><i class="material-icons">crop_square</i>&nbsp;&nbsp;&nbsp;Área</a>
+  </div>
+  <div class="collapsible-body" id="menu_8" style="display: none">
+      <a [routerLink]="['/defectoconfeccion']"><i class="material-icons">do_not_disturb_on</i>&nbsp;&nbsp;&nbsp;Defectos</a>
+  </div>
+  <div class="collapsible-body" id="menu_9" style="display: none">
+      <a [routerLink]="['/operacionconfeccion']"><i class="material-icons">settings_applications</i>&nbsp;&nbsp;&nbsp;Operaciones</a>
+  </div>
+  <div class="collapsible-body" id="menu_10" style="display: none">
+      <a [routerLink]="['/plantas']" ><i class="material-icons">business</i>&nbsp;&nbsp;&nbsp;Plantas</a>
+  </div>
+  <div class="collapsible-body" id="menu_43" style="display: none">
+      <a [routerLink]="['/auditoriaconfeccion']" ><i class="material-icons">done_all</i>&nbsp;&nbsp;&nbsp;Auditoría Conf.</a>
+  </div>
+</li>
+<li>
+  <div class="collapsible-header" id="menu_11" style="display: none">
+    <a><i class="material-icons">content_cut</i>&nbsp;&nbsp;&nbsp;Corte</a>
+  </div>
+  <div class="collapsible-body" id="menu_12" style="display: none">
+      <a [routerLink]="['/corte']"><i class="material-icons">content_cut</i>&nbsp;&nbsp;&nbsp;Cortadores</a>
+  </div>
+  <div class="collapsible-body" id="menu_13" style="display: none">
+      <a [routerLink]="['/defectocorte']"><i class="material-icons">do_not_disturb_on</i>&nbsp;&nbsp;&nbsp;Defectos</a>
+  </div>
+  <div class="collapsible-body" id="menu_14" style="display: none">
+      <a [routerLink]="['/mesa']"><i class="material-icons">border_outer</i>&nbsp;&nbsp;&nbsp;Mesa</a>
+  </div>
+  <div class="collapsible-body" id="menu_15" style="display: none">
+      <a [routerLink]="['/posicioncorte']"><i class="material-icons">zoom_out_map</i>&nbsp;&nbsp;&nbsp;Posición</a>
+  </div>
+  <div class="collapsible-body" id="menu_16" style="display: none">
+      <a [routerLink]="['/tendido']"><i class="material-icons">view_array</i>&nbsp;&nbsp;&nbsp;Tendido</a>
+  </div>
+  <div class="collapsible-body" id="menu_17" style="display: none">
+    <a [routerLink]="['/tipotendido']"><i class="material-icons">view_day</i>&nbsp;&nbsp;&nbsp;Tipo Tendido</a>
+  </div>
+  <div class="collapsible-body" id="menu_18" style="display: none">
+    <a [routerLink]="['/toleranciacorte']"><i class="material-icons">timeline</i>&nbsp;&nbsp;&nbsp;Tolerancia</a>
+  </div>
+  <div class="collapsible-body" id="menu_37" style="display: none">
+    <a [routerLink]="['/auditoriacorte']"><i class="material-icons">done_all</i>&nbsp;&nbsp;&nbsp;Auditoría Corte</a>
+  </div>
+  <div class="collapsible-body" id="menu_42" style="display: none">
+    <a [routerLink]="['/auditoriatendido']"><i class="material-icons">done_all</i>&nbsp;&nbsp;&nbsp;Auditoría Tendido</a>
+  </div>
+</li>
+<li>
+  <div class="collapsible-header" id="menu_19" style="display: none">
+    <a><i class="material-icons">local_laundry_service</i>&nbsp;&nbsp;&nbsp;Lavandería</a>
+  </div>
+  <div class="collapsible-body" id="menu_20" style="display: none">
+      <a [routerLink]="['/lavanderiadefectos']"><i class="material-icons">do_not_disturb_on</i>&nbsp;&nbsp;&nbsp;Defectos</a>
+  </div>
+  <div class="collapsible-body" id="menu_21" style="display: none">
+      <a><i class="material-icons">settings_applications</i>&nbsp;&nbsp;&nbsp;Operaciones</a>
+  </div>
+  <div class="collapsible-body" id="menu_22" style="display: none">
+      <a><i class="material-icons">zoom_out_map</i>&nbsp;&nbsp;&nbsp;Posición</a>
+  </div>
+</li>
+<li>
+  <div class="collapsible-header" id="menu_23" style="display: none">
+    <a><i class="material-icons">perm_data_setting</i>&nbsp;&nbsp;&nbsp;Procesos Esp.</a>
+  </div>
+  <div class="collapsible-body" id="menu_24" style="display: none">
+      <a [routerLink]="['/procesosespecialesdefectos']"><i class="material-icons">do_not_disturb_on</i>&nbsp;&nbsp;&nbsp;Defectos</a>
+  </div>
+  <div class="collapsible-body" id="menu_25" style="display: none">
+      <a [routerLink]="['/procesosespecialesoperaciones']"><i class="material-icons">settings_applications</i>&nbsp;&nbsp;&nbsp;Operaciones</a>
+  </div>
+  <div class="collapsible-body" id="menu_26" style="display: none">
+      <a [routerLink]="['/procesosespecialesposicion']" ><i class="material-icons">zoom_out_map</i>&nbsp;&nbsp;&nbsp;Posición</a>
+  </div>
+  <div class="collapsible-body" id="menu_44" style="display: none">
+    <a [routerLink]="['/auditoriaprocesosespeciales']" ><i class="material-icons">done_all</i>&nbsp;&nbsp;&nbsp;Auditoría Proc Esp</a>
+  </div>
+</li>
+<li>
+  <div class="collapsible-header" id="menu_38" style="display: none">
+    <a><i class="material-icons">done</i>&nbsp;&nbsp;&nbsp;Terminado</a>
+  </div>
+  <div class="collapsible-body" id="menu_40" style="display: none">
+      <a><i class="material-icons">do_not_disturb_on</i>&nbsp;&nbsp;&nbsp;Defectos</a>
+  </div>
+  <div class="collapsible-body" id="menu_39" style="display: none">
+      <a><i class="material-icons">settings_applications</i>&nbsp;&nbsp;&nbsp;Operaciones</a>
+  </div>
+  <div class="collapsible-body" id="menu_41" style="display: none">
+      <a><i class="material-icons">zoom_out_map</i>&nbsp;&nbsp;&nbsp;Posición</a>
+  </div>
+</li>
+<li>
+  <div class="collapsible-header" id="menu_27" style="display: none">
+    <a><i class="material-icons">insert_chart</i>&nbsp;&nbsp;&nbsp;Reportes</a>
+  </div>
+  <div class="collapsible-body" id="menu_28" style="display: none">
+    <a>&nbsp;Compostura X Marca</a>
+  </div>
+  <div class="collapsible-body" id="menu_29" style="display: none">
+      <a>&nbsp;Compostura X Planta</a>
+  </div>
+  <div class="collapsible-body" id="menu_30" style="display: none">
+    <a>&nbsp;Costo y Cotizado</a>
+  </div>
+  <div class="collapsible-body" id="menu_31" style="display: none">
+    <a>&nbsp;Corte x pulgadas</a>
+  </div>
+  <div class="collapsible-body" id="menu_32" style="display: none">
+    <a>&nbsp;Refilado por cortador</a>
+  </div>
+  <div class="collapsible-body" id="menu_33" style="display: none">
+    <a>&nbsp;Composturas</a>
+  </div>
+  <div class="collapsible-body" id="menu_34" style="display: none">
+    <a>&nbsp;Composturas x Marca</a>
+  </div>
+  <div class="collapsible-body" id="menu_35" style="display: none">
+      <a>&nbsp;Composturas y 2DAS</a>
+  </div>
+  <div class="collapsible-body" id="menu_36" style="display: none">
+    <a>&nbsp;Composturas Plantas</a>
+  </div>
+  <div class="collapsible-body" id="menu_45" style="display: none">
+    <a [routerLink]="['/reportecortegeneral']">&nbsp;Wip General</a>
+  </div> 
+</li>
+</ul>

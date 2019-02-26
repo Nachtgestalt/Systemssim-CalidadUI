@@ -1,0 +1,207 @@
+<div class="card-panel">
+  <div class="row">
+    <form class="col s12">
+      <div class="row">
+          <div class="input-field col s3">
+              <i class="material-icons prefix">email</i>
+              <input id="USU_BUSQUEDA_EMAIL" type="email" class="validate">
+              <label for="USU_BUSQUEDA_EMAIL">Correo electrónico</label>
+          </div>
+          <div class="col s9" style="text-align: right">
+              <button class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar los correos electrónicos por filtro seleccionado" (click)="GetEmails()" type="button" name="btnSearch">Buscar
+                <i class="material-icons right">search</i>
+              </button>
+          </div>
+      </div>
+      <div class="row">
+        <table id="tlbCorreosAuditoria" class="row-border hover">
+          <thead>
+            <tr>
+              <th></th>
+              <th>No.</th>
+              <th>Correo Electrónico</th>
+              <th>Corte</th>
+              <th>Confección</th>
+              <th>Lavandería</th>
+              <th>Procesos Especiales</th>
+              <th>Terminado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <br/>
+      <div class="row" style="text-align: right">
+          <div class="col s12">
+            <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+              <i class="material-icons left">arrow_back</i>
+            </button>
+            &nbsp;&nbsp;
+            <button (click)="GetUsuarios()" class="btn tooltipped waves-effect waves-light modal-trigger" data-target="modalNewCorreo" data-position="bottom" data-tooltip="Agrega un nuevo usuario para cierre de auditoría" type="button" name="btnAddNewCierre">Agregar
+              <i class="material-icons right">send</i>
+            </button>
+          </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL NUEVO USUARIO -->
+<div id="modalCorreos" class="modal modal-fixed-footer" style="top: 30%; height: 40%">
+  <div class="modal-content">
+    <h4>Alertas en módulos</h4>
+    <form class="col s12">
+      <br/>
+      <div class="row">
+        <div class="col s4">
+          <label>
+            <input type="checkbox" class="filled-in" id="Corte_New_Mail" />
+            <span>Corte</span>
+          </label>
+        </div>
+        <div class="col s4">
+          <label>
+              <input type="checkbox" class="filled-in" id="Confeccion_New_Mail" />
+              <span>Confección</span>
+            </label>
+        </div>
+        <div class="col s4">
+          <label>
+            <input type="checkbox" class="filled-in" id="Lavanderia_New_Mail" />
+            <span>Lavandería</span>
+          </label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s4">
+          <label>
+            <input type="checkbox" class="filled-in" id="Terminado_New_Mail" />
+            <span>Terminado</span>
+          </label>
+        </div>
+        <div class="col s4">
+          <label>
+            <input type="checkbox" class="filled-in" id="ProcEsp_New_Mail" />
+            <span>Procesos Especiales</span>
+          </label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+      <div class="row">
+        <div class="col s6" style="text-align: left">
+          <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+        </div>
+        <div class="col s6" style="text-align: right">
+          <a (click)="SaveAlertasCorreo()" class="waves-effect waves-green btn-flat">Agregar</a>
+        </div>
+      </div>
+  </div>
+</div>
+
+ <!-- MODAL NUEVO USUARIO -->
+ <div id="modalNewCorreo" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Nueva notificación para cierre de auditoría</h4>
+    <form class="col s12">
+      <div class="row">
+        <table id="tlbNuevoCierreAudiCorreo" class="row-border hover">
+          <thead>
+            <tr>
+              <td></td>
+              <td>No.</td>
+              <td>Nombre</td>
+              <td>Usuario</td>
+              <td>Email</td>
+            </tr>
+          </thead>
+        </table>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a class="waves-effect waves-green btn-flat">Agregar</a>
+      </div>
+    </div>
+  </div>
+ </div>
+
+ <!-- EDITA USUARIO -->
+<div id="modalEdtCorreos" class="modal modal-fixed-footer" style="top: 30%; height: 30%">
+    <div class="modal-content">
+      <h4>Alertas en módulos</h4>
+      <form class="col s12">
+        <br/>
+        <div class="row">
+          <div class="col s4">
+            <label>
+              <input type="checkbox" class="filled-in" id="Corte_Edt_Mail" />
+              <span>Corte</span>
+            </label>
+          </div>
+          <div class="col s4">
+            <label>
+                <input type="checkbox" class="filled-in" id="Confeccion_Edt_Mail" />
+                <span>Confección</span>
+              </label>
+          </div>
+          <div class="col s4">
+            <label>
+              <input type="checkbox" class="filled-in" id="Lavanderia_Edt_Mail" />
+              <span>Lavandería</span>
+            </label>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col s4">
+            <label>
+              <input type="checkbox" class="filled-in" id="Terminado_Edt_Mail" />
+              <span>Terminado</span>
+            </label>
+          </div>
+          <div class="col s4">
+            <label>
+              <input type="checkbox" class="filled-in" id="ProcEsp_Edt_Mail" />
+              <span>Procesos Especiales</span>
+            </label>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+        <div class="row">
+          <div class="col s6" style="text-align: left">
+            <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+          </div>
+          <div class="col s6" style="text-align: right">
+            <a (click)="UpdateAlertasUsuario()" class="waves-effect waves-green btn-flat">Actualiza</a>
+          </div>
+        </div>
+    </div>
+  </div>
+
+<!-- ELIMINA USUARIO -->
+<div id="modalDeleteAlerta" class="modal">
+    <div class="modal-content">
+      <div style="text-align: center">
+        <p>¿Realmente deseas eliminar las alertas para el usuario seleccionado?</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <div class="row">
+        <div class="col s6" style="text-align: left">
+          <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+        </div>
+        <div class="col s6" style="text-align: right">
+          <a (click)="DeleteAlertaUsuario()" class="waves-effect waves-green btn-flat">Aceptar</a>
+        </div>
+      </div>
+    </div>
+  </div>

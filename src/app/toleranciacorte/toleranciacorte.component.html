@@ -1,0 +1,180 @@
+<div class="card-panel">
+  <div class="row" style="text-align: right;">
+    <div class="col s12">
+      <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+        <i class="material-icons left">arrow_back</i>
+      </button> &nbsp;
+      <button (click)="DisposeNewTolerancia()" class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega una nueva tolerancia" data-target="modalNewTolerancia" type="button" name="btnAddTolerancia">Agregar
+        <i class="material-icons right">send</i>
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <form class="col s12">
+      <div class="row">
+        <div class="col s8">
+          <div class="input-field col s4">
+            <i class="material-icons prefix">font_download</i>
+            <input class="validate" type="text" id="FILTRO_DESCRIPCION">
+            <label for="FILTRO_DESCRIPCION">Descripción</label>
+          </div>
+        </div>
+        <div class="col s4" style="text-align: right">
+          <button (click)="ObtieneTolerancias()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar las tolerancias registradas" type="button" name="btnSearchTolerancia">Buscar
+            <i class="material-icons right">search</i>
+          </button>
+        </div>
+      </div>
+      <br/>
+      <div class="row">
+        <table id="tlbTolerancia" class="row-border hover">
+          <thead>
+            <th></th>
+            <th>No.</th>
+            <th>Descripción</th>
+            <th>Tolerancia (+)</th>
+            <th>Tolerancia (-)</th>
+            <th>Numerador</th>
+            <th>Denominador</th>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <br />
+    </form>
+  </div>
+</div>
+
+<!-- DETALLES -->
+<div id="modalEdtTolerancia" class="modal modal-fixed-footer" style="height: 40%">
+  <div class="modal-content">
+    <h4>Detalles Tolerancia</h4>
+    <form class="col s12">
+      <br>
+      <div class="row">
+          <div class="col s2">
+              <div class="switch">
+                <label>
+                  <input type="checkbox" id="chkTolerancia" disabled="disabled" checked="checked">
+                  <span class="lever"></span>
+                  1
+                </label>
+              </div>
+            </div>
+            <div class="col s2">
+              <div class="switch">
+                <label>
+                  <input type="checkbox" id="TOL_EDT_POSITIVA">
+                    <span class="lever"></span>
+                      +
+                </label>
+              </div>
+            </div>
+            <div class="col s2">
+              <div class="switch">
+                <label>
+                  <input type="checkbox" id="TOL_EDT_NEGATIVA">
+                    <span class="lever"></span>
+                      -
+                </label>
+              </div>
+            </div>
+            <div class="col s2">
+              <div class="input-field">
+                <input id="TOL_EDT_NUMERADOR" type="number" class="validate">
+                <label class="active" for="TOL_EDT_NUMERADOR">Numerador</label>
+              </div>
+            </div>
+            <div class="col s1">
+              <span>&nbsp;&nbsp;&nbsp;/</span>
+            </div>
+            <div class="col s2">
+              <div class="input-field">
+                <input id="TOL_EDT_DENOMINADOR" type="number" class="validate">
+                <label class="active" for="TOL_EDT_DENOMINADOR">Denominador</label>
+              </div>
+            </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s12" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NUEVA TOLERANCIA -->
+<div id="modalNewTolerancia" class="modal modal-fixed-footer" style="height: 40%">
+  <div class="modal-content">
+    <h4>Nueva Tolerancia</h4>
+    <form class="col s12">
+      <br>
+      <div class="row">
+        <div class="col s2">
+          <div class="switch">
+            <label>
+              <input type="checkbox" id="chkToleranciaUno" disabled="disabled" checked="checked">
+              <span class="lever"></span>
+              1
+            </label>
+          </div>
+        </div>
+        <div class="col s2">
+          <div class="switch">
+            <label>
+              <input type="checkbox" id="chkToleranciaPositiva">
+                <span class="lever"></span>
+                  +
+            </label>
+          </div>
+        </div>
+        <div class="col s2">
+          <div class="switch">
+            <label>
+              <input type="checkbox" id="chkToleranciaNegativa">
+                <span class="lever"></span>
+                  -
+            </label>
+          </div>
+        </div>
+        <div class="col s2">
+          <div class="input-field">
+            <input id="TOL_NUMERADOR" type="number" class="validate">
+            <label for="TOL_NUMERADOR">Numerador</label>
+          </div>
+        </div>
+        <div class="col s1">
+          <span>&nbsp;&nbsp;&nbsp;/</span>
+        </div>
+        <div class="col s2">
+          <div class="input-field">
+            <input id="TOL_DENOMINADOR" type="number" class="validate">
+            <label for="TOL_DENOMINADOR">Denominador</label>
+          </div>
+        </div>
+      </div>
+      <br/>
+      <div class="row">
+        <div class="col s6">
+          <div class="input-field">
+            <input id="TOL_DESCRIPCION" type="text" class="validate" >
+            <label for="TOL_DESCRIPCION">Descripción</label>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="NewTolerancia()" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>

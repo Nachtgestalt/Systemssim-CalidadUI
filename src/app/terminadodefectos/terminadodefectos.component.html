@@ -1,0 +1,207 @@
+<div class="card-panel">
+  <div class="row" style="text-align: right">
+    <div class="col s12">
+      <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+        <i class="material-icons left">arrow_back</i>
+      </button>
+      &nbsp;&nbsp;
+      <button class="btn tooltipped waves-effect waves-light modal-trigger"
+              data-position="bottom" data-tooltip="Agrega un nuevo defecto" data-target="modalNewDefectoTerminado"
+              type="button"
+              name="btnAddCortador">Agregar
+        <i class="material-icons right">send</i>
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <form class="col s12" [formGroup]="formSearch">
+      <div class="row">
+        <div class="input-field col s4">
+          <i class="material-icons prefix">font_download</i>
+          <input id="CLAVE_CORTADOR" type="text" class="validate" formControlName="clave">
+          <label for="CLAVE_CORTADOR">Clave</label>
+        </div>
+        <div class="input-field col s4">
+          <i class="material-icons prefix">font_download</i>
+          <input id="NOMBRE_DEFECTO" type="text" class="validate" formControlName="defecto">
+          <label for="NOMBRE_DEFECTO">Defecto</label>
+        </div>
+        <div class="col s4" style="text-align: right">
+          <button (click)="getDefectosTerminado()" class="btn tooltipped waves-effect waves-light"
+                  data-position="bottom"
+                  data-tooltip="Consultar los defectos por filtro seleccionado" type="button"
+                  name="btnSearchCortadores">Buscar
+            <i class="material-icons right">search</i>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <table id="tblDefectosTerminado" class="row-border hover"
+               #tblDefectosTerminado>
+          <thead>
+          <th></th>
+          <th *ngIf="defectos.length > 0">No.</th>
+          <th>Clave Defecto</th>
+          <th>Defecto</th>
+          <th>Estatus</th>
+          <th></th>
+          </thead>
+          <tbody>
+          <tr *ngFor="let defecto of defectos; let i = index">
+            <td>
+              <a class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditDefectoTerminado"
+                 data-position="bottom" data-tooltip="Edita el defecto  seleccionado"
+                 (click)="getInfoDefectoTerminado(defecto.ID)">
+                <i class="material-icons right">edit</i>
+              </a>
+            </td>
+            <td>{{i + 1}}</td>
+            <td>{{defecto.Clave}}</td>
+            <td>{{defecto.Nombre}}</td>
+            <td>{{defecto.Activo ? 'SI' : 'NO'}}</td>
+            <td class="center-align">
+              <a class="waves-effect waves-light btn tooltiped modal-trigger bold_sub"
+                 data-tooltiped="Activa / Inactiva el defecto seleccionado"
+                 data-target="modalEnableDefectoTerminado"
+                 (click)="cambiarID(defecto.ID)">
+                <u>{{defecto.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u>
+              </a>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <br/>
+    </form>
+  </div>
+</div>
+
+<div id="modalNewDefectoTerminado" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Nuevo defecto</h4>
+    <form class="col s12" [formGroup]="form">
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate"
+                 #clave formControlName="Clave">
+          <label for="CVE_NEW_CORTADOR">Clave</label>
+        </div>
+        <div class="input-field col s6">
+          <i class="material-icons prefix">account_circle</i>
+          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate"
+                 formControlName="Nombre"
+                 #nombre>
+          <label for="NOMBRE_NEW_CORTADOR">Defecto</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">font_download</i>
+          <textarea id="CVE_NEW_DESCRIPCION_TERMINADO" type="text" class="materialize-textarea"
+                    formControlName="Descripcion"></textarea>
+          <label for="CVE_NEW_DESCRIPCION_TERMINADO">Descripción</label>
+        </div>
+      </div>
+      <div class="row">
+        <label>Imagen Defecto</label>
+        <div class="file-field input-field" id="divImagen">
+          <div class="btn">
+            <span>Buscar</span>
+            <input id="ImageTerminoDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text" placeholder="Carga Archivo"/>
+          </div>
+          <img id="blah" src="http://placehold.it/180" alt="your image"/>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="NewDefectoTerminado()" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalEditDefectoTerminado" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Editar defecto terminado</h4>
+    <form class="col s12" [formGroup]="formEdit">
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_EDIT_DEFECTO_TERMINADO" maxlength="10" type="text" class="validate"
+                 #clave_edit formControlName="Clave">
+          <label for="CVE_EDIT_DEFECTO_TERMINADO">Clave</label>
+        </div>
+        <div class="input-field col s6">
+          <i class="material-icons prefix">account_circle</i>
+          <input id="NOMBRE_EDIT_DEFECTO_TERMINADO" maxlength="150" type="text" class="validate"
+                 formControlName="Nombre"
+                 #nombre_edit>
+          <label for="NOMBRE_EDIT_DEFECTO_TERMINADO">Defecto</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">font_download</i>
+          <textarea id="CVE_EDIT_DESCRIPCION_TERMINADO" type="text" class="materialize-textarea"
+                    formControlName="Descripcion" #descripcion_edit></textarea>
+          <label for="CVE_EDIT_DESCRIPCION_TERMINADO">Descripción</label>
+        </div>
+      </div>
+      <div class="row">
+        <label>Imagen Defecto</label>
+        <div class="file-field input-field" id="divImagenEdit">
+          <div class="btn">
+            <span>Buscar</span>
+            <input id="ImageTerminoDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text" placeholder="Carga Archivo"/>
+          </div>
+          <img id="blah"
+               [src]="formEdit.get('Imagen').value != null && formEdit.get('Imagen').value !== '' ? formEdit.get('Imagen').value : 'http://placehold.it/180'"
+               alt="your image"/>
+        </div>
+      </div>
+      <!--<app-carga-imagenes></app-carga-imagenes>-->
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="editDefectoTerminado()" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Update Enabled Cortador -->
+<div id="modalEnableDefectoTerminado" class="modal">
+  <div class="modal-content">
+    <div style="text-align: center">
+      <p>¿Realmente deseas activar o desactivar el defecto?</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="GetEnabledDefectoTerminado();" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>

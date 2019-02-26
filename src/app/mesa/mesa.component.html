@@ -1,0 +1,150 @@
+<div class="card-panel">
+  <div class="row" style="text-align: right">
+    <div class="col s12">
+      <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+        <i class="material-icons left">arrow_back</i>
+      </button>
+      &nbsp;&nbsp;
+      <button (click)="DisposeNewMesa()" class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega una nueva Mesa" data-target="modalNewMesa" type="button" name="btnAddMesa">Agregar
+        <i class="material-icons right">send</i>
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s3">
+          <i class="material-icons prefix">font_download</i>
+          <input id="CLAVE_CORTADOR" type="text" class="validate">
+          <label for="CLAVE_CORTADOR">Clave</label>
+        </div>
+        <div class="input-field col s3">
+          <i class="material-icons prefix">account_box</i>
+          <input id="NOMBRE_CORTADOR" type="text" class="validate">
+          <label for="NOMBRE_CORTADOR">Nombre</label>
+        </div>
+        <div class="col s6" style="text-align: right">
+          <button (click)="GetMesa()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar los cortadores por mesa " type="button" name="btnSearchMesa">Buscar
+            <i class="material-icons right">search</i>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <table id="tlbMesa" class="row-border hover">
+          <thead>
+            <th></th>
+            <th>Clave Mesa</th>
+            <th>Nombre Mesa</th>
+            <th>Estatus</th>
+            <th></th>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <br />
+    </form>
+  </div>
+</div>
+
+<div id="modalNewMesa" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Nuevo Cortador por Mesa</h4>
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate">
+          <label for="CVE_NEW_CORTADOR">Clave</label>
+        </div>
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_circle</i>
+          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate">
+          <label for="NOMBRE_NEW_CORTADOR">Nombre:</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate">
+          <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>
+        </div>
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate">
+          <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="NewMesa()" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalEditMesa" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Edita el Cortador por Mesa</h4>
+    <form class="col s12">
+      <div class="row">
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_EDT_MESA" maxlength="10" type="text" class="validate">
+          <label class="active" for="CVE_EDT_MESA">Clave</label>
+        </div>
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_circle</i>
+          <input id="NOMBRE_EDT_MESA" maxlength="150" type="text" class="validate">
+          <label class="active" for="NOMBRE_EDT_MESA">Nombre:</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="OBSERVACIONES_EDT_MESA" maxlength="10" type="text" class="validate">
+          <label class="active" for="OBSERVACIONES_EDT_MESA">Obs.:</label>
+        </div>
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="DESCRIPCION_EDT_MESA" maxlength="250" type="text" class="validate">
+          <label class="active" for="DESCRIPCION_EDT_MESA">Descripcion:</label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Update Enabled Cortador -->
+<div id="modalEnableMesa" class="modal">
+  <div class="modal-content">
+    <div style="text-align: center">
+      <p>¿Realmente deseas activar o desactivar el cortador por mesa?</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="GetEnabledMesa();" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
