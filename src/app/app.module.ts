@@ -113,6 +113,7 @@ import { NgDropFilesDirective } from './directives/ng-drop-files.directive';
     AngularFontAwesomeModule,
     DataTablesModule,
     BrowserAnimationsModule,
+    DataTablesModule,
     ToastrModule.forRoot({
       timeOut: 3000,
       positionClass: 'toast-bottom-right',

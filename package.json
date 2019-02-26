@@ -21,7 +21,7 @@
     "@angular/platform-browser-dynamic": "^6.0.3",
     "@angular/router": "^6.0.3",
     "@progress/telerik-angular-report-viewer": "^5.18.1003",
-    "angular-datatables": "^6.0.0",
+    "angular-datatables": "^6.0.1",
     "angular-font-awesome": "^3.1.2",
     "angular-route": "^1.7.2",
     "angular-toastr": "^2.1.1",

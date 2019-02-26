@@ -21,11 +21,11 @@
           <input id="CLAVE_CORTADOR" type="text" class="validate" formControlName="clave">
           <label for="CLAVE_CORTADOR">Clave</label>
         </div>
-        <div class="input-field col s4">
-          <i class="material-icons prefix">font_download</i>
-          <input id="NOMBRE_DEFECTO" type="text" class="validate" formControlName="defecto">
-          <label for="NOMBRE_DEFECTO">Defecto</label>
-        </div>
+        <!--<div class="input-field col s4">-->
+        <!--<i class="material-icons prefix">font_download</i>-->
+        <!--<input id="NOMBRE_DEFECTO" type="text" class="validate" formControlName="defecto">-->
+        <!--<label for="NOMBRE_DEFECTO">Descripción</label>-->
+        <!--</div>-->
         <div class="col s4" style="text-align: right">
           <button (click)="getDefectosTerminado()" class="btn tooltipped waves-effect waves-light"
                   data-position="bottom"
@@ -37,14 +37,16 @@
       </div>
       <div class="row">
         <table id="tblDefectosTerminado" class="row-border hover"
-               #tblDefectosTerminado>
+               datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
           <thead>
-          <th></th>
-          <th *ngIf="defectos.length > 0">No.</th>
-          <th>Clave Defecto</th>
-          <th>Defecto</th>
-          <th>Estatus</th>
-          <th></th>
+          <tr>
+            <th></th>
+            <th>No.</th>
+            <th>Clave Defecto</th>
+            <th>Descripción</th>
+            <th>Estatus</th>
+            <th></th>
+          </tr>
           </thead>
           <tbody>
           <tr *ngFor="let defecto of defectos; let i = index">
@@ -57,7 +59,7 @@
             </td>
             <td>{{i + 1}}</td>
             <td>{{defecto.Clave}}</td>
-            <td>{{defecto.Nombre}}</td>
+            <td>{{defecto.Descripcion}}</td>
             <td>{{defecto.Activo ? 'SI' : 'NO'}}</td>
             <td class="center-align">
               <a class="waves-effect waves-light btn tooltiped modal-trigger bold_sub"
@@ -87,13 +89,13 @@
                  #clave formControlName="Clave">
           <label for="CVE_NEW_CORTADOR">Clave</label>
         </div>
-        <div class="input-field col s6">
-          <i class="material-icons prefix">account_circle</i>
-          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate"
-                 formControlName="Nombre"
-                 #nombre>
-          <label for="NOMBRE_NEW_CORTADOR">Defecto</label>
-        </div>
+        <!--<div class="input-field col s6">-->
+        <!--<i class="material-icons prefix">account_circle</i>-->
+        <!--<input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate"-->
+        <!--formControlName="Nombre"-->
+        <!--#nombre>-->
+        <!--<label for="NOMBRE_NEW_CORTADOR">Defecto</label>-->
+        <!--</div>-->
       </div>
       <div class="row">
         <div class="input-field col s12">
@@ -141,13 +143,13 @@
                  #clave_edit formControlName="Clave">
           <label for="CVE_EDIT_DEFECTO_TERMINADO">Clave</label>
         </div>
-        <div class="input-field col s6">
-          <i class="material-icons prefix">account_circle</i>
-          <input id="NOMBRE_EDIT_DEFECTO_TERMINADO" maxlength="150" type="text" class="validate"
-                 formControlName="Nombre"
-                 #nombre_edit>
-          <label for="NOMBRE_EDIT_DEFECTO_TERMINADO">Defecto</label>
-        </div>
+        <!--<div class="input-field col s6">-->
+        <!--<i class="material-icons prefix">account_circle</i>-->
+        <!--<input id="NOMBRE_EDIT_DEFECTO_TERMINADO" maxlength="150" type="text" class="validate"-->
+        <!--formControlName="Nombre"-->
+        <!--#nombre_edit>-->
+        <!--<label for="NOMBRE_EDIT_DEFECTO_TERMINADO">Defecto</label>-->
+        <!--</div>-->
       </div>
       <div class="row">
         <div class="input-field col s12">
@@ -162,12 +164,13 @@
         <div class="file-field input-field" id="divImagenEdit">
           <div class="btn">
             <span>Buscar</span>
-            <input id="ImageTerminoDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
+            <input id="ImageTerminoDefecto" type="file" accept="image/*" onchange="readURL(this);"
+                   #fileInput formControlName="Imagen"/>
           </div>
           <div class="file-path-wrapper">
             <input class="file-path validate" type="text" placeholder="Carga Archivo"/>
           </div>
-          <img id="blah"
+          <img id="blahEdit"
                [src]="formEdit.get('Imagen').value != null && formEdit.get('Imagen').value !== '' ? formEdit.get('Imagen').value : 'http://placehold.it/180'"
                alt="your image"/>
         </div>

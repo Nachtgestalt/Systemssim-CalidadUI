@@ -1,24 +1,27 @@
-import {AfterViewChecked, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {AfterViewChecked, AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
 import 'jquery';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {TerminadoService} from '../services/terminado/terminado.service';
+import {Subject} from 'rxjs';
+import {DataTableDirective} from 'angular-datatables';
 
 declare var $: any;
-declare var Materialize: any;
 
 @Component({
   selector: 'app-terminadodefectos',
   templateUrl: './terminadodefectos.component.html',
   styleUrls: ['./terminadodefectos.component.css']
 })
-export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
+export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild('clave') claveField: ElementRef;
   @ViewChild('nombre') nombreField: ElementRef;
   @ViewChild('clave_edit') claveFieldEdit: ElementRef;
   @ViewChild('nombre_edit') nombreFieldEdit: ElementRef;
   @ViewChild('descripcion_edit') descripcionFieldEdit: ElementRef;
   @ViewChild('tblDefectosTerminado') tblDefectos: ElementRef;
+  @ViewChild(DataTableDirective) dtElement: DataTableDirective;
+  @ViewChild('fileInput') fileInput;
 
   form: FormGroup;
   formEdit: FormGroup;
@@ -26,8 +29,10 @@ export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
   json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
 
   defectos = [];
-
   idDefecto;
+
+  dtOptions = {};
+  dtTrigger: Subject<any> = new Subject();
 
   constructor(private _toast: ToastrService,
               public _terminadoService: TerminadoService
@@ -35,6 +40,26 @@ export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
   }
 
   ngOnInit() {
+    this.dtOptions = {
+      language: {
+        processing: 'Procesando...',
+        search: 'Buscar:',
+        lengthMenu: 'Mostrar _MENU_ elementos',
+        info: '_START_ - _END_ de _TOTAL_ elementos',
+        infoEmpty: 'Mostrando ningún elemento.',
+        infoFiltered: '(filtrado _MAX_ elementos total)',
+        infoPostFix: '',
+        loadingRecords: 'Cargando registros...',
+        zeroRecords: 'No se encontraron registros',
+        emptyTable: 'No hay datos disponibles en la tabla',
+        paginate: {
+          first: 'Primero',
+          previous: 'Anterior',
+          next: 'Siguiente',
+          last: 'Último'
+        },
+      }
+    };
     this.initFormGroup();
     this.initFormGroupEdit();
     $('.tooltipped').tooltip();
@@ -42,9 +67,16 @@ export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
     $('#modalEditDefectoTerminado').modal();
     $('#modalEnableDefectoTerminado').modal();
     $('#lblModulo').text('Terminado - Defectos');
+    this.getDefectosTerminado();
   }
 
-  ngAfterViewChecked() {
+  ngAfterViewInit(): void {
+    this.dtTrigger.next();
+  }
+
+  ngOnDestroy(): void {
+    // Do not forget to unsubscribe the event
+    this.dtTrigger.unsubscribe();
   }
 
   initFormGroup() {
@@ -52,8 +84,8 @@ export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
       'IdSubModulo': new FormControl(1),
       'IdUsuario': new FormControl(this.json_Usuario.ID),
       'Clave': new FormControl(null, [Validators.required]),
-      'Nombre': new FormControl(null, [Validators.required]),
-      'Descripcion': new FormControl(''),
+      'Nombre': new FormControl(''),
+      'Descripcion': new FormControl('', [Validators.required]),
       'Observaciones': new FormControl(''),
       'Imagen': new FormControl(''),
     });
@@ -69,8 +101,8 @@ export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
       'ID': new FormControl(''),
       'IdUsuario': new FormControl(this.json_Usuario.ID),
       'Clave': new FormControl('', [Validators.required]),
-      'Nombre': new FormControl('-', [Validators.required]),
-      'Descripcion': new FormControl(''),
+      'Nombre': new FormControl(''),
+      'Descripcion': new FormControl('', [Validators.required]),
       'Observaciones': new FormControl(''),
       'Imagen': new FormControl(''),
     });
@@ -81,8 +113,8 @@ export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
     if (this.form.get('Clave').invalid) {
       this._toast.warning('Se debe ingresar una clave de defecto terminado', '');
       this.claveField.nativeElement.focus();
-    } else if (this.form.get('Nombre').invalid) {
-      this._toast.warning('Se debe ingresar un nombre de defecto', '');
+    } else if (this.form.get('Descripcion').invalid) {
+      this._toast.warning('Se debe ingresar una descripción de defecto', '');
       this.nombreField.nativeElement.focus();
     }
 
@@ -98,6 +130,7 @@ export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
           }
         },
         error1 => {
+          console.log(error1);
           this._toast.error('No se pudo establecer conexión a la base de datos', '');
         }
       );
@@ -120,10 +153,19 @@ export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
         (res: any) => {
           console.log(res);
           if (res.Message.IsSuccessStatusCode) {
-            this.defectos = res.Vst_Terminado;
+            this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+              // Destroy the table first
+              dtInstance.destroy();
+              this.defectos = res.Vst_Terminado;
+              // Call the dtTrigger to rerender again
+              this.dtTrigger.next();
+            });
           }
         },
-        error1 => this._toast.error('No se pudo establecer conexión a la base de datos', '')
+        error1 => {
+          console.log(error1);
+          this._toast.error('No se pudo establecer conexión a la base de datos', '');
+        }
       );
   }
 
@@ -137,7 +179,10 @@ export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
             this.formEdit.patchValue(res.Vst_Terminado);
           }
         },
-        error1 => this._toast.error('No se pudo establecer conexión a la base de datos', '')
+        error1 => {
+          console.log(error1);
+          this._toast.error('No se pudo establecer conexión a la base de datos', '');
+        }
       );
   }
 
@@ -145,8 +190,8 @@ export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
     if (this.formEdit.get('Clave').invalid) {
       this._toast.warning('Se debe ingresar una clave de defecto terminado', '');
       this.claveFieldEdit.nativeElement.focus();
-    } else if (this.formEdit.get('Nombre').invalid) {
-      this._toast.warning('Se debe ingresar un nombre de defecto', '');
+    } else if (this.formEdit.get('Descripcion').invalid) {
+      this._toast.warning('Se debe ingresar una descripción de defecto', '');
       this.nombreFieldEdit.nativeElement.focus();
     }
     this.formEdit.get('Imagen').patchValue(($('#blahEdit')[0].src === 'http://placehold.it/180' ? '' : $('#blahEdit')[0].src));
@@ -160,6 +205,7 @@ export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
           }
         },
         error1 => {
+          console.log(error1);
           this._toast.error('No se pudo establecer conexión a la base de datos', '');
         }
       );
@@ -177,6 +223,7 @@ export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
           }
         },
         error1 => {
+          console.log(error1);
           this._toast.error('No se pudo establecer conexión a la base de datos', '');
         }
       );
@@ -188,11 +235,8 @@ export class TerminadodefectosComponent implements OnInit, AfterViewChecked {
   }
 
   updateTextFields() {
-    this.nombreFieldEdit.nativeElement.focus();
+    // this.nombreFieldEdit.nativeElement.focus();
     this.descripcionFieldEdit.nativeElement.focus();
     this.claveFieldEdit.nativeElement.focus();
   }
-
-
-
 }

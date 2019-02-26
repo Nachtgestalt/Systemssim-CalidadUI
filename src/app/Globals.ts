@@ -7,7 +7,5 @@ export class Globals {
   // PRODUCCION
   // public static UriRioSulApi = 'http://192.168.7.196:99/api/';
 
-  // public static UriRioSulApi = 'http://187.157.25.2:99/api/';
-
   public static PasswordKey = 'YWJjZGVmZ2hpamtsbW5vcHFycw==';
 }
