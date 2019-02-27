@@ -2,8 +2,9 @@ import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from
 import {DataTableDirective} from 'angular-datatables';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Subject} from 'rxjs';
-import {TerminadoService} from '../services/terminado/terminado.service';
 import {ToastrService} from 'ngx-toastr';
+import {OperacionesService} from '../services/terminado/operaciones.service';
+
 import 'jquery';
 declare var $: any;
 
@@ -33,7 +34,7 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
   dtTrigger: Subject<any> = new Subject();
 
   constructor(private _toast: ToastrService,
-              public _terminadoService: TerminadoService) {
+              public _terminadoOperacionesService: OperacionesService) {
   }
 
   ngOnInit() {
@@ -61,10 +62,9 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
     this.initFormGroup();
     this.initFormGroupEdit();
     $('.tooltipped').tooltip();
-    $('#modalNewDefectoTerminado').modal();
-    $('#modalEditDefectoTerminado').modal();
-    $('#modalEnableDefectoTerminado').modal();
-    $('#lblModulo').text('Terminado - Defectos');
+    $('#modalNewOperacionTerminado').modal();
+    $('#modalEditOperacionTerminado').modal();
+    $('#modalEnableOperacionTerminado').modal();
     this.getOperacionesTerminado();
   }
 
@@ -97,12 +97,8 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
   initFormGroupEdit() {
     this.formEdit = new FormGroup({
       'ID': new FormControl(''),
-      'IdUsuario': new FormControl(this.json_Usuario.ID),
       'Clave': new FormControl('', [Validators.required]),
-      'Nombre': new FormControl(''),
-      'Descripcion': new FormControl('', [Validators.required]),
-      'Observaciones': new FormControl(''),
-      'Imagen': new FormControl(''),
+      'Nombre': new FormControl('', [Validators.required]),
     });
   }
 
@@ -111,20 +107,21 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
     if (this.form.get('Clave').invalid) {
       this._toast.warning('Se debe ingresar una clave de operacion terminado', '');
       this.claveField.nativeElement.focus();
-    } else if (this.form.get('Descripcion').invalid) {
-      this._toast.warning('Se debe ingresar una descripción de operación', '');
+    } else if (this.form.get('Nombre').invalid) {
+      this._toast.warning('Se debe ingresar el campo Operación', '');
       this.nombreField.nativeElement.focus();
     }
-
-    this.form.get('Imagen').patchValue(($('#blah')[0].src === 'http://placehold.it/180' ? '' : $('#blah')[0].src));
-
-    this._terminadoService.createDefecto(this.form.value)
+    this._terminadoOperacionesService.createOperacion(this.form.value)
       .subscribe(
         (res: any) => {
           console.log('RESPUESTA DE CREATE DEFECTO TERMINADO: ', res);
           if (res.Message.IsSuccessStatusCode) {
-            this._toast.success('Se agrego correctamente el defecto terminado', '');
-            $('#modalNewDefectoTerminado').modal('close');
+            this._toast.success('Se agrego correctamente la operación', '');
+            $('#modalNewOperacionTerminado').modal('close');
+            this.getOperacionesTerminado();
+            this.initFormGroup();
+          } else {
+            this._toast.warning('Ha ocurrido un error al agregar operación', '');
           }
         },
         error1 => {
@@ -134,7 +131,7 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
       );
   }
 
-  getDefectosTerminado() {
+  getOperacionesTerminado() {
     let clave = '';
     let defecto = '';
     if (this.formSearch.get('clave').value !== '' && this.formSearch.get('defecto').value === '') {
@@ -146,7 +143,7 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
       defecto = this.formSearch.get('defecto').value;
     }
 
-    this._terminadoService.listDefectos(clave, defecto)
+    this._terminadoOperacionesService.listOperaciones(clave, defecto)
       .subscribe(
         (res: any) => {
           console.log(res);
@@ -154,7 +151,7 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
             this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
               // Destroy the table first
               dtInstance.destroy();
-              this.operaciones = res.Vst_Terminado;
+              this.operaciones = res.COperacionTerminados;
               // Call the dtTrigger to rerender again
               this.dtTrigger.next();
             });
@@ -167,14 +164,14 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
       );
   }
 
-  getInfoDefectoTerminado(id) {
-    this._terminadoService.getDefecto(id)
+  getInfoOperacionTerminado(id) {
+    this._terminadoOperacionesService.getOperacion(id)
       .subscribe(
         (res: any) => {
-          this.updateTextFields();
           console.log(res);
           if (res.Message.IsSuccessStatusCode) {
-            this.formEdit.patchValue(res.Vst_Terminado);
+            this.formEdit.patchValue(res.c_operacion_t);
+            this.updateTextFields();
           }
         },
         error1 => {
@@ -184,22 +181,23 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
       );
   }
 
-  editDefectoTerminado() {
+  editOperacionTerminado() {
     if (this.formEdit.get('Clave').invalid) {
       this._toast.warning('Se debe ingresar una clave de defecto terminado', '');
       this.claveFieldEdit.nativeElement.focus();
-    } else if (this.formEdit.get('Descripcion').invalid) {
+    } else if (this.formEdit.get('Nombre').invalid) {
       this._toast.warning('Se debe ingresar una descripción de defecto', '');
       this.nombreFieldEdit.nativeElement.focus();
     }
-    this.formEdit.get('Imagen').patchValue(($('#blahEdit')[0].src === 'http://placehold.it/180' ? '' : $('#blahEdit')[0].src));
-    this._terminadoService.updateDefecto(this.formEdit.value)
+    this._terminadoOperacionesService.updateOperacion(this.formEdit.value)
       .subscribe(
         (res: any) => {
           console.log(res);
           if (res.Message.IsSuccessStatusCode) {
-            this._toast.success('Se agrego correctamente el defecto terminado', '');
-            $('#modalEditDefectoTerminado').modal('close');
+            this._toast.success('Se modifico correctamente la operación', '');
+            $('#modalEditOperacionTerminado').modal('close');
+            this.getOperacionesTerminado();
+            this.initFormGroupEdit();
           }
         },
         error1 => {
@@ -209,15 +207,15 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
       );
   }
 
-  GetEnabledDefectoTerminado() {
-    this._terminadoService.inactivaActiva(this.idOperacion)
+  GetEnabledOperacionTerminado() {
+    this._terminadoOperacionesService.inactivaActiva(this.idOperacion)
       .subscribe(
         (res: any) => {
           console.log(res);
           if (res.Message.IsSuccessStatusCode) {
-            this._toast.success('Se inactivó correctamente el defecto terminado', '');
-            $('#modalEnableDefectoTerminado').modal('close');
-            this.getDefectosTerminado();
+            this._toast.success('Se inactivó correctamente la operación', '');
+            $('#modalEnableOperacionTerminado').modal('close');
+            this.getOperacionesTerminado();
           }
         },
         error1 => {

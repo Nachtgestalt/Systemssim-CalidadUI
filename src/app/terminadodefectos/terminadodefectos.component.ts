@@ -200,8 +200,9 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
         (res: any) => {
           console.log(res);
           if (res.Message.IsSuccessStatusCode) {
-            this._toast.success('Se agrego correctamente el defecto terminado', '');
+            this._toast.success('Se modifico correctamente el defecto', '');
             $('#modalEditDefectoTerminado').modal('close');
+            this.getDefectosTerminado();
           }
         },
         error1 => {

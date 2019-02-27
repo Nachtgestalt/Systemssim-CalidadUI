@@ -19,7 +19,7 @@
         <div class="input-field col s4">
           <i class="material-icons prefix">font_download</i>
           <input id="CLAVE_CORTADOR" type="text" class="validate" formControlName="clave">
-          <label for="CLAVE_CORTADOR">Clave</label>
+          <label for="CLAVE_CORTADOR">ID Operación</label>
         </div>
         <!--<div class="input-field col s4">-->
         <!--<i class="material-icons prefix">font_download</i>-->
@@ -42,8 +42,8 @@
           <tr>
             <th></th>
             <th>No.</th>
-            <th>Clave Operación</th>
-            <th>Descripción</th>
+            <th>ID Operación</th>
+            <th>Operación</th>
             <th>Estatus</th>
             <th></th>
           </tr>
@@ -59,13 +59,13 @@
             </td>
             <td>{{i + 1}}</td>
             <td>{{operacion.Clave}}</td>
-            <td>{{operacion.Descripcion}}</td>
+            <td>{{operacion.Nombre}}</td>
             <td>{{operacion.Activo ? 'SI' : 'NO'}}</td>
             <td class="center-align">
               <a class="waves-effect waves-light btn tooltiped modal-trigger bold_sub"
                  data-tooltiped="Activa / Inactiva la operacion seleccionada"
                  data-target="modalEnableOperacionTerminado"
-                 (click)="cambiarID(.ID)">
+                 (click)="cambiarID(operacion.ID)">
                 <u>{{operacion.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u>
               </a>
             </td>
@@ -89,20 +89,13 @@
                  #clave formControlName="Clave">
           <label for="CVE_NEW_CORTADOR">Clave</label>
         </div>
-        <!--<div class="input-field col s6">-->
-        <!--<i class="material-icons prefix">account_circle</i>-->
-        <!--<input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate"-->
-        <!--formControlName="Nombre"-->
-        <!--#nombre>-->
-        <!--<label for="NOMBRE_NEW_CORTADOR">Defecto</label>-->
-        <!--</div>-->
       </div>
       <div class="row">
         <div class="input-field col s12">
           <i class="material-icons prefix">font_download</i>
           <textarea id="CVE_NEW_DESCRIPCION_TERMINADO" type="text" class="materialize-textarea"
-                    formControlName="Descripcion"></textarea>
-          <label for="CVE_NEW_DESCRIPCION_TERMINADO">Descripción</label>
+                    formControlName="Nombre"></textarea>
+          <label for="CVE_NEW_DESCRIPCION_TERMINADO">Operación</label>
         </div>
       </div>
     </form>
@@ -142,8 +135,8 @@
         <div class="input-field col s12">
           <i class="material-icons prefix">font_download</i>
           <textarea id="CVE_EDIT_DESCRIPCION_TERMINADO" type="text" class="materialize-textarea"
-                    formControlName="Descripcion" #descripcion_edit></textarea>
-          <label for="CVE_EDIT_DESCRIPCION_TERMINADO">Descripción</label>
+                    formControlName="Nombre" #descripcion_edit></textarea>
+          <label for="CVE_EDIT_DESCRIPCION_TERMINADO">Operación</label>
         </div>
       </div>
       <!--<app-carga-imagenes></app-carga-imagenes>-->

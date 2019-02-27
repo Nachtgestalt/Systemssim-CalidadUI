@@ -1,4 +1,3 @@
-import {MaterializeModule} from 'angular2-materialize';
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -50,12 +49,15 @@ import {ReportsPageComponent} from './pages/reports-page/reports-page.component'
 import {FinishedPageComponent} from './pages/finished-page/finished-page.component';
 import {AdminPageComponent} from './pages/admin-page/admin-page.component';
 import {TerminadoOperacionesComponent} from './terminado-operaciones/terminado-operaciones.component';
-import { TerminadoPosicionComponent } from './terminado-posicion/terminado-posicion.component';
-import { TerminadoOrigenComponent } from './terminado-origen/terminado-origen.component';
-import { TerminadoAudiotoriaDefectosComponent } from './terminado-audiotoria-defectos/terminado-audiotoria-defectos.component';
+import {TerminadoPosicionComponent} from './terminado-posicion/terminado-posicion.component';
+import {TerminadoOrigenComponent} from './terminado-origen/terminado-origen.component';
+import {TerminadoAudiotoriaDefectosComponent} from './terminado-audiotoria-defectos/terminado-audiotoria-defectos.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import { CargaImagenesComponent } from './components/carga-imagenes/carga-imagenes.component';
-import { NgDropFilesDirective } from './directives/ng-drop-files.directive';
+import {CargaImagenesComponent} from './components/carga-imagenes/carga-imagenes.component';
+import {NgDropFilesDirective} from './directives/ng-drop-files.directive';
+import {EliminarComponent} from './dialogs/eliminar/eliminar.component';
+import {MaterialModule} from './material/material.module';
+import {AddEditOperacionTerminadoComponent} from './terminado-operaciones/add-edit-operacion-terminado/add-edit-operacion-terminado.component';
 
 @NgModule({
   declarations: [
@@ -103,16 +105,21 @@ import { NgDropFilesDirective } from './directives/ng-drop-files.directive';
     TerminadoOrigenComponent,
     TerminadoAudiotoriaDefectosComponent,
     CargaImagenesComponent,
-    NgDropFilesDirective
+    NgDropFilesDirective,
+    EliminarComponent,
+    AddEditOperacionTerminadoComponent
+  ],
+  entryComponents: [
+    AddEditOperacionTerminadoComponent
   ],
   imports: [
+    BrowserAnimationsModule,
+    MaterialModule,
     HttpClientModule,
     BrowserModule,
     FormsModule,
     ReactiveFormsModule,
     AngularFontAwesomeModule,
-    DataTablesModule,
-    BrowserAnimationsModule,
     DataTablesModule,
     ToastrModule.forRoot({
       timeOut: 3000,
