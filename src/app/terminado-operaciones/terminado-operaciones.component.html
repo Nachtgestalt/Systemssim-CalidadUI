@@ -1,3 +1,181 @@
-<p>
-  terminado-operaciones works!
-</p>
+<div class="card-panel">
+  <div class="row" style="text-align: right">
+    <div class="col s12">
+      <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+        <i class="material-icons left">arrow_back</i>
+      </button>
+      &nbsp;&nbsp;
+      <button class="btn tooltipped waves-effect waves-light modal-trigger"
+              data-position="bottom" data-tooltip="Agrega un nuevo operación" data-target="modalNewOperacionTerminado"
+              type="button"
+              name="btnAddCortador">Agregar
+        <i class="material-icons right">send</i>
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <form class="col s12" [formGroup]="formSearch">
+      <div class="row">
+        <div class="input-field col s4">
+          <i class="material-icons prefix">font_download</i>
+          <input id="CLAVE_CORTADOR" type="text" class="validate" formControlName="clave">
+          <label for="CLAVE_CORTADOR">Clave</label>
+        </div>
+        <!--<div class="input-field col s4">-->
+        <!--<i class="material-icons prefix">font_download</i>-->
+        <!--<input id="NOMBRE_DEFECTO" type="text" class="validate" formControlName="defecto">-->
+        <!--<label for="NOMBRE_DEFECTO">Descripción</label>-->
+        <!--</div>-->
+        <div class="col s4" style="text-align: right">
+          <button (click)="getOperacionesTerminado()" class="btn tooltipped waves-effect waves-light"
+                  data-position="bottom"
+                  data-tooltip="Consultar las operaciones por filtro seleccionado" type="button"
+                  name="btnSearchCortadores">Buscar
+            <i class="material-icons right">search</i>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <table id="tblOperacionesTerminado" class="row-border hover"
+               datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
+          <thead>
+          <tr>
+            <th></th>
+            <th>No.</th>
+            <th>Clave Operación</th>
+            <th>Descripción</th>
+            <th>Estatus</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let operacion of operaciones; let i = index">
+            <td>
+              <a class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditOperacionTerminado"
+                 data-position="bottom" data-tooltip="Edita la operación  seleccionada"
+                 (click)="getInfoOperacionTerminado(operacion.ID)">
+                <i class="material-icons right">edit</i>
+              </a>
+            </td>
+            <td>{{i + 1}}</td>
+            <td>{{operacion.Clave}}</td>
+            <td>{{operacion.Descripcion}}</td>
+            <td>{{operacion.Activo ? 'SI' : 'NO'}}</td>
+            <td class="center-align">
+              <a class="waves-effect waves-light btn tooltiped modal-trigger bold_sub"
+                 data-tooltiped="Activa / Inactiva la operacion seleccionada"
+                 data-target="modalEnableOperacionTerminado"
+                 (click)="cambiarID(.ID)">
+                <u>{{operacion.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u>
+              </a>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <br/>
+    </form>
+  </div>
+</div>
+
+<div id="modalNewOperacionTerminado" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Nuevo operación</h4>
+    <form class="col s12" [formGroup]="form">
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate"
+                 #clave formControlName="Clave">
+          <label for="CVE_NEW_CORTADOR">Clave</label>
+        </div>
+        <!--<div class="input-field col s6">-->
+        <!--<i class="material-icons prefix">account_circle</i>-->
+        <!--<input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate"-->
+        <!--formControlName="Nombre"-->
+        <!--#nombre>-->
+        <!--<label for="NOMBRE_NEW_CORTADOR">Defecto</label>-->
+        <!--</div>-->
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">font_download</i>
+          <textarea id="CVE_NEW_DESCRIPCION_TERMINADO" type="text" class="materialize-textarea"
+                    formControlName="Descripcion"></textarea>
+          <label for="CVE_NEW_DESCRIPCION_TERMINADO">Descripción</label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="NewOperacionTerminado()" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalEditOperacionTerminado" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Editar operación terminado</h4>
+    <form class="col s12" [formGroup]="formEdit">
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_EDIT_OPERACION_TERMINADO" maxlength="10" type="text" class="validate"
+                 #clave_edit formControlName="Clave">
+          <label for="CVE_EDIT_OPERACION_TERMINADO">Clave</label>
+        </div>
+        <!--<div class="input-field col s6">-->
+        <!--<i class="material-icons prefix">account_circle</i>-->
+        <!--<input id="NOMBRE_EDIT_DEFECTO_TERMINADO" maxlength="150" type="text" class="validate"-->
+        <!--formControlName="Nombre"-->
+        <!--#nombre_edit>-->
+        <!--<label for="NOMBRE_EDIT_DEFECTO_TERMINADO">Defecto</label>-->
+        <!--</div>-->
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">font_download</i>
+          <textarea id="CVE_EDIT_DESCRIPCION_TERMINADO" type="text" class="materialize-textarea"
+                    formControlName="Descripcion" #descripcion_edit></textarea>
+          <label for="CVE_EDIT_DESCRIPCION_TERMINADO">Descripción</label>
+        </div>
+      </div>
+      <!--<app-carga-imagenes></app-carga-imagenes>-->
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="editOperacionTerminado()" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Update Enabled Cortador -->
+<div id="modalEnableOperacionTerminado" class="modal">
+  <div class="modal-content">
+    <div style="text-align: center">
+      <p>¿Realmente deseas activar o desactivar la operación?</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="GetEnabledOperacionTerminado();" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
