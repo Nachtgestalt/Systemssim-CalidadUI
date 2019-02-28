@@ -1,25 +1,25 @@
 import { Injectable } from '@angular/core';
-import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Globals} from '../../Globals';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
-export class OperacionesService {
+export class OrigenTerminadoService {
 
   private URL_TERMINADO = `${Globals.UriRioSulApi}Terminado`;
 
   constructor(private _http: HttpClient) { }
 
-  createOperacion(operacion) {
-    const url = `${this.URL_TERMINADO}/NuevaOperacionTerminado`;
-    const body = JSON.stringify(operacion);
+  createOrigen(origen) {
+    const url = `${this.URL_TERMINADO}/NuevoOrigenT`;
+    const body = JSON.stringify(origen);
     const headers = new HttpHeaders().append('content-type', 'application/json');
     return this._http.post(url, body, {headers});
   }
 
-  listOperaciones(clave, nombre) {
-    const url = `${this.URL_TERMINADO}/ObtieneOperacionTerminados`;
+  listOrigenes(clave, nombre) {
+    const url = `${this.URL_TERMINADO}/ObtieneOrigenT`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams();
     if (clave !== '') {
@@ -31,22 +31,22 @@ export class OperacionesService {
     return this._http.get(url, {headers, params});
   }
 
-  getOperacion(id) {
-    const url = `${this.URL_TERMINADO}/ObtieneInfOperacionTerminado`;
+  getOrigen(id) {
+    const url = `${this.URL_TERMINADO}/ObtieneInfOrigenT`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);
     return this._http.get(url, {headers, params});
   }
 
-  updateOperacion(operacion) {
-    const url = `${this.URL_TERMINADO}/ActualizaOperacionTerminado`;
-    const body = JSON.stringify(operacion);
+  updateOrigen(origen) {
+    const url = `${this.URL_TERMINADO}/ActualizaOrigenT`;
+    const body = JSON.stringify(origen);
     const headers = new HttpHeaders().append('content-type', 'application/json');
     return this._http.post(url, body, {headers});
   }
 
   inactivaActiva(id) {
-    const url = `${this.URL_TERMINADO}/ActivaInactivaOperacion`;
+    const url = `${this.URL_TERMINADO}/ActivaInactivaOrigenT`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);
     return this._http.get(url, {headers, params});

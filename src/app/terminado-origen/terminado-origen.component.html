@@ -1,3 +1,161 @@
-<p>
-  terminado-origen works!
-</p>
+<div class="card-panel">
+  <div class="row" style="text-align: right">
+    <div class="col s12">
+      <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+        <i class="material-icons left">arrow_back</i>
+      </button>
+      &nbsp;&nbsp;
+      <button class="btn tooltipped waves-effect waves-light modal-trigger"
+              data-position="bottom" data-tooltip="Agrega un nuevo origen" data-target="modalNewOrigenTerminado"
+              type="button"
+              name="btnAddCortador">Agregar
+        <i class="material-icons right">send</i>
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <form class="col s12" [formGroup]="formSearch">
+      <div class="row">
+        <div class="input-field col s8">
+          <i class="material-icons prefix">font_download</i>
+          <input id="CLAVE_CORTADOR" type="text" class="validate" formControlName="clave">
+          <label for="CLAVE_CORTADOR">ID Origen</label>
+        </div>
+        <div class="col s4" style="text-align: right">
+          <button (click)="getOrigenesTerminado()" class="btn tooltipped waves-effect waves-light"
+                  data-position="bottom"
+                  data-tooltip="Consultar los origenes por filtro seleccionado" type="button"
+                  name="btnSearchCortadores">Buscar
+            <i class="material-icons right">search</i>
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <table id="tblOperacionesTerminado" class="row-border hover"
+               datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
+          <thead>
+          <tr>
+            <th></th>
+            <th>No.</th>
+            <th>ID ORIGEN</th>
+            <th>DESCRIPCIÓN ORIGEN</th>
+            <th>ESTATUS</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let origen of origenes; let i = index">
+            <td>
+              <a class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditOrigenTerminado"
+                 matTooltip="Edita el origen seleccionado"
+                 (click)="getInfoOrigenTerminado(origen.ID)">
+                <i class="material-icons right">edit</i>
+              </a>
+            </td>
+            <td>{{i + 1}}</td>
+            <td>{{origen.Clave}}</td>
+            <td>{{origen.Nombre}}</td>
+            <td>{{origen.Activo ? 'SI' : 'NO'}}</td>
+            <td class="center-align">
+              <a class="waves-effect waves-light btn tooltiped modal-trigger bold_sub"
+                 matTooltip="Activa / Inactiva el origen seleccionado"
+                 data-target="modalEnableOrigenTerminado"
+                 (click)="cambiarID(origen.ID)">
+                <u>{{origen.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u>
+              </a>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+      <br/>
+    </form>
+  </div>
+</div>
+
+<div id="modalNewOrigenTerminado" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Nueva origen</h4>
+    <form class="col s12" [formGroup]="form">
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate"
+                 #clave formControlName="Clave">
+          <label for="CVE_NEW_CORTADOR">ID Origen</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">font_download</i>
+          <textarea id="CVE_NEW_DESCRIPCION_TERMINADO" type="text" class="materialize-textarea"
+                    formControlName="Nombre"></textarea>
+          <label for="CVE_NEW_DESCRIPCION_TERMINADO">Origen</label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="NewOrigenTerminado()" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalEditOrigenTerminado" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Editar operación terminado</h4>
+    <form class="col s12" [formGroup]="formEdit">
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_EDIT_OPERACION_TERMINADO" maxlength="10" type="text" class="validate"
+                 #clave_edit formControlName="Clave">
+          <label for="CVE_EDIT_OPERACION_TERMINADO">ID ORIGEN</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <i class="material-icons prefix">font_download</i>
+          <textarea id="CVE_EDIT_DESCRIPCION_TERMINADO" type="text" class="materialize-textarea"
+                    formControlName="Nombre" #descripcion_edit></textarea>
+          <label for="CVE_EDIT_DESCRIPCION_TERMINADO">ORIGEN </label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="editOrigenTerminado()" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Update Enabled Cortador -->
+<div id="modalEnableOrigenTerminado" class="modal">
+  <div class="modal-content">
+    <div style="text-align: center">
+      <p>¿Realmente deseas activar o desactivar el origen?</p>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="GetEnabledOrigenTerminado();" class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>

@@ -6,7 +6,7 @@
       </button>
       &nbsp;&nbsp;
       <button class="btn tooltipped waves-effect waves-light modal-trigger"
-              data-position="bottom" data-tooltip="Agrega un nuevo operación" data-target="modalNewOperacionTerminado"
+              data-position="bottom" data-tooltip="Agrega una nueva operación" data-target="modalNewOperacionTerminado"
               type="button"
               name="btnAddCortador">Agregar
         <i class="material-icons right">send</i>
@@ -16,7 +16,7 @@
   <div class="row">
     <form class="col s12" [formGroup]="formSearch">
       <div class="row">
-        <div class="input-field col s4">
+        <div class="input-field col s8">
           <i class="material-icons prefix">font_download</i>
           <input id="CLAVE_CORTADOR" type="text" class="validate" formControlName="clave">
           <label for="CLAVE_CORTADOR">ID Operación</label>
@@ -42,9 +42,9 @@
           <tr>
             <th></th>
             <th>No.</th>
-            <th>ID Operación</th>
-            <th>Operación</th>
-            <th>Estatus</th>
+            <th>ID OPERACIÓN</th>
+            <th>OPERACIÓN</th>
+            <th>ESTATUS</th>
             <th></th>
           </tr>
           </thead>
@@ -52,7 +52,7 @@
           <tr *ngFor="let operacion of operaciones; let i = index">
             <td>
               <a class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditOperacionTerminado"
-                 data-position="bottom" data-tooltip="Edita la operación  seleccionada"
+                 matTooltip="Edita la operación  seleccionada"
                  (click)="getInfoOperacionTerminado(operacion.ID)">
                 <i class="material-icons right">edit</i>
               </a>
@@ -63,7 +63,7 @@
             <td>{{operacion.Activo ? 'SI' : 'NO'}}</td>
             <td class="center-align">
               <a class="waves-effect waves-light btn tooltiped modal-trigger bold_sub"
-                 data-tooltiped="Activa / Inactiva la operacion seleccionada"
+                 matTooltip="Activa / Inactiva la operacion seleccionada"
                  data-target="modalEnableOperacionTerminado"
                  (click)="cambiarID(operacion.ID)">
                 <u>{{operacion.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u>
@@ -80,14 +80,14 @@
 
 <div id="modalNewOperacionTerminado" class="modal modal-fixed-footer">
   <div class="modal-content">
-    <h4>Nuevo operación</h4>
+    <h4>Nueva operación</h4>
     <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s6">
           <i class="material-icons prefix">account_box</i>
           <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate"
                  #clave formControlName="Clave">
-          <label for="CVE_NEW_CORTADOR">Clave</label>
+          <label for="CVE_NEW_CORTADOR">ID Operación</label>
         </div>
       </div>
       <div class="row">

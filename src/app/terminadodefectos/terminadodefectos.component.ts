@@ -23,6 +23,10 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
   @ViewChild(DataTableDirective) dtElement: DataTableDirective;
   @ViewChild('fileInput') fileInput;
 
+  selectedFile: ImageSnippet;
+  selectedFileEdit;
+  noMostrar = true;
+
   form: FormGroup;
   formEdit: FormGroup;
   formSearch: FormGroup;
@@ -33,6 +37,8 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
 
   dtOptions = {};
   dtTrigger: Subject<any> = new Subject();
+
+  urlImagen = '';
 
   constructor(private _toast: ToastrService,
               public _terminadoService: TerminadoService
@@ -118,7 +124,7 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
       this.nombreField.nativeElement.focus();
     }
 
-    this.form.get('Imagen').patchValue(($('#blah')[0].src === 'http://placehold.it/180' ? '' : $('#blah')[0].src));
+    // this.form.get('Imagen').patchValue(($('#blah')[0].src === 'http://placehold.it/180' ? '' : $('#blah')[0].src));
 
     this._terminadoService.createDefecto(this.form.value)
       .subscribe(
@@ -127,6 +133,9 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
           if (res.Message.IsSuccessStatusCode) {
             this._toast.success('Se agrego correctamente el defecto terminado', '');
             $('#modalNewDefectoTerminado').modal('close');
+            this.getDefectosTerminado();
+            this.initFormGroup();
+            this.selectedFile = null;
           }
         },
         error1 => {
@@ -177,6 +186,8 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
           console.log(res);
           if (res.Message.IsSuccessStatusCode) {
             this.formEdit.patchValue(res.Vst_Terminado);
+            this.selectedFileEdit = res.Vst_Terminado.Imagen;
+            this.updateTextFields();
           }
         },
         error1 => {
@@ -187,6 +198,7 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
   }
 
   editDefectoTerminado() {
+    console.log(this.formEdit.value);
     if (this.formEdit.get('Clave').invalid) {
       this._toast.warning('Se debe ingresar una clave de defecto terminado', '');
       this.claveFieldEdit.nativeElement.focus();
@@ -194,7 +206,7 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
       this._toast.warning('Se debe ingresar una descripción de defecto', '');
       this.nombreFieldEdit.nativeElement.focus();
     }
-    this.formEdit.get('Imagen').patchValue(($('#blahEdit')[0].src === 'http://placehold.it/180' ? '' : $('#blahEdit')[0].src));
+    // this.formEdit.get('Imagen').patchValue(($('#blahEdit')[0].src === 'http://placehold.it/180' ? '' : $('#blahEdit')[0].src));
     this._terminadoService.updateDefecto(this.formEdit.value)
       .subscribe(
         (res: any) => {
@@ -203,6 +215,7 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
             this._toast.success('Se modifico correctamente el defecto', '');
             $('#modalEditDefectoTerminado').modal('close');
             this.getDefectosTerminado();
+            this.initFormGroupEdit();
           }
         },
         error1 => {
@@ -239,5 +252,44 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
     // this.nombreFieldEdit.nativeElement.focus();
     this.descripcionFieldEdit.nativeElement.focus();
     this.claveFieldEdit.nativeElement.focus();
+  }
+
+  changeImagen(event) {
+    console.log(event);
+  }
+
+  private onSuccess() {
+    this.selectedFile.pending = false;
+    this.selectedFile.status = 'ok';
+  }
+
+  private onError() {
+    this.selectedFile.pending = false;
+    this.selectedFile.status = 'fail';
+    this.selectedFile.src = '';
+  }
+
+  processFile(imageInput: any, nuevo: boolean) {
+    const file: File = imageInput.files[0];
+    const reader = new FileReader();
+    console.log(file);
+
+    reader.addEventListener('load', (event: any) => {
+
+      this.selectedFile = new ImageSnippet(event.target.result, file);
+      this.selectedFile.pending = true;
+      nuevo ? this.form.get('Imagen').patchValue(event.target.result) : this.formEdit.get('Imagen').patchValue(event.target.result);
+      this.noMostrar = false;
+    });
+
+    reader.readAsDataURL(file);
+  }
+}
+
+class ImageSnippet {
+  pending: boolean = false;
+  status: string = 'init';
+
+  constructor(public src: string, public file: File) {
   }
 }

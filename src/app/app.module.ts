@@ -191,7 +191,7 @@ import {AddEditOperacionTerminadoComponent} from './terminado-operaciones/add-ed
       },
       {
         path: 'finished', component: FinishedPageComponent, children: [
-          {path: '', redirectTo: 'terminadodefectos', pathMatch: 'full'},
+          {path: '', redirectTo: 'terminado-operaciones', pathMatch: 'full'},
           {path: 'terminadodefectos', component: TerminadodefectosComponent},
           {path: 'terminado-operaciones', component: TerminadoOperacionesComponent},
           {path: 'terminado-posicion', component: TerminadoPosicionComponent},

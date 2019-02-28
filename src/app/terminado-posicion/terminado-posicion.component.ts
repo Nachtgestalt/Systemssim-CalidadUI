@@ -3,7 +3,7 @@ import {DataTableDirective} from 'angular-datatables';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Subject} from 'rxjs';
 import {ToastrService} from 'ngx-toastr';
-import {OperacionesService} from '../services/terminado/operaciones.service';
+import {PosicionTerminadoService} from '../services/terminado/posicion-terminado.service';
 
 import 'jquery';
 declare var $: any;
@@ -29,13 +29,13 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
   json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
 
   idPosicion;
-  operaciones = [];
+  posiciones = [];
 
   dtOptions = {};
   dtTrigger: Subject<any> = new Subject();
 
   constructor(private _toast: ToastrService,
-              public _terminadoOperacionesService: OperacionesService) {
+              public _terminadoPosicionService: PosicionTerminadoService) {
   }
 
   ngOnInit() {
@@ -63,10 +63,10 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
     this.initFormGroup();
     this.initFormGroupEdit();
     $('.tooltipped').tooltip();
-    $('#modalNewDefectoTerminado').modal();
-    $('#modalEditDefectoTerminado').modal();
-    $('#modalEnableDefectoTerminado').modal();
-    this.getOperacionesTerminado();
+    $('#modalNewPosicionTerminado').modal();
+    $('#modalEditPosicionTerminado').modal();
+    $('#modalEnablePosicionTerminado').modal();
+    this.getPosicionesTerminado();
   }
 
   ngAfterViewInit(): void {
@@ -83,8 +83,8 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
       'IdSubModulo': new FormControl(1),
       'IdUsuario': new FormControl(this.json_Usuario.ID),
       'Clave': new FormControl(null, [Validators.required]),
-      'Nombre': new FormControl(''),
-      'Descripcion': new FormControl('', [Validators.required]),
+      'Nombre': new FormControl('', [Validators.required]),
+      'Descripcion': new FormControl(''),
       'Observaciones': new FormControl(''),
       'Imagen': new FormControl(''),
     });
@@ -98,34 +98,32 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
   initFormGroupEdit() {
     this.formEdit = new FormGroup({
       'ID': new FormControl(''),
-      'IdUsuario': new FormControl(this.json_Usuario.ID),
       'Clave': new FormControl('', [Validators.required]),
-      'Nombre': new FormControl(''),
-      'Descripcion': new FormControl('', [Validators.required]),
-      'Observaciones': new FormControl(''),
-      'Imagen': new FormControl(''),
+      'Nombre': new FormControl('', [Validators.required]),
     });
   }
 
-  NewOperacionTerminado() {
+  NewPosicionTerminado() {
     console.log(this.form.value);
     if (this.form.get('Clave').invalid) {
-      this._toast.warning('Se debe ingresar una clave de operacion terminado', '');
+      this._toast.warning('Se debe ingresar una clave de posicion', '');
       this.claveField.nativeElement.focus();
-    } else if (this.form.get('Descripcion').invalid) {
-      this._toast.warning('Se debe ingresar una descripción de operación', '');
+    } else if (this.form.get('Nombre').invalid) {
+      this._toast.warning('Se debe ingresar el campo posición', '');
       this.nombreField.nativeElement.focus();
     }
 
-    this.form.get('Imagen').patchValue(($('#blah')[0].src === 'http://placehold.it/180' ? '' : $('#blah')[0].src));
-
-    this._terminadoOperacionesService.createOperacion(this.form.value)
+    this._terminadoPosicionService.createPosicion(this.form.value)
       .subscribe(
         (res: any) => {
-          console.log('RESPUESTA DE CREATE DEFECTO TERMINADO: ', res);
+          console.log('RESPUESTA DE CREATE POSICION TERMINADO: ', res);
           if (res.Message.IsSuccessStatusCode) {
-            this._toast.success('Se agrego correctamente el defecto terminado', '');
-            $('#modalNewDefectoTerminado').modal('close');
+            this._toast.success('Se agrego correctamente la posición', '');
+            $('#modalNewPosicionTerminado').modal('close');
+            this.getPosicionesTerminado();
+            this.initFormGroup();
+          } else {
+            this._toast.warning('Ha ocurrido un error al agregar posición', '');
           }
         },
         error1 => {
@@ -135,7 +133,7 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
       );
   }
 
-  getOperacionesTerminado() {
+  getPosicionesTerminado() {
     let clave = '';
     let defecto = '';
     if (this.formSearch.get('clave').value !== '' && this.formSearch.get('defecto').value === '') {
@@ -147,7 +145,7 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
       defecto = this.formSearch.get('defecto').value;
     }
 
-    this._terminadoOperacionesService.listOperaciones(clave, defecto)
+    this._terminadoPosicionService.listPosiciones(clave, defecto)
       .subscribe(
         (res: any) => {
           console.log(res);
@@ -155,7 +153,7 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
             this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
               // Destroy the table first
               dtInstance.destroy();
-              this.operaciones = res.Vst_Terminado;
+              this.posiciones = res.c_posicion_t;
               // Call the dtTrigger to rerender again
               this.dtTrigger.next();
             });
@@ -168,14 +166,15 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
       );
   }
 
-  getInfoOperacionTerminado(id) {
-    this._terminadoOperacionesService.getOperacion(id)
+  getInfoPosicionTerminado(id) {
+    this._terminadoPosicionService.getPosicion(id)
       .subscribe(
         (res: any) => {
           this.updateTextFields();
           console.log(res);
           if (res.Message.IsSuccessStatusCode) {
-            this.formEdit.patchValue(res.Vst_Terminado);
+            this.formEdit.patchValue(res.c_posicion_t);
+            this.updateTextFields();
           }
         },
         error1 => {
@@ -185,22 +184,23 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
       );
   }
 
-  editOperacionTerminado() {
+  editPosicionTerminado() {
     if (this.formEdit.get('Clave').invalid) {
-      this._toast.warning('Se debe ingresar una clave de defecto terminado', '');
+      this._toast.warning('Se debe ingresar una clave de posición', '');
       this.claveFieldEdit.nativeElement.focus();
-    } else if (this.formEdit.get('Descripcion').invalid) {
-      this._toast.warning('Se debe ingresar una descripción de defecto', '');
+    } else if (this.formEdit.get('Nombre').invalid) {
+      this._toast.warning('Se debe ingresar el campo posición', '');
       this.nombreFieldEdit.nativeElement.focus();
     }
-    this.formEdit.get('Imagen').patchValue(($('#blahEdit')[0].src === 'http://placehold.it/180' ? '' : $('#blahEdit')[0].src));
-    this._terminadoOperacionesService.updateOperacion(this.formEdit.value)
+    this._terminadoPosicionService.updatePosicion(this.formEdit.value)
       .subscribe(
         (res: any) => {
           console.log(res);
           if (res.Message.IsSuccessStatusCode) {
-            this._toast.success('Se agrego correctamente el defecto terminado', '');
-            $('#modalEditDefectoTerminado').modal('close');
+            this._toast.success('Se agrego correctamente la posición', '');
+            $('#modalEditPosicionTerminado').modal('close');
+            this.getPosicionesTerminado();
+            this.initFormGroupEdit();
           }
         },
         error1 => {
@@ -210,15 +210,15 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
       );
   }
 
-  GetEnabledOperacionTerminado() {
-    this._terminadoOperacionesService.inactivaActiva(this.idPosicion)
+  GetEnabledPosicionTerminado() {
+    this._terminadoPosicionService.inactivaActiva(this.idPosicion)
       .subscribe(
         (res: any) => {
           console.log(res);
           if (res.Message.IsSuccessStatusCode) {
             this._toast.success('Se inactivó correctamente el defecto terminado', '');
-            $('#modalEnableDefectoTerminado').modal('close');
-            this.getOperacionesTerminado();
+            $('#modalEnablePosicionTerminado').modal('close');
+            this.getPosicionesTerminado();
           }
         },
         error1 => {

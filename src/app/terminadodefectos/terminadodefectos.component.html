@@ -16,10 +16,10 @@
   <div class="row">
     <form class="col s12" [formGroup]="formSearch">
       <div class="row">
-        <div class="input-field col s4">
+        <div class="input-field col s8">
           <i class="material-icons prefix">font_download</i>
           <input id="CLAVE_CORTADOR" type="text" class="validate" formControlName="clave">
-          <label for="CLAVE_CORTADOR">Clave</label>
+          <label for="CLAVE_CORTADOR">Clave defecto</label>
         </div>
         <!--<div class="input-field col s4">-->
         <!--<i class="material-icons prefix">font_download</i>-->
@@ -42,9 +42,9 @@
           <tr>
             <th></th>
             <th>No.</th>
-            <th>Clave Defecto</th>
-            <th>Descripción</th>
-            <th>Estatus</th>
+            <th>CLAVE DEFECTO</th>
+            <th>DESCRIPCIÓN</th>
+            <th>ESTATUS</th>
             <th></th>
           </tr>
           </thead>
@@ -52,7 +52,7 @@
           <tr *ngFor="let defecto of defectos; let i = index">
             <td>
               <a class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditDefectoTerminado"
-                 data-position="bottom" data-tooltip="Edita el defecto  seleccionado"
+                 matTooltip="Edita el defecto  seleccionado"
                  (click)="getInfoDefectoTerminado(defecto.ID)">
                 <i class="material-icons right">edit</i>
               </a>
@@ -63,7 +63,7 @@
             <td>{{defecto.Activo ? 'SI' : 'NO'}}</td>
             <td class="center-align">
               <a class="waves-effect waves-light btn tooltiped modal-trigger bold_sub"
-                 data-tooltiped="Activa / Inactiva el defecto seleccionado"
+                 matTooltip="Activa / Inactiva el defecto seleccionado"
                  data-target="modalEnableDefectoTerminado"
                  (click)="cambiarID(defecto.ID)">
                 <u>{{defecto.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u>
@@ -107,15 +107,19 @@
       </div>
       <div class="row">
         <label>Imagen Defecto</label>
-        <div class="file-field input-field" id="divImagen">
-          <div class="btn">
-            <span>Buscar</span>
-            <input id="ImageTerminoDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
+      </div>
+      <div class="row">
+        <label class="image-upload-container btn btn-bwm">
+          <span>Selecciona imagen</span>
+          <input #imageInput
+                 type="file"
+                 accept="image/*"
+                 (change)="processFile(imageInput, true)">
+        </label>
+        <div *ngIf="selectedFile" class="img-preview-container">
+          <div class="img-preview{{selectedFile.status === 'fail' ? '-error' : ''}}"
+               [ngStyle]="{'background-image': 'url('+ selectedFile.src + ')'}">
           </div>
-          <div class="file-path-wrapper">
-            <input class="file-path validate" type="text" placeholder="Carga Archivo"/>
-          </div>
-          <img id="blah" src="http://placehold.it/180" alt="your image"/>
         </div>
       </div>
     </form>
@@ -161,18 +165,24 @@
       </div>
       <div class="row">
         <label>Imagen Defecto</label>
-        <div class="file-field input-field" id="divImagenEdit">
-          <div class="btn">
-            <span>Buscar</span>
-            <input id="ImageTerminoDefecto" type="file" accept="image/*" onchange="readURL(this);"
-                   #fileInput formControlName="Imagen"/>
+      </div>
+      <div class="row">
+        <label class="image-upload-container btn btn-bwm">
+          <span>Selecciona imagen</span>
+          <input #imageInput2
+                 type="file"
+                 accept="image/*"
+                 (change)="processFile(imageInput2, false)">
+        </label>
+
+        <div class="img-preview-container" *ngIf="noMostrar">
+          <img [src]="selectedFileEdit">
+        </div>
+
+        <div *ngIf="selectedFile" class="img-preview-container">
+          <div class="img-preview{{selectedFile.status === 'fail' ? '-error' : ''}}"
+               [ngStyle]="{'background-image': 'url('+ selectedFile.src + ')'}">
           </div>
-          <div class="file-path-wrapper">
-            <input class="file-path validate" type="text" placeholder="Carga Archivo"/>
-          </div>
-          <img id="blahEdit"
-               [src]="formEdit.get('Imagen').value != null && formEdit.get('Imagen').value !== '' ? formEdit.get('Imagen').value : 'http://placehold.it/180'"
-               alt="your image"/>
         </div>
       </div>
       <!--<app-carga-imagenes></app-carga-imagenes>-->

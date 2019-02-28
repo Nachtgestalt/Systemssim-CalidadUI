@@ -82,8 +82,8 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
       'IdSubModulo': new FormControl(1),
       'IdUsuario': new FormControl(this.json_Usuario.ID),
       'Clave': new FormControl(null, [Validators.required]),
-      'Nombre': new FormControl(''),
-      'Descripcion': new FormControl('', [Validators.required]),
+      'Nombre': new FormControl('', [Validators.required]),
+      'Descripcion': new FormControl(''),
       'Observaciones': new FormControl(''),
       'Imagen': new FormControl(''),
     });
