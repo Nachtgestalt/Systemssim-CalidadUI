@@ -58,6 +58,7 @@ import {NgDropFilesDirective} from './directives/ng-drop-files.directive';
 import {EliminarComponent} from './dialogs/eliminar/eliminar.component';
 import {MaterialModule} from './material/material.module';
 import {AddEditOperacionTerminadoComponent} from './terminado-operaciones/add-edit-operacion-terminado/add-edit-operacion-terminado.component';
+import { NumberPipePipe } from './pipes/number-pipe.pipe';
 
 @NgModule({
   declarations: [
@@ -107,18 +108,19 @@ import {AddEditOperacionTerminadoComponent} from './terminado-operaciones/add-ed
     CargaImagenesComponent,
     NgDropFilesDirective,
     EliminarComponent,
-    AddEditOperacionTerminadoComponent
+    AddEditOperacionTerminadoComponent,
+    NumberPipePipe,
   ],
   entryComponents: [
     AddEditOperacionTerminadoComponent
   ],
   imports: [
-    BrowserAnimationsModule,
-    MaterialModule,
-    HttpClientModule,
     BrowserModule,
+    BrowserAnimationsModule,
     FormsModule,
     ReactiveFormsModule,
+    MaterialModule,
+    HttpClientModule,
     AngularFontAwesomeModule,
     DataTablesModule,
     ToastrModule.forRoot({

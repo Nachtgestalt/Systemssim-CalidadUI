@@ -22,6 +22,7 @@ export class ClientesComponent implements OnInit {
     $('#mdlNewRefCru').modal();
     $('#mdlNewCliRef').modal();
     $('#lblModulo').text('Catálogo Clientes');
+    this.GetClientsRefCru();
   }
 
   GetClientsRefCru() {
@@ -33,7 +34,7 @@ export class ClientesComponent implements OnInit {
     if ($('#CLI_DESCRIPCION').val() !== '') {
       _request += '?Descripcion=' + $('#CLI_DESCRIPCION').val();
     }
-    if (_request !== '') {
+    // if (_request !== '') {
       $.ajax({
         // tslint:disable-next-line:max-line-length
         url: Globals.UriRioSulApi + 'Cliente/ObtieneClientes' + _request,
@@ -95,9 +96,9 @@ export class ClientesComponent implements OnInit {
           console.log('No se pudo establecer coneción a la base de datos');
         }
       });
-    } else {
-      this._toast.warning('Debe seleccionar al ménos un filtro de búsqueda', '');
-    }
+    // } else {
+    //   this._toast.warning('Debe seleccionar al ménos un filtro de búsqueda', '');
+    // }
   }
 
   GetClients() {

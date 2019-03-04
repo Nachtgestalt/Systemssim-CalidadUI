@@ -254,10 +254,6 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
     this.claveFieldEdit.nativeElement.focus();
   }
 
-  changeImagen(event) {
-    console.log(event);
-  }
-
   private onSuccess() {
     this.selectedFile.pending = false;
     this.selectedFile.status = 'ok';

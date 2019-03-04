@@ -17,7 +17,7 @@ export class TerminadoService {
     return this._http.post(url, body, {headers});
   }
 
-  listDefectos(clave, nombre) {
+  listDefectos(clave = '', nombre = '') {
     const url = `${this.URL_TERMINADO}/ObtieneDefecto`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams();

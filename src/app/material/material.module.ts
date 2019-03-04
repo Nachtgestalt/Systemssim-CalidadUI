@@ -7,7 +7,7 @@ import {
   MatDialogModule, MatExpansionModule, MatFormFieldModule,
   MatIconModule, MatInputModule, MatMenuModule, MatNativeDateModule,
   MatPaginatorModule, MatProgressBarModule, MatProgressSpinnerModule,
-  MatRadioModule, MatSnackBarModule, MatSortModule,
+  MatRadioModule, MatSelectModule, MatSnackBarModule, MatSortModule,
   MatTableModule, MatTabsModule, MatTooltipModule
 } from '@angular/material';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -37,6 +37,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
     MatAutocompleteModule,
     MatDatepickerModule,
     MatFormFieldModule,
+    MatSelectModule
   ],
   exports: [
     BrowserAnimationsModule,
@@ -63,6 +64,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
     MatAutocompleteModule,
     MatDatepickerModule,
     MatFormFieldModule,
+    MatSelectModule
   ]
 })
 export class MaterialModule { }

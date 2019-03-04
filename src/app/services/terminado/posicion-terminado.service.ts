@@ -18,7 +18,7 @@ export class PosicionTerminadoService {
     return this._http.post(url, body, {headers});
   }
 
-  listPosiciones(clave, nombre) {
+  listPosiciones(clave='', nombre='') {
     const url = `${this.URL_TERMINADO}/ObtienePosicionT`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams();

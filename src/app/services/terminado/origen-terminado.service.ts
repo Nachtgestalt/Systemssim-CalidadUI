@@ -18,7 +18,7 @@ export class OrigenTerminadoService {
     return this._http.post(url, body, {headers});
   }
 
-  listOrigenes(clave, nombre) {
+  listOrigenes(clave='', nombre='') {
     const url = `${this.URL_TERMINADO}/ObtieneOrigenT`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams();

@@ -18,7 +18,7 @@ export class OperacionesService {
     return this._http.post(url, body, {headers});
   }
 
-  listOperaciones(clave, nombre) {
+  listOperaciones(clave= '', nombre= '') {
     const url = `${this.URL_TERMINADO}/ObtieneOperacionTerminados`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams();
