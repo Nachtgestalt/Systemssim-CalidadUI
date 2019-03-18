@@ -22,6 +22,7 @@ export class DefectocorteComponent implements OnInit {
     $('#modalEditDefectoCortador').modal();
     $('#modalEnableDefectoCortador').modal();
     $('#lblModulo').text('Corte - Defectos');
+    this.GetDefectosCortadores();
   }
 
   GetDefectosCortadores() {

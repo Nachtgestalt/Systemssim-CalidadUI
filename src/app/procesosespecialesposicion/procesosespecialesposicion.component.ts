@@ -22,6 +22,7 @@ export class ProcesosespecialesposicionComponent implements OnInit {
     $('#modalEditPosicionProcesosEspeciales').modal();
     $('#modalEnablePosicionProcesosEspeciales').modal();
     $('#lblModulo').text('Procesos Especiales - Posición');
+    this.GetPosicionProcesosEspeciales();
   }
 
   GetPosicionProcesosEspeciales() {

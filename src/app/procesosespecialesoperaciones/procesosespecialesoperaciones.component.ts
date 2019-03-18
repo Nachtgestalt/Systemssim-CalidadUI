@@ -21,6 +21,7 @@ export class ProcesosespecialesoperacionesComponent implements OnInit {
     $('#modalEnableOperacionProcesosEspeciales').modal();
     $('#modalNewOperacionProcesosEspeciales').modal();
     $('#modalEditOperacionProcesosEspeciales').modal();
+    this.GetOperacionProcesosEspeciales()
   }
 
   DisposeNewOperacionProcesosEspeciales() {

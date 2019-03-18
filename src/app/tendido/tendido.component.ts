@@ -22,6 +22,7 @@ export class TendidoComponent implements OnInit {
     $('#modalEditTendido').modal();
     $('#modalEnableTendido').modal();
     $('#lblModulo').text('Tendido - Corte');
+    this.GetTendido();
   }
 
   GetTendido() {

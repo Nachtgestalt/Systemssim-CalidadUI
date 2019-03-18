@@ -20,6 +20,7 @@ export class SegundasComponent implements OnInit {
     $('#modalPorcentajes').modal();
     $('#modalPorcentajesEdt').modal();
     $('#lblModulo').text('Catálogo Segundas');
+    this.GetSegundas();
   }
 
   GetSegundasDynamic() {
@@ -177,7 +178,7 @@ export class SegundasComponent implements OnInit {
     $('#SegPreloader').css('display', 'block');
     const request = ($('#BUSQUEDA_SEG').val() === '' ? '' : '?Busqueda=' + $('#BUSQUEDA_SEG').val());
     let sOptions = '';
-    if ($('#BUSQUEDA_SEG').val() !== '') {
+    // if ($('#BUSQUEDA_SEG').val() !== '') {
       $.ajax({
         url: Globals.UriRioSulApi + 'CatalogoSegundas/ObtieneEstilosApp' + request,
         dataType: 'json',
@@ -200,12 +201,14 @@ export class SegundasComponent implements OnInit {
               sOptions += '<td>' + json[i].Porcentaje_Lavanderia + '</td>';
               sOptions += '<td>' + json[i].Porcentaje_ProcesosEspeciales + '</td>';
               sOptions += '<td>' + json[i].Porcentaje_Terminado + '</td>';
+              sOptions += '<td>' + json[i].Costo_Segunda + '</td>';
+              sOptions += '<td>' + json[i].Costo_Estilo + '</td>';
               sOptions += '</tr>';
               index++;
             }
             $('#tlbsegundas').html('');
             // tslint:disable-next-line:max-line-length
-            $('#tlbsegundas').html('<thead><tr><th></th><th>No.</th><th>Estilo</th><th>Descripcion</th><th>Tela</th><th>Corte</th><th>Confección</th><th>Lavandería</th><th>Procesos Esp.</th><th>Terminado</th></tr></thead><tbody>' + sOptions + '</tbody>');
+            $('#tlbsegundas').html('<thead><tr><th></th><th>No.</th><th>Estilo</th><th>Descripcion</th><th>Tela</th><th>Corte</th><th>Confección</th><th>Lavandería</th><th>Procesos Esp.</th><th>Terminado</th><th>Costo Estilo</th><th>Costo Segundas</th></tr></thead><tbody>' + sOptions + '</tbody>');
             $('#tlbsegundas').DataTable({
               sorting: true,
               bDestroy: true,
@@ -232,9 +235,9 @@ export class SegundasComponent implements OnInit {
           console.log('No se pudo establecer conexión con la base de datos');
         }
       });
-    } else {
-      this._toast.warning('Debes ingresar un filtro de búsqueda', '');
-    }
+    // } else {
+    //   this._toast.warning('Debes ingresar un filtro de búsqueda', '');
+    // }
   }
 
   ValidateEstilo(Estilo: string, Descripcion: string): boolean {

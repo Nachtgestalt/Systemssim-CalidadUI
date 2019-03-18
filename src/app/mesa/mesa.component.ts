@@ -22,6 +22,7 @@ export class MesaComponent implements OnInit {
     $('#modalEditMesa').modal();
     $('#modalEnableMesa').modal();
     $('#lblModulo').text('Corte - # Mesa');
+    this.GetMesa();
   }
 
   GetMesa() {

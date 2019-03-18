@@ -19,6 +19,7 @@ export class PlantasComponent implements OnInit {
   ngOnInit() {
     $('#modalRelacionArea').modal();
     $('#lblModulo').text('Confección - Plantas');
+    this.GetPlantasDynamics();
   }
 
   GetPlantasDynamics() {

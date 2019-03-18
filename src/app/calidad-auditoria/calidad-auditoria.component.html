@@ -8,7 +8,7 @@
       <button class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom"
               data-tooltip="Agrega una nueva auditoria de tendido corte" data-target="modalNewAuditoria" type="button"
               name="btnAddAuditoria">
-        <!--(click)="cargarOT()">-->
+              <!--(click)="cargarOT()">-->
         Agregar
         <i class="material-icons right">send</i>
       </button>
@@ -106,34 +106,6 @@
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         </table>
-
-
-        <!--<table id="first-table"-->
-        <!--class="row-border hover"-->
-        <!--datatable [dtOptions]="dtOptions" [dtTrigger]="dtTriggerPrincipal">-->
-        <!--<thead>-->
-        <!--<tr>-->
-        <!--<th></th>-->
-        <!--<th>No.</th>-->
-        <!--<th>Cliente</th>-->
-        <!--<th>Orden Trabajo</th>-->
-        <!--<th>PO</th>-->
-        <!--<th>Tela</th>-->
-        <!--<th>Marca</th>-->
-        <!--<th>NumCortada</th>-->
-        <!--<th>Lavado</th>-->
-        <!--<th>Estilo</th>-->
-        <!--<th>Planta</th>-->
-        <!--</tr>-->
-        <!--</thead>-->
-        <!--<tbody>-->
-        <!--<tr *ngFor="let auditoria of auditorias; let i = index">-->
-        <!--<td></td>-->
-        <!--<td>{{i + 1}}</td>-->
-        <!--<td>{{auditoria.Descripcion}}</td>-->
-        <!--</tr>-->
-        <!--</tbody>-->
-        <!--</table>-->
       </div>
     </form>
   </div>
@@ -223,14 +195,14 @@
           <label>DEFECTO:</label>
         </div>
         <div class="col s"></div>
-        <div class="col s3">
-          <p>
-            <label>
-              <input type="checkbox" formControlName="Compostura"/>
-              <span>Composturas</span>
-            </label>
-          </p>
-        </div>
+        <!--<div class="col s3">-->
+        <!--<p>-->
+        <!--<label>-->
+        <!--<input type="checkbox" formControlName="Compostura"/>-->
+        <!--<span>Composturas</span>-->
+        <!--</label>-->
+        <!--</p>-->
+        <!--</div>-->
       </div>
       <div class="row">
         <div class="input-field col s6">
@@ -263,10 +235,20 @@
         </div>
       </div>
       <div class="row">
-        <div class="input-field col s6">
-          <input id="cantidad" class="validate" type="number" style="text-align: right;"
-                 formControlName="Cantidad"/>
-          <label for="cantidad">CANTIDAD:</label>
+        <div class="input-field col s4">
+          <input id="recuperadas" class="validate" type="number" style="text-align: right;"
+                 formControlName="Recup"/>
+          <label for="recuperadas">Pzas Recuperadas</label>
+        </div>
+        <div class="input-field col s4">
+          <input id="criterio" class="validate" type="number" style="text-align: right;"
+                 formControlName="Criterio"/>
+          <label for="criterio">Pzas Criterio</label>
+        </div>
+        <div class="input-field col s4">
+          <input id="segundas" class="validate" type="number" style="text-align: right;"
+                 formControlName="Fin"/>
+          <label for="segundas">2das Fin</label>
         </div>
       </div>
       <div class="row">

@@ -22,6 +22,7 @@ export class TipotendidoComponent implements OnInit {
     $('#modalEditTipoTendido').modal();
     $('#modalEnableTipoTendido').modal();
     $('#lblModulo').text('Tendido - Tipo Tendido');
+    this.GetTipoTendido();
   }
 
   GetTipoTendido() {

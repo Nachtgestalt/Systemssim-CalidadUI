@@ -22,6 +22,7 @@ export class ProcesosespecialesdefectosComponent implements OnInit {
     $('#modalEditDefectoProcesosEspeciales').modal();
     $('#modalEnableDefectoProcesosEspeciales').modal();
     $('#lblModulo').text('Procesos Especiales - Defectos');
+    this.GetDefectosProcesosEspeciales();
   }
 
   GetDefectosProcesosEspeciales() {

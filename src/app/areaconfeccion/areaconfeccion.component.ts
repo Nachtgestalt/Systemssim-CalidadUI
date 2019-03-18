@@ -22,6 +22,7 @@ export class AreaconfeccionComponent implements OnInit {
     $('#modalNewAreaConfeccion').modal();
     $('#modalEditAreaConfeccion').modal();
     $('#lblModulo').text('Confección - Área');
+    this.GetAreaConfeccion();
   }
 
   DisposeNewAreaConfeccion() {

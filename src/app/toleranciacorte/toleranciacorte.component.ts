@@ -21,6 +21,7 @@ export class ToleranciacorteComponent implements OnInit {
     $('#modalEdtTolerancia').modal();
     $('.tooltipped').tooltip();
     $('#lblModulo').text('Corte - Tolerancia');
+    this.ObtieneTolerancias();
   }
 
   ObtieneTolerancias() {

@@ -6,6 +6,7 @@ import {ToastrService} from 'ngx-toastr';
 import {PosicionTerminadoService} from '../services/terminado/posicion-terminado.service';
 
 import 'jquery';
+import {Router} from '@angular/router';
 declare var $: any;
 
 @Component({
@@ -35,11 +36,13 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
   dtTrigger: Subject<any> = new Subject();
 
   constructor(private _toast: ToastrService,
-              public _terminadoPosicionService: PosicionTerminadoService) {
+              public _terminadoPosicionService: PosicionTerminadoService,
+              public router: Router) {
   }
 
   ngOnInit() {
-    $('#lblModulo').text('Terminado - Posición');
+    const mensaje = (this.router.url === '/quality/calidad-posicion' ? 'Calidad - Posición' : 'Terminado - Posición');
+    $('#lblModulo').text(mensaje);
     this.dtOptions = {
       language: {
         processing: 'Procesando...',

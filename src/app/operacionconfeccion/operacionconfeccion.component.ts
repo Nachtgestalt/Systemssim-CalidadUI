@@ -22,6 +22,7 @@ export class OperacionconfeccionComponent implements OnInit {
     $('#modalNewOperacionConfeccion').modal();
     $('#modalEditOperacionConfeccion').modal();
     $('#lblModulo').text('Confección - Operación');
+    this.GetOperacionConfeccion();
   }
 
   DisposeNewOperacionConfeccion() {

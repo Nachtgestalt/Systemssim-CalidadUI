@@ -23,6 +23,7 @@ export class CorreoselectronicosComponent implements OnInit {
     $('#modalCorreos').modal();
     $('#modalDeleteAlerta').modal();
     $('#lblModulo').text('Catálogo Correos Electrónicos');
+    this.GetEmails();
   }
 
   GetEmails() {

@@ -22,6 +22,7 @@ export class CorteComponent implements OnInit {
     $('#modalEditDeCortador').modal();
     $('#modalEnableCortador').modal();
     $('#lblModulo').text('Corte - Cortadores');
+    this.GetCortadores();
   }
 
   GetCortadores() {

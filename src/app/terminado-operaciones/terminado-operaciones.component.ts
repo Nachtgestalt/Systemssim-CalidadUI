@@ -6,6 +6,7 @@ import {ToastrService} from 'ngx-toastr';
 import {OperacionesService} from '../services/terminado/operaciones.service';
 
 import 'jquery';
+import {Router} from '@angular/router';
 declare var $: any;
 
 @Component({
@@ -34,11 +35,14 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
   dtTrigger: Subject<any> = new Subject();
 
   constructor(private _toast: ToastrService,
-              public _terminadoOperacionesService: OperacionesService) {
+              public _terminadoOperacionesService: OperacionesService,
+              public router: Router) {
   }
 
   ngOnInit() {
-    $('#lblModulo').text('Terminado - Operaciones');
+    console.log(this.router.url);
+    const mensaje = (this.router.url === '/quality/calidad-operaciones' ? 'Calidad - Operaciones' : 'Terminado - Operaciones');
+    $('#lblModulo').text(mensaje);
     this.dtOptions = {
       language: {
         processing: 'Procesando...',

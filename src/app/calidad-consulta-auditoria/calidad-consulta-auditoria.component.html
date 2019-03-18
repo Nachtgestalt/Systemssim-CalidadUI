@@ -1,0 +1,501 @@
+<div class="card-panel">
+  <div class="row" style="text-align: right">
+    <div class="col s12">
+      <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+        <i class="material-icons left">arrow_back</i>
+      </button>
+      &nbsp;&nbsp;
+      <!--<button class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom"-->
+      <!--data-tooltip="Agrega una nueva auditoria de tendido corte" data-target="modalNewAuditoria" type="button"-->
+      <!--name="btnAddAuditoria">-->
+      <!--&lt;!&ndash;(click)="cargarOT()">&ndash;&gt;-->
+      <!--Agregar-->
+      <!--<i class="material-icons right">send</i>-->
+      <!--</button>-->
+    </div>
+  </div>
+  <div class="row">
+    <div class="col s4 center-align">
+      <span>Periodo</span>
+    </div>
+    <div class="col s2 center-align">
+      <span>Cliente</span>
+    </div>
+    <div class="col s2 center-align">
+      <span>Marca</span>
+    </div>
+    <div class="col s1 center-align">
+      <span># PO</span>
+    </div>
+    <div class="col s1 center-align">
+      <span># Corte</span>
+    </div>
+    <div class="col s1 center-align">
+      <span>Planta</span>
+    </div>
+    <div class="col s1 center-align">
+      <span>Estilo</span>
+    </div>
+  </div>
+  <form [formGroup]="formFilter">
+    <div class="row">
+      <div class="col s2">
+        <div class="input-field">
+          <i class="material-icons prefix">date_range</i>
+          <input id="inicio" type="date" class="validate"
+                 formControlName="Fecha_i">
+          <label for="inicio">Inicio</label>
+        </div>
+      </div>
+
+      <div class="col s2">
+        <div class="input-field">
+          <i class="material-icons prefix">date_range</i>
+          <input id="fin" type="date" class="validate"
+                 formControlName="Fecha_f">
+          <label for="fin">Fin</label>
+        </div>
+      </div>
+
+      <div class="col s2">
+        <div class="input-field">
+          <input id="cliente" type="text" class="validate" [matAutocomplete]="cliente"
+                 formControlName="IdCliente"
+                 (focus)="obtenerMarcas(true)"
+                 (blur)="obtenerMarcas(true)">
+          <mat-autocomplete #cliente="matAutocomplete">
+            <mat-option *ngFor="let cliente of clientes" [value]="cliente.IdClienteRef">
+              {{cliente.Descripcion}}
+            </mat-option>
+          </mat-autocomplete>
+          <label for="cliente">Buscar cliente</label>
+        </div>
+      </div>
+
+      <div class="col s2">
+        <div class="input-field">
+          <input id="marca" type="text" class="validate" [matAutocomplete]="marca"
+                 formControlName="Marca"
+                 (focus)="obtenerMarcas()"
+                 (blur)="obtenerPO()">
+          <mat-autocomplete #marca="matAutocomplete">
+            <mat-option *ngFor="let marca of marcas" [value]="marca">
+              {{marca}}
+            </mat-option>
+          </mat-autocomplete>
+          <label for="marca">Buscar marca</label>
+        </div>
+      </div>
+
+      <div class="col s1">
+        <div class="input-field">
+          <input id="po" type="text" class="validate" [matAutocomplete]="po"
+                 formControlName="PO"
+                 (focus)="obtenerPO()"
+                 (blur)="obtenerCorte()">
+          <mat-autocomplete #po="matAutocomplete">
+            <mat-option *ngFor="let po of pos" [value]="po">
+              {{po}}
+            </mat-option>
+          </mat-autocomplete>
+          <label for="po">Buscar PO</label>
+        </div>
+      </div>
+
+      <div class="col s1">
+        <div class="input-field">
+          <input id="corte" type="text" class="validate" [matAutocomplete]="corte"
+                 formControlName="Corte"
+                 (focus)="obtenerCorte()">
+          <mat-autocomplete #corte="matAutocomplete">
+            <mat-option *ngFor="let corte of cortes" [value]="corte">
+              {{corte}}
+            </mat-option>
+          </mat-autocomplete>
+          <label for="corte">Buscar Corte</label>
+        </div>
+      </div>
+
+      <div class="col s1">
+        <div class="input-field">
+          <input id="planta" type="text" class="validate" [matAutocomplete]="planta">
+          <mat-autocomplete #planta="matAutocomplete">
+            <mat-option *ngFor="let planta of plantas" [value]="planta.Planta">
+              {{planta.Descripcion}}
+            </mat-option>
+          </mat-autocomplete>
+          <label for="planta">Buscar Planta</label>
+        </div>
+      </div>
+
+      <div class="col s1">
+        <div class="input-field">
+          <input id="estilo" type="text" class="validate" [matAutocomplete]="estilo">
+          <mat-autocomplete #estilo="matAutocomplete">
+            <mat-option *ngFor="let estilo of estilos" [value]="estilo.Estilo">
+              {{estilo.Descripcion}}
+            </mat-option>
+          </mat-autocomplete>
+          <label for="estilo">Buscar Estilo</label>
+        </div>
+      </div>
+    </div>
+    <div class="row right-align">
+      <div class="col s12">
+        <button type="button" name="btnAddCortador"
+                style="margin-right: 1rem;"
+                class="btn light-blue darken-4 tooltipped waves-effect waves-light"
+                (click)="reset()">Reiniciar
+          <!--<i class="material-icons right">search</i>-->
+        </button>
+        <button type="button" name="btnAddCortador"
+                class="btn light-blue darken-4 tooltipped waves-effect waves-light"
+                (click)="buscar()">Buscar
+          <i class="material-icons right">search</i>
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!--TABLA DE RESULTADOS-->
+  <div class="row">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      <!-- Cliente Column -->
+      <ng-container matColumnDef="Cliente">
+        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+        <td mat-cell *matCellDef="let element; let i = index">
+          {{element.Cliente}}
+          <!--<a class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditDefectoTerminado"-->
+          <!--matTooltip="Edita el defecto  seleccionado">-->
+          <!--&lt;!&ndash;(click)="getInfoDefectoTerminado(defecto.ID)">&ndash;&gt;-->
+          <!--<i class="material-icons right">edit</i>-->
+          <!--</a>-->
+        </td>
+      </ng-container>
+
+      <!-- Marca Column -->
+      <ng-container matColumnDef="Marca">
+        <th mat-header-cell *matHeaderCellDef>Marca</th>
+        <td mat-cell *matCellDef="let element; let i = index"> {{element.Marca}} </td>
+      </ng-container>
+
+      <!-- PO Column -->
+      <ng-container matColumnDef="PO">
+        <th mat-header-cell *matHeaderCellDef> PO</th>
+        <td mat-cell *matCellDef="let element"> {{element.PO}} </td>
+      </ng-container>
+
+      <!-- Corte Column -->
+      <ng-container matColumnDef="Corte">
+        <th mat-header-cell *matHeaderCellDef> Corte</th>
+        <td mat-cell *matCellDef="let element"> {{element.Corte}} </td>
+      </ng-container>
+
+      <!-- Planta Column -->
+      <ng-container matColumnDef="Planta">
+        <th mat-header-cell *matHeaderCellDef> Planta</th>
+        <td mat-cell *matCellDef="let element"> {{element.Planta}} </td>
+      </ng-container>
+
+      <!-- Estilo Column -->
+      <ng-container matColumnDef="Estilo">
+        <th mat-header-cell *matHeaderCellDef> Estilo</th>
+        <td mat-cell *matCellDef="let element"> {{element.Estilo}} </td>
+      </ng-container>
+
+      <!-- Fecha Inicio Column -->
+      <ng-container matColumnDef="Fecha Inicio">
+        <th mat-header-cell *matHeaderCellDef> Fecha Inicio</th>
+        <td mat-cell *matCellDef="let element"> {{element.Fecha_i | date: 'dd/MM/yyyy'}} </td>
+      </ng-container>
+
+      <!-- Fecha fin de trabajo Column -->
+      <ng-container matColumnDef="Fecha fin">
+        <th mat-header-cell *matHeaderCellDef> Fecha fin</th>
+        <td mat-cell *matCellDef="let element"> {{element.Fecha_f | date: 'dd/MM/yyyy'}} </td>
+      </ng-container>
+
+      <!-- Pzas Recup. -->
+      <ng-container matColumnDef="Pzas Recup.">
+        <th mat-header-cell *matHeaderCellDef> Pzas Recup.</th>
+        <td mat-cell *matCellDef="let element"> {{element.pzas_r}} </td>
+      </ng-container>
+
+      <!-- Pzas Criterio Column -->
+      <ng-container matColumnDef="Pzas Criterio">
+        <th mat-header-cell *matHeaderCellDef> Pzas Criterio</th>
+        <td mat-cell *matCellDef="let element"> {{element.pzas_c}} </td>
+      </ng-container>
+
+      <!-- 2das Finales Column -->
+      <ng-container matColumnDef="2das Finales">
+        <th mat-header-cell *matHeaderCellDef> 2das Finales</th>
+        <td mat-cell *matCellDef="let element"> {{element.pzas_2}} </td>
+      </ng-container>
+
+      <!-- Totales Finales Column -->
+      <ng-container matColumnDef="Totales">
+        <th mat-header-cell *matHeaderCellDef> Totales</th>
+        <td mat-cell *matCellDef="let element"> {{element.total}} </td>
+      </ng-container>
+
+      <!-- Status Finales Column -->
+      <ng-container matColumnDef="Status">
+        <th mat-header-cell *matHeaderCellDef> Status</th>
+        <td mat-cell *matCellDef="let element"> {{element.status}} </td>
+      </ng-container>
+
+      <!-- Status Finales Column -->
+      <ng-container matColumnDef="Opciones">
+        <th mat-header-cell *matHeaderCellDef></th>
+        <td mat-cell *matCellDef="let element">
+          <button type="button" name="btnAddCortador"
+                  class="btn light-blue darken-4 tooltipped waves-effect waves-light modal-trigger"
+                  data-target="modalNewAuditoria"
+                  data-position="bottom" data-tooltip="Editar auditoría"
+                  (click)="openModal(element)">
+            <i class="material-icons right">edit</i>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL NUEVA AUDITORIA -->
+<!--<div style="width: 80%" id="modalNewAuditoria" class="modal modal-fixed-footer modal-lg">-->
+  <!--<div class="modal-content">-->
+    <!--<h4>Nuevo Auditoría Terminado</h4>-->
+    <!--<div class="row">-->
+      <!--<div class="input-field col s4">-->
+        <!--&lt;!&ndash;<select [(ngModel)]="ordenTrabajo" [disabled]="bloquearOT"&ndash;&gt;-->
+        <!--&lt;!&ndash;(ngModelChange)="detalleOT($event)">&ndash;&gt;-->
+        <!--&lt;!&ndash;<option value="0" disabled selected>SELECCIONE...</option>&ndash;&gt;-->
+        <!--&lt;!&ndash;<option *ngFor="let orden of ordenesTrabajo" [ngValue]="orden">{{orden.OT}}</option>&ndash;&gt;-->
+        <!--&lt;!&ndash;</select>&ndash;&gt;-->
+        <!--&lt;!&ndash;<label>Orden Trabajo</label>&ndash;&gt;-->
+        <!--&lt;!&ndash;<i class="material-icons prefix">details</i>&ndash;&gt;-->
+        <!--&lt;!&ndash;<input id="ddlOT" name="ddlOT" type="text" class="validate"&ndash;&gt;-->
+               <!--&lt;!&ndash;[(ngModel)]="ordenTrabajo" [readonly]="bloquearOT">&ndash;&gt;-->
+        <!--&lt;!&ndash;<label for="ddlOT">Orden Trabajo</label>&ndash;&gt;-->
+      <!--</div>-->
+      <!--<div class="col s2" style="text-align:right">-->
+        <!--<label style="font-size: 1.2rem">STATUS: </label>-->
+        <!--<label style="font-size: 1.2rem" id="lblEstado"></label>-->
+      <!--</div>-->
+    <!--</div>-->
+    <!--<div class="row">-->
+      <!--<div class="col s4">-->
+        <!--<label style="font-size: 1.2rem">CLIENTE: </label>-->
+        <!--<label id="lblCliente" style="font-size: 1.2rem"></label>-->
+      <!--</div>-->
+      <!--<div class="col s4">-->
+        <!--<label style="font-size: 1.2rem">PO: </label>-->
+        <!--<label style="font-size: 1.2rem" id="lblPO"></label>-->
+      <!--</div>-->
+      <!--<div class="col s4">-->
+        <!--<label style="font-size: 1.2rem">TELA: </label>-->
+        <!--<label style="font-size: 1.2rem" id="lblTela"></label>-->
+      <!--</div>-->
+    <!--</div>-->
+    <!--<div class="row">-->
+      <!--<div class="col s4">-->
+        <!--<label style="font-size: 1.2rem">MARCA: </label>-->
+        <!--<label style="font-size: 1.2rem" id="lblMarca"></label>-->
+      <!--</div>-->
+      <!--<div class="col s4">-->
+        <!--<label style="font-size: 1.2rem">#CORTADA: </label>-->
+        <!--<label style="font-size: 1.2rem" id="lblNoCortada"></label>-->
+      <!--</div>-->
+      <!--<div class="col s4">-->
+        <!--<label style="font-size: 1.2rem">LAVADO: </label>-->
+        <!--<label style="font-size: 1.2rem" id="lblLavado"></label>-->
+      <!--</div>-->
+    <!--</div>-->
+    <!--<div class="row">-->
+      <!--<div class="col s4">-->
+        <!--<label style="font-size: 1.2rem">ESTILO: </label>-->
+        <!--<label style="font-size: 1.2rem" id="lblEstilo"></label>-->
+      <!--</div>-->
+      <!--<div class="col s4">-->
+        <!--<label style="font-size: 1.2rem">PLANTA: </label>-->
+        <!--<label style="font-size: 1.2rem" id="lblPlanta"></label>-->
+      <!--</div>-->
+      <!--<div class="col s4">-->
+        <!--<label style="font-size: 1.2rem">RUTA: </label>-->
+        <!--<label style="font-size: 1.2rem" id="lblRuta"></label>-->
+      <!--</div>-->
+    <!--</div>-->
+    <!--<form class="col s12" [formGroup]="form">-->
+      <!--<div class="row">-->
+        <!--<div class="input-field col s6">-->
+          <!--<select formControlName="Defecto">-->
+            <!--<option value="0" disabled selected>SELECCIONE...</option>-->
+            <!--<option *ngFor="let defecto of defectos" [ngValue]="defecto">{{defecto.Descripcion}}</option>-->
+          <!--</select>-->
+          <!--<label>DEFECTO:</label>-->
+        <!--</div>-->
+        <!--<div class="col s"></div>-->
+        <!--&lt;!&ndash;<div class="col s3">&ndash;&gt;-->
+        <!--&lt;!&ndash;<p>&ndash;&gt;-->
+        <!--&lt;!&ndash;<label>&ndash;&gt;-->
+        <!--&lt;!&ndash;<input type="checkbox" formControlName="Compostura"/>&ndash;&gt;-->
+        <!--&lt;!&ndash;<span>Composturas</span>&ndash;&gt;-->
+        <!--&lt;!&ndash;</label>&ndash;&gt;-->
+        <!--&lt;!&ndash;</p>&ndash;&gt;-->
+        <!--&lt;!&ndash;</div>&ndash;&gt;-->
+      <!--</div>-->
+      <!--<div class="row">-->
+        <!--<div class="input-field col s6">-->
+          <!--<select id="ddlTipoTendido" formControlName="Operacion">-->
+            <!--<option value="0" disabled selected>SELECCIONE...</option>-->
+            <!--<option *ngFor="let operacion of operaciones" [ngValue]="operacion">{{operacion.Nombre}}</option>-->
+          <!--</select>-->
+          <!--<label>OPERACIÓN:</label>-->
+        <!--</div>-->
+      <!--</div>-->
+      <!--<div class="row">-->
+        <!--<div class="input-field col s6">-->
+          <!--<select id="ddlDefecto" formControlName="Posicion">-->
+            <!--<option value="0" disabled selected>SELECCIONE...</option>-->
+            <!--<option *ngFor="let posicion of posiciones" [ngValue]="posicion">{{posicion.Nombre}}</option>-->
+          <!--</select>-->
+          <!--<label>POSICIÓN:</label>-->
+        <!--</div>-->
+      <!--</div>-->
+      <!--<div class="row">-->
+        <!--<div class="input-field col s6">-->
+          <!--<select formControlName="Origen">-->
+            <!--<option value="0" disabled selected>SELECCIONE...</option>-->
+            <!--<option *ngFor="let origen of origenes"-->
+                    <!--[ngValue]="origen">-->
+              <!--{{origen.Nombre}}-->
+            <!--</option>-->
+          <!--</select>-->
+          <!--<label>ORIGEN:</label>-->
+        <!--</div>-->
+      <!--</div>-->
+      <!--<div class="row">-->
+        <!--<div class="input-field col s4">-->
+          <!--<input id="recuperadas" class="validate" type="number" style="text-align: right;"-->
+                 <!--formControlName="Recup"/>-->
+          <!--<label for="recuperadas">Pzas Recuperadas</label>-->
+        <!--</div>-->
+        <!--<div class="input-field col s4">-->
+          <!--<input id="criterio" class="validate" type="number" style="text-align: right;"-->
+                 <!--formControlName="Criterio"/>-->
+          <!--<label for="criterio">Pzas Criterio</label>-->
+        <!--</div>-->
+        <!--<div class="input-field col s4">-->
+          <!--<input id="segundas" class="validate" type="number" style="text-align: right;"-->
+                 <!--formControlName="Fin"/>-->
+          <!--<label for="segundas">2das Fin</label>-->
+        <!--</div>-->
+      <!--</div>-->
+      <!--<div class="row">-->
+        <!--<div class="input-field col s12">-->
+          <!--<textarea id="textarea1" class="materialize-textarea" formControlName="Nota"></textarea>-->
+          <!--<label for="textarea1">NOTA:</label>-->
+        <!--</div>-->
+      <!--</div>-->
+      <!--<div class="row">-->
+        <!--<div class="col s6">-->
+          <!--<label class="image-upload-container btn btn-bwm">-->
+            <!--<span>-->
+              <!--<i class="material-icons">image</i>-->
+              <!--Selecciona imagen-->
+            <!--</span>-->
+            <!--<input #imageInput2-->
+                   <!--type="file"-->
+                   <!--accept="image/*"-->
+                   <!--(change)="processFile(imageInput2, false)">-->
+          <!--</label>-->
+
+          <!--<div *ngIf="selectedFile" class="img-preview-container">-->
+            <!--<div class="img-preview{{selectedFile.status === 'fail' ? '-error' : ''}}"-->
+                 <!--[ngStyle]="{'background-image': 'url('+ selectedFile.src + ')'}">-->
+            <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
+        <!--&lt;!&ndash;<div class="col s6">&ndash;&gt;-->
+        <!--&lt;!&ndash;<label class="image-upload-container btn btn-bwm">&ndash;&gt;-->
+        <!--&lt;!&ndash;<span>&ndash;&gt;-->
+        <!--&lt;!&ndash;<i class="material-icons">attach_file</i>&ndash;&gt;-->
+        <!--&lt;!&ndash;Selecciona archivo&ndash;&gt;-->
+        <!--&lt;!&ndash;</span>&ndash;&gt;-->
+        <!--&lt;!&ndash;<input #imageInput2&ndash;&gt;-->
+        <!--&lt;!&ndash;type="file"&ndash;&gt;-->
+        <!--&lt;!&ndash;accept="application/pdf"&ndash;&gt;-->
+        <!--&lt;!&ndash;(change)="processFile(imageInput2, false)">&ndash;&gt;-->
+        <!--&lt;!&ndash;</label>&ndash;&gt;-->
+        <!--&lt;!&ndash;</div>&ndash;&gt;-->
+      <!--</div>-->
+      <!--<br/>-->
+      <!--<div style="text-align: right">-->
+        <!--<button type="button" name="btnAddCortador"-->
+                <!--class="btn light-blue darken-4 tooltipped waves-effect waves-light w-100"-->
+                <!--data-position="bottom" data-tooltip="Agrega elemento a auditoría"-->
+                <!--(click)="validaAgregaAuditoria()">Agregar-->
+          <!--<i class="material-icons right">send</i>-->
+        <!--</button>-->
+      <!--</div>-->
+      <!--<div class="row">-->
+        <!--<table-->
+          <!--id="second-table"-->
+          <!--datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="row-border">-->
+          <!--<thead>-->
+          <!--<tr>-->
+            <!--<th>No.</th>-->
+            <!--<th>DEFECTO</th>-->
+            <!--<th>OPERACIÓN</th>-->
+            <!--<th>POSICIÓN</th>-->
+            <!--<th>ORIGEN</th>-->
+            <!--<th>CANTIDAD</th>-->
+            <!--<th>IMAGEN</th>-->
+            <!--<th>NOTA</th>-->
+            <!--<th>ARCHIVO</th>-->
+            <!--<th></th>-->
+          <!--</tr>-->
+          <!--</thead>-->
+          <!--<tbody>-->
+          <!--<tr *ngFor="let item of items; let i = index">-->
+            <!--<td>{{i + 1}}</td>-->
+            <!--<td>{{item.Defecto.Descripcion}}</td>-->
+            <!--<td>{{item.Operacion.Nombre}}</td>-->
+            <!--<td>{{item.Posicion.Nombre}}</td>-->
+            <!--<td>{{item.Origen.Nombre}}</td>-->
+            <!--<td>{{item.Cantidad}}</td>-->
+            <!--<td>-->
+              <!--<img [src]="item.Imagen" alt="imagen" style="width:40px;height:40px;"-->
+                   <!--*ngIf="item.Imagen !== null">-->
+            <!--</td>-->
+            <!--<td></td>-->
+            <!--<td></td>-->
+            <!--<td class="center-align">-->
+              <!--<button class="waves-effect waves-light red darken-4 btn tooltiped bold_sub"-->
+                      <!--matTooltip="Eliminar"-->
+                      <!--(click)="eliminar(i)">-->
+                <!--<i class="material-icons">delete</i>-->
+              <!--</button>-->
+            <!--</td>-->
+          <!--</tr>-->
+          <!--</tbody>-->
+        <!--</table>-->
+      <!--</div>-->
+    <!--</form>-->
+  <!--</div>-->
+  <!--<div class="modal-footer">-->
+    <!--<div class="row">-->
+      <!--<div class="col s6" style="text-align: left">-->
+        <!--<a class="modal-close waves-effect waves-green btn-flat" (click)="reset()">Cancelar</a>-->
+      <!--</div>-->
+      <!--<div class="col s6" style="text-align: right">-->
+        <!--<a (click)="guardarAuditoria()"-->
+           <!--class="waves-effect waves-green btn-flat">Aceptar</a>-->
+      <!--</div>-->
+    <!--</div>-->
+  <!--</div>-->
+<!--</div>-->

@@ -22,6 +22,7 @@ export class PosicioncorteComponent implements OnInit {
     $('#modalEditPosicionCortador').modal();
     $('#modalEnablePosicionCortador').modal();
     $('#lblModulo').text('Corte - Posición');
+    this.GetPosicionCortador();
   }
 
   GetPosicionCortador() {

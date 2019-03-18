@@ -22,6 +22,7 @@ export class DefectoconfeccionComponent implements OnInit {
     $('#modalEditDefectoConfeccion').modal();
     $('#modalEnableDefectoConfeccion').modal();
     $('#lblModulo').text('Confección - Defectos');
+    this.GetDefectosConfeccion();
   }
 
   GetDefectosConfeccion() {

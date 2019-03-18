@@ -1,35 +1,33 @@
 import {AfterViewChecked, AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-
-declare var $: any;
-declare var M: any;
-import 'jquery';
+import {DataTableDirective} from 'angular-datatables';
 import {TerminadoService} from '../services/terminado/terminado.service';
 import {OperacionesService} from '../services/terminado/operaciones.service';
 import {PosicionTerminadoService} from '../services/terminado/posicion-terminado.service';
 import {OrigenTerminadoService} from '../services/terminado/origen-terminado.service';
-import {forkJoin, Subject} from 'rxjs';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {DataTableDirective} from 'angular-datatables';
 import {ToastrService} from 'ngx-toastr';
-import {AuditoriaTerminadoService} from '../services/terminado/auditoria-terminado.service';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatTableDataSource} from '@angular/material';
-import {Router} from '@angular/router';
+import {forkJoin, Subject} from 'rxjs';
+import 'jquery';
+import {AuditoriaCalidadService} from '../services/calidad/auditoria-calidad.service';
+declare var $: any;
+declare var M: any;
 
 @Component({
-  selector: 'app-terminado-audiotoria-defectos',
-  templateUrl: './terminado-audiotoria-defectos.component.html',
-  styleUrls: ['./terminado-audiotoria-defectos.component.css']
+  selector: 'app-calidad-auditoria',
+  templateUrl: './calidad-auditoria.component.html',
+  styleUrls: ['./calidad-auditoria.component.css']
 })
-export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy {
+export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy {
+
   @ViewChild(DataTableDirective) dtElement: DataTableDirective;
 
   constructor(private _defectoTerminadoService: TerminadoService,
               private _operacionTerminadoService: OperacionesService,
               private _posicionTerminadoService: PosicionTerminadoService,
               private _origenTerminadoService: OrigenTerminadoService,
-              private _auditoriaService: AuditoriaTerminadoService,
-              private _toast: ToastrService,
-              private router: Router) {
+              private _auditoriaCalidadService: AuditoriaCalidadService,
+              private _toast: ToastrService) {
   }
 
   form: FormGroup;
@@ -81,7 +79,7 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
       }
     };
     this.initFormGroup();
-    $('#lblModulo').text('Terminado - Registro auditoría terminado');
+    $('#lblModulo').text('Calidad - Registro auditoría calidad');
     $('.tooltipped').tooltip();
 
     const elems = document.querySelectorAll('.modal');
@@ -127,15 +125,17 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
       'Operacion': new FormControl('', [Validators.required]),
       'Posicion': new FormControl('', [Validators.required]),
       'Origen': new FormControl('', [Validators.required]),
-      'Cantidad': new FormControl('', [Validators.required]),
       'Imagen': new FormControl(),
       'Compostura': new FormControl(),
-      'Nota': new FormControl()
+      'Nota': new FormControl(),
+      'Recup': new FormControl(),
+      'Criterio': new FormControl(),
+      'Fin': new FormControl(),
     });
   }
 
   cargarAuditorias() {
-    this._auditoriaService.listAuditorias().subscribe(
+    this._auditoriaCalidadService.listAuditorias().subscribe(
       (res: any) => {
         this.dataSource = new MatTableDataSource(res.RES);
         console.log(res);
@@ -145,11 +145,11 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
 
   cargarOT() {
     this.mostrarOT = true;
-    this._auditoriaService.listOT()
+    this._auditoriaCalidadService.listOT()
       .subscribe(
         (ot: any) => {
           console.log(ot);
-          this.ordenesTrabajo = ot.OrdenTrabajo;
+          // this.ordenesTrabajo = ot.OrdenTrabajo;
           console.log(this.ordenesTrabajo);
           const elems = document.querySelectorAll('select');
           setTimeout(() => M.FormSelect.init(elems, {}), 500);
@@ -159,7 +159,7 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
 
   detalleOT(ot) {
     console.log(ot);
-    this._auditoriaService.getDetailOT(ot)
+    this._auditoriaCalidadService.getDetailOT(ot)
       .subscribe(
         (res: any) => {
           console.log(res);
@@ -235,7 +235,7 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
       'IdUsuario': this.Json_Usuario.ID,
       'Det': this.Det
     };
-    this._auditoriaService.createAuditoria(data)
+    this._auditoriaCalidadService.createAuditoria(data)
       .subscribe(
         res => {
           this._toast.success('Se agrego correctamente auditoria terminado', '');

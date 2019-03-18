@@ -59,6 +59,9 @@ import {EliminarComponent} from './dialogs/eliminar/eliminar.component';
 import {MaterialModule} from './material/material.module';
 import {AddEditOperacionTerminadoComponent} from './terminado-operaciones/add-edit-operacion-terminado/add-edit-operacion-terminado.component';
 import { NumberPipePipe } from './pipes/number-pipe.pipe';
+import { QualityPageComponent } from './pages/quality-page/quality-page.component';
+import { CalidadAuditoriaComponent } from './calidad-auditoria/calidad-auditoria.component';
+import { CalidadConsultaAuditoriaComponent } from './calidad-consulta-auditoria/calidad-consulta-auditoria.component';
 
 @NgModule({
   declarations: [
@@ -110,6 +113,9 @@ import { NumberPipePipe } from './pipes/number-pipe.pipe';
     EliminarComponent,
     AddEditOperacionTerminadoComponent,
     NumberPipePipe,
+    QualityPageComponent,
+    CalidadAuditoriaComponent,
+    CalidadConsultaAuditoriaComponent,
   ],
   entryComponents: [
     AddEditOperacionTerminadoComponent
@@ -199,6 +205,17 @@ import { NumberPipePipe } from './pipes/number-pipe.pipe';
           {path: 'terminado-posicion', component: TerminadoPosicionComponent},
           {path: 'terminado-origen', component: TerminadoOrigenComponent},
           {path: 'terminado-auditoria-defectos', component: TerminadoAudiotoriaDefectosComponent},
+        ]
+      },
+      {
+        path: 'quality', component: QualityPageComponent, children: [
+          {path: '', redirectTo: 'calidad-operaciones', pathMatch: 'full'},
+          {path: 'calidad-defectos', component: TerminadodefectosComponent},
+          {path: 'calidad-operaciones', component: TerminadoOperacionesComponent},
+          {path: 'calidad-posicion', component: TerminadoPosicionComponent},
+          {path: 'calidad-origen', component: TerminadoOrigenComponent},
+          {path: 'calidad-auditoria-registro', component: CalidadAuditoriaComponent},
+          {path: 'calidad-auditoria-consulta', component: CalidadConsultaAuditoriaComponent},
         ]
       },
       {path: '**', redirectTo: ''}

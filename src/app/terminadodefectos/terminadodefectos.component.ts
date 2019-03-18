@@ -5,6 +5,7 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {TerminadoService} from '../services/terminado/terminado.service';
 import {Subject} from 'rxjs';
 import {DataTableDirective} from 'angular-datatables';
+import {Router} from '@angular/router';
 
 declare var $: any;
 
@@ -41,7 +42,8 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
   urlImagen = '';
 
   constructor(private _toast: ToastrService,
-              public _terminadoService: TerminadoService
+              public _terminadoService: TerminadoService,
+              public router: Router
   ) {
   }
 
@@ -66,13 +68,14 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
         },
       }
     };
+    const mensaje = (this.router.url === '/quality/calidad-defectos' ? 'Calidad - Defectos' : 'Terminado - Defectos');
     this.initFormGroup();
     this.initFormGroupEdit();
     $('.tooltipped').tooltip();
     $('#modalNewDefectoTerminado').modal();
     $('#modalEditDefectoTerminado').modal();
     $('#modalEnableDefectoTerminado').modal();
-    $('#lblModulo').text('Terminado - Defectos');
+    $('#lblModulo').text(mensaje);
     this.getDefectosTerminado();
   }
 
