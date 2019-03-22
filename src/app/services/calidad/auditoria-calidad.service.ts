@@ -26,9 +26,9 @@ export class AuditoriaCalidadService {
   }
 
   deleteAuditoria(id) {
-    const url = `${this.URL_CALIDAD}/ActualizaAuditoriaDet`;
+    const url = `${this.URL_CALIDAD}/EliminaAuditoria`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
-    const params = new HttpParams().append('IdAuditoriaDet', id);
+    const params = new HttpParams().append('IdAuditoria', id);
     return this._http.delete(url, {headers, params});
   }
 

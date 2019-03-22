@@ -57,11 +57,17 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
   filteredOptionsPlanta: Observable<any>;
   filteredOptionsEstilo: Observable<any>;
   dataSource: MatTableDataSource<any>;
+  dataSourceDetalle: MatTableDataSource<any>;
   displayedColumns: string[] = [
     'Cliente', 'Marca', 'PO', 'Corte', 'Planta', 'Estilo', 'Fecha Inicio',
     'Fecha fin', 'Pzas Recup.', 'Pzas Criterio', '2das Finales', 'Totales',
     'Status', 'Opciones'
   ];
+
+  displayedColumnsDetalle: string[] = [
+    'Defecto', 'Operacion', 'Posicion', 'Origen', 'Recup', 'Criterio', '2das',
+    'Imagen', 'Nota', 'Archivo'];
+  totalDetall = 0;
   form: FormGroup;
   formFilter: FormGroup;
 
@@ -95,8 +101,10 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
         },
       }
     };
-    $('.tooltipped').tooltip();
-    const elems = document.querySelectorAll('.modal');
+    const tooltips = document.querySelectorAll('.tooltipped');
+    const instancesTooltip = M.Tooltip.init(tooltips, {});
+    // $('.tooltipped').tooltip();
+    const elems = document.querySelector('#modalNewAuditoria');
     const instances = M.Modal.init(elems, {dismissible: false});
     this.initFormGroupFilter();
     this.initFormGroup();
@@ -429,14 +437,18 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
               (res: any) => {
                 console.log(res);
                 if (res.Response.StatusCode !== 409) {
-                  swal('Exito', 'Auditoria eliminada con exito', 'success');
+                  this._toast.success('Auditoria eliminada con exito', '');
+                  // swal('Exito', 'Auditoria eliminada con exito', 'success');
+                  this.buscar();
                 } else {
-                  swal('Ups! Algo no salio bien', res.Message, 'warning');
+                  this._toast.warning('Ups! Algo no salio bien', '');
+                  // swal('Ups! Algo no salio bien', res.Message, 'warning');
                 }
               },
               error => {
                 console.log(error);
-                swal('Error al conectar a la base de datos', 'error');
+                this._toast.error('Error al conectar a la base de datos', '');
+                // swal('Error al conectar a la base de datos', 'error');
               }
             );
         }
@@ -473,6 +485,27 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
     const filterValue = name.toLowerCase();
 
     return this.clientes.filter(option => option.Descripcion.toLowerCase().indexOf(filterValue) === 0);
+  }
+
+  openModalDetalle(auditoria) {
+    const modalDetalle = document.querySelector('#modal-detalle');
+    M.Modal.init(modalDetalle);
+    const modalInstance = M.Modal.getInstance(modalDetalle);
+    modalInstance.open();
+    this.totalDetall = auditoria.total;
+
+    this._auditoriaCalidadService.getAuditoriaDetail(auditoria.IdAuditoria)
+      .subscribe((res: any) => {
+        this.dataSourceDetalle = new MatTableDataSource(res.RES_DET);
+        this.otDetalle = res.RES;
+        console.log(res);
+      });
+  }
+
+  closeModalDetalle() {
+    const modalDetalle = document.querySelector('#modal-detalle');
+    const modalInstance = M.Modal.getInstance(modalDetalle);
+    modalInstance.close();
   }
 
 

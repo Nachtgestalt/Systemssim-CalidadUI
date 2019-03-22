@@ -12,6 +12,7 @@ import {ToastrService} from 'ngx-toastr';
 import * as moment from 'moment';
 import {AuditoriaTerminadoService} from '../services/terminado/auditoria-terminado.service';
 import {DataTableDirective} from 'angular-datatables';
+import swal from 'sweetalert';
 
 declare var $: any;
 declare var M: any;
@@ -241,7 +242,15 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
   reset() {
     this.initFormGroupFilter();
     this.initFormGroup();
+    this.otDetalle = {};
+    this.selectedFile = null;
     this.dataSource = new MatTableDataSource();
+    this.dtElem.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.destroy();
+      this.items = [];
+      this.dtTrigger.next();
+    });
+    this.Det = [];
   }
 
   openModal(auditoria) {
@@ -256,6 +265,11 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
         this.dtElem.dtInstance.then((dtInstance: DataTables.Api) => {
           dtInstance.destroy();
           this.items = res.RES_DET;
+          this.items.forEach(x => {
+            x.Imagen = x.Aud_Imagen;
+            this.Det.push(x);
+          });
+          console.log('DETALLE DESPUES DE CARGAR MODAL: ', this.Det);
           this.dtTrigger.next();
         });
       });
@@ -297,8 +311,23 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
       console.log(this.Det);
       this.dtElem.dtInstance.then((dtInstance: DataTables.Api) => {
         // Destroy the table first
+        const defecto = this.form.controls['Defecto'].value;
+        const operacion = this.form.controls['Operacion'].value;
+        const posicion = this.form.controls['Posicion'].value;
+        const origen = this.form.controls['Origen'].value;
+        const cantidad = this.form.controls['Cantidad'].value;
+        const imagen = this.form.controls['Imagen'].value;
         dtInstance.destroy();
-        this.items.push(this.form.value);
+        const itemTable = {
+          Defecto: defecto.Nombre,
+          Operacion: operacion.Nombre,
+          Posicion: posicion.Nombre,
+          Origen: origen.Nombre,
+          Cantidad: cantidad,
+          Aud_Imagen: imagen,
+          Nota: this.form.controls['Nota'].value
+        };
+        this.items.push(itemTable);
         this.form.reset();
         this.selectedFile = null;
         const elems = document.querySelectorAll('select');
@@ -321,6 +350,71 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
   }
 
   guardarAuditoria() {
+    if (this.Det.length > 0) {
+      const data = {
+        IdAuditoria: this.otDetalle.IdAuditoria,
+        Det: this.Det
+      };
+      this._terminadoAuditoriaService.updateAuditoria(data)
+        .subscribe(
+          res => {
+            this._toast.success('Se actualizo correctamente auditoria calidad', '');
+            console.log(res);
+            const elem = document.querySelector('#modalNewAuditoria');
+            const instance = M.Modal.getInstance(elem);
+            instance.close();
+            this.buscar();
+            this.reset();
+          }
+        );
+    } else {
+      this._toast.warning('La auditoría debe contener al menos un detalle', '');
+    }
+  }
+
+  eliminarAuditoria(id) {
+    console.log(id);
+    swal({
+      text: '¿Estas seguro de eliminar esta auditoria?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._terminadoAuditoriaService.deleteAuditoria(id)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Response.StatusCode !== 409) {
+                  swal('Exito', 'Auditoria eliminada con exito', 'success');
+                } else {
+                  swal('Ups! Algo no salio bien', res.Message, 'warning');
+                }
+              },
+              error => {
+                console.log(error);
+                swal('Error al conectar a la base de datos', 'error');
+              }
+            );
+        }
+      });
+  }
+
+  closeModal() {
+    const elem = document.querySelector('#modalNewAuditoria');
+    const instance = M.Modal.getInstance(elem);
+    this.Det = [];
+    instance.close();
   }
 
   processFile(imageInput: any, nuevo: boolean) {

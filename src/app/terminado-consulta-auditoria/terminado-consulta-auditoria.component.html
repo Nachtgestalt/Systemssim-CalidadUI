@@ -236,11 +236,18 @@
         <th mat-header-cell *matHeaderCellDef></th>
         <td mat-cell *matCellDef="let element">
           <button type="button" name="btnAddCortador"
-                  class="btn light-blue darken-4 tooltipped waves-effect waves-light modal-trigger"
+                  class="btn light-blue darken-4 tooltipped waves-effect waves-light modal-trigger mr-3"
                   data-target="modalNewAuditoria"
                   data-position="bottom" data-tooltip="Editar auditoría"
-                  (click)="openModal(element)">EDITAR
-            <i class="material-icons right">edit</i>
+                  (click)="openModal(element)">
+            <i class="material-icons center">edit</i>
+          </button>
+          <button type="button" name="btnAddCortador"
+                  class="btn red darken-4 tooltipped"
+                  data-target="modalNewAuditoria"
+                  data-position="bottom" data-tooltip="Eliminar auditoría"
+                  (click)="eliminarAuditoria(element.IdAuditoria)">
+            <i class="material-icons center">delete_forever</i>
           </button>
         </td>
       </ng-container>
@@ -318,52 +325,52 @@
     </div>
     <form class="col s12" [formGroup]="form">
       <div class="row">
-        <div class="input-field col s6">
-          <select formControlName="Defecto">
-            <option value="0" disabled selected>SELECCIONE...</option>
-            <option *ngFor="let defecto of defectos" [ngValue]="defecto">{{defecto.Descripcion}}</option>
-          </select>
-          <label>DEFECTO:</label>
-        </div>
+        <mat-form-field class="col s6">
+          <mat-label>DEFECTO</mat-label>
+          <mat-select formControlName="Defecto">
+            <mat-option *ngFor="let defecto of defectos" [value]="defecto">
+              {{defecto.Descripcion}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
         <div class="col s"></div>
-        <div class="col s3">
-          <p>
-            <label>
-              <input type="checkbox" formControlName="Compostura"/>
-              <span>Composturas</span>
-            </label>
-          </p>
-        </div>
       </div>
       <div class="row">
-        <div class="input-field col s6">
-          <select id="ddlTipoTendido" formControlName="Operacion">
-            <option value="0" disabled selected>SELECCIONE...</option>
-            <option *ngFor="let operacion of operaciones" [ngValue]="operacion">{{operacion.Nombre}}</option>
-          </select>
-          <label>OPERACIÓN:</label>
-        </div>
+        <mat-form-field class="col s6">
+          <mat-label>OPERACIÓN</mat-label>
+          <mat-select formControlName="Operacion">
+            <mat-option *ngFor="let operacion of operaciones" [value]="operacion">
+              {{operacion.Nombre}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
       <div class="row">
-        <div class="input-field col s6">
-          <select id="ddlDefecto" formControlName="Posicion">
-            <option value="0" disabled selected>SELECCIONE...</option>
-            <option *ngFor="let posicion of posiciones" [ngValue]="posicion">{{posicion.Nombre}}</option>
-          </select>
-          <label>POSICIÓN:</label>
-        </div>
+        <mat-form-field class="col s6">
+          <mat-label>POSICIÓN</mat-label>
+          <mat-select formControlName="Posicion">
+            <mat-option *ngFor="let posicion of posiciones" [value]="posicion">
+              {{posicion.Nombre}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <!--<div class="input-field col s6">-->
+        <!--<select id="ddlDefecto" formControlName="Posicion">-->
+        <!--<option value="0" disabled selected>SELECCIONE...</option>-->
+        <!--<option *ngFor="let posicion of posiciones" [ngValue]="posicion">{{posicion.Nombre}}</option>-->
+        <!--</select>-->
+        <!--<label>POSICIÓN:</label>-->
+        <!--</div>-->
       </div>
       <div class="row">
-        <div class="input-field col s6">
-          <select formControlName="Origen">
-            <option value="0" disabled selected>SELECCIONE...</option>
-            <option *ngFor="let origen of origenes"
-                    [ngValue]="origen">
+        <mat-form-field class="col s6">
+          <mat-label>ORIGEN</mat-label>
+          <mat-select formControlName="Origen">
+            <mat-option *ngFor="let origen of origenes" [value]="origen">
               {{origen.Nombre}}
-            </option>
-          </select>
-          <label>ORIGEN:</label>
-        </div>
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
       </div>
       <div class="row">
         <div class="input-field col s6">
@@ -449,7 +456,7 @@
               <img [src]="item.Aud_Imagen" alt="imagen" style="width:40px;height:40px;"
                    *ngIf="item.Aud_Imagen !== null">
             </td>
-            <td></td>
+            <td>{{item.Nota}}</td>
             <td></td>
             <td class="center-align">
               <button class="waves-effect waves-light red darken-4 btn tooltiped bold_sub"
@@ -467,7 +474,7 @@
   <div class="modal-footer">
     <div class="row">
       <div class="col s6" style="text-align: left">
-        <a class="modal-close waves-effect waves-green btn-flat" (click)="reset()">Cancelar</a>
+        <a class="modal-close waves-effect waves-green btn-flat" (click)="closeModal()">Cancelar</a>
       </div>
       <div class="col s6" style="text-align: right">
         <a (click)="guardarAuditoria()"
