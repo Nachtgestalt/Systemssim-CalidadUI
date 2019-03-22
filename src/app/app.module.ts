@@ -62,6 +62,7 @@ import { NumberPipePipe } from './pipes/number-pipe.pipe';
 import { QualityPageComponent } from './pages/quality-page/quality-page.component';
 import { CalidadAuditoriaComponent } from './calidad-auditoria/calidad-auditoria.component';
 import { CalidadConsultaAuditoriaComponent } from './calidad-consulta-auditoria/calidad-consulta-auditoria.component';
+import { TerminadoConsultaAuditoriaComponent } from './terminado-consulta-auditoria/terminado-consulta-auditoria.component';
 
 @NgModule({
   declarations: [
@@ -116,6 +117,7 @@ import { CalidadConsultaAuditoriaComponent } from './calidad-consulta-auditoria/
     QualityPageComponent,
     CalidadAuditoriaComponent,
     CalidadConsultaAuditoriaComponent,
+    TerminadoConsultaAuditoriaComponent,
   ],
   entryComponents: [
     AddEditOperacionTerminadoComponent
@@ -205,6 +207,7 @@ import { CalidadConsultaAuditoriaComponent } from './calidad-consulta-auditoria/
           {path: 'terminado-posicion', component: TerminadoPosicionComponent},
           {path: 'terminado-origen', component: TerminadoOrigenComponent},
           {path: 'terminado-auditoria-defectos', component: TerminadoAudiotoriaDefectosComponent},
+          {path: 'terminado-auditoria-consulta', component: TerminadoConsultaAuditoriaComponent},
         ]
       },
       {

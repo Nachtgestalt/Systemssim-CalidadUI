@@ -18,10 +18,31 @@ export class AuditoriaCalidadService {
     return this._http.post(url, body, {headers});
   }
 
+  updateAuditoria(auditoria) {
+    const url = `${this.URL_CALIDAD}/ActualizaAuditoriaDet`;
+    const body = JSON.stringify(auditoria);
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.put(url, body, {headers});
+  }
+
+  deleteAuditoria(id) {
+    const url = `${this.URL_CALIDAD}/ActualizaAuditoriaDet`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('IdAuditoriaDet', id);
+    return this._http.delete(url, {headers, params});
+  }
+
   listOT() {
     const url = `${Globals.UriRioSulApi}AuditoriaTerminado/ObtenemosOT`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     return this._http.get(url, {headers});
+  }
+
+  getAuditoriaDetail(id) {
+    const url = `${this.URL_CALIDAD}/ObtieneAuditoriaDet`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('id', id);
+    return this._http.get(url, {headers, params});
   }
 
   getDetailOT(ot) {

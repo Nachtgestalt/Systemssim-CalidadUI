@@ -10,6 +10,7 @@ import {MatTableDataSource} from '@angular/material';
 import {forkJoin, Subject} from 'rxjs';
 import 'jquery';
 import {AuditoriaCalidadService} from '../services/calidad/auditoria-calidad.service';
+
 declare var $: any;
 declare var M: any;
 
@@ -50,12 +51,11 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
 
   dtOptions = {};
   displayedColumns: string[] = [
-    'Opciones', 'Numero', 'Cliente', 'OrdenTrabajo', 'PO', 'Tela', 'Marca', 'NumCortada', 'Lavado', 'Estilo', 'Planta'
+    'Opciones', 'Numero', 'Cliente', 'OrdenTrabajo', 'PO', 'Marca', 'NumCortada', 'Lavado', 'Estilo', 'Planta'
   ];
   dataSource: MatTableDataSource<any>;
   // dataSource = [];
   dtTrigger: Subject<any> = new Subject();
-  dtTriggerPrincipal: Subject<any> = new Subject();
 
   ngOnInit() {
     this.dtOptions = {
@@ -187,9 +187,12 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
         'IdOperacion': detalle.Defecto.ID,
         'Revisado': false,
         'Compostura': !!detalle.Compostura,
-        'cantidad': detalle.Cantidad,
+        // 'cantidad': detalle.Cantidad,
         'Imagen': detalle.Imagen,
-        'Nota': detalle.Nota
+        'Nota': detalle.Nota,
+        'Recup': detalle.Recup,
+        'Criterio': detalle.Criterio,
+        'Fin': detalle.Fin
       };
       this.Det.push(detalleItem);
       console.log(this.Det);
@@ -221,33 +224,37 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
   guardarAuditoria() {
     const detalle = JSON.stringify(this.Det);
     console.log(this.Det);
-    const data = {
-      'IdClienteRef': +this.otDetalle.ID_Cliente,
-      'OrdenTrabajo': this.ordenTrabajo,
-      'PO': document.getElementById('lblPO').innerText,
-      'Tela': document.getElementById('lblTela').innerText,
-      'Marca': document.getElementById('lblMarca').innerText,
-      'NumCortada': document.getElementById('lblNoCortada').innerText,
-      'Lavado': document.getElementById('lblLavado').innerText,
-      'Estilo': document.getElementById('lblEstilo').innerText,
-      'Planta': document.getElementById('lblPlanta').innerText,
-      'Ruta': document.getElementById('lblRuta').innerText,
-      'IdUsuario': this.Json_Usuario.ID,
-      'Det': this.Det
-    };
-    this._auditoriaCalidadService.createAuditoria(data)
-      .subscribe(
-        res => {
-          this._toast.success('Se agrego correctamente auditoria terminado', '');
-          console.log(res);
-          const elem = document.querySelector('#modalNewAuditoria');
-          const instance = M.Modal.getInstance(elem);
-          instance.close();
-          this.cargarAuditorias();
-          this.reset();
-        },
-        error => this._toast.success('No se agrego correctamente el cierre de auditoría', '')
-      );
+    if (this.Det.length > 0) {
+      const data = {
+        'IdClienteRef': +this.otDetalle.ID_Cliente,
+        'OrdenTrabajo': this.ordenTrabajo,
+        'PO': document.getElementById('lblPO').innerText,
+        'Tela': document.getElementById('lblTela').innerText,
+        'Marca': document.getElementById('lblMarca').innerText,
+        'NumCortada': document.getElementById('lblNoCortada').innerText,
+        'Lavado': document.getElementById('lblLavado').innerText,
+        'Estilo': document.getElementById('lblEstilo').innerText,
+        'Planta': document.getElementById('lblPlanta').innerText,
+        'Ruta': document.getElementById('lblRuta').innerText,
+        'IdUsuario': this.Json_Usuario.ID,
+        'Det': this.Det
+      };
+      this._auditoriaCalidadService.createAuditoria(data)
+        .subscribe(
+          res => {
+            this._toast.success('Se agrego correctamente auditoria terminado', '');
+            console.log(res);
+            const elem = document.querySelector('#modalNewAuditoria');
+            const instance = M.Modal.getInstance(elem);
+            instance.close();
+            this.cargarAuditorias();
+            this.reset();
+          },
+          error => this._toast.error('No se agrego correctamente el cierre de auditoría', '')
+        );
+    } else {
+      this._toast.warning('La auditoría debe contener al menos un detalle', '');
+    }
   }
 
   reset() {

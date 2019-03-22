@@ -68,10 +68,10 @@
           </ng-container>
 
           <!-- Tela Column -->
-          <ng-container matColumnDef="Tela">
-            <th mat-header-cell *matHeaderCellDef> Tela</th>
-            <td mat-cell *matCellDef="let element"> {{element.Tela}} </td>
-          </ng-container>
+          <!--<ng-container matColumnDef="Tela">-->
+            <!--<th mat-header-cell *matHeaderCellDef> Tela</th>-->
+            <!--<td mat-cell *matCellDef="let element"> {{element.Tela}} </td>-->
+          <!--</ng-container>-->
 
           <!-- Marca Column -->
           <ng-container matColumnDef="Marca">
@@ -114,7 +114,7 @@
 <!-- MODAL NUEVA AUDITORIA -->
 <div style="width: 80%" id="modalNewAuditoria" class="modal modal-fixed-footer modal-lg">
   <div class="modal-content">
-    <h4>Nuevo Auditoría Terminado</h4>
+    <h4>Nuevo Auditoría Calidad</h4>
     <div class="row">
       <div class="input-field col s4">
         <!--<select [(ngModel)]="ordenTrabajo" [disabled]="bloquearOT"-->
@@ -146,43 +146,43 @@
     <div class="row">
       <div class="col s4">
         <label style="font-size: 1.2rem">CLIENTE: </label>
-        <label id="lblCliente" style="font-size: 1.2rem">{{otDetalle.Cliente}}</label>
+        <label id="lblCliente" style="font-size: 1.2rem">{{otDetalle?.Cliente}}</label>
       </div>
       <div class="col s4">
         <label style="font-size: 1.2rem">PO: </label>
-        <label style="font-size: 1.2rem" id="lblPO">{{otDetalle.PO}}</label>
+        <label style="font-size: 1.2rem" id="lblPO">{{otDetalle?.PO}}</label>
       </div>
       <div class="col s4">
         <label style="font-size: 1.2rem">TELA: </label>
-        <label style="font-size: 1.2rem" id="lblTela">{{otDetalle.Tela_int}}</label>
+        <label style="font-size: 1.2rem" id="lblTela">{{otDetalle?.Tela_int}}</label>
       </div>
     </div>
     <div class="row">
       <div class="col s4">
         <label style="font-size: 1.2rem">MARCA: </label>
-        <label style="font-size: 1.2rem" id="lblMarca">{{otDetalle.Marca}}</label>
+        <label style="font-size: 1.2rem" id="lblMarca">{{otDetalle?.Marca}}</label>
       </div>
       <div class="col s4">
         <label style="font-size: 1.2rem">#CORTADA: </label>
-        <label style="font-size: 1.2rem" id="lblNoCortada">{{otDetalle.No_Cortada}}</label>
+        <label style="font-size: 1.2rem" id="lblNoCortada">{{otDetalle?.No_Cortada}}</label>
       </div>
       <div class="col s4">
         <label style="font-size: 1.2rem">LAVADO: </label>
-        <label style="font-size: 1.2rem" id="lblLavado">{{otDetalle.Lavado}}</label>
+        <label style="font-size: 1.2rem" id="lblLavado">{{otDetalle?.Lavado}}</label>
       </div>
     </div>
     <div class="row">
       <div class="col s4">
         <label style="font-size: 1.2rem">ESTILO: </label>
-        <label style="font-size: 1.2rem" id="lblEstilo">{{otDetalle.Estilo}}</label>
+        <label style="font-size: 1.2rem" id="lblEstilo">{{otDetalle?.Estilo}}</label>
       </div>
       <div class="col s4">
         <label style="font-size: 1.2rem">PLANTA: </label>
-        <label style="font-size: 1.2rem" id="lblPlanta">{{otDetalle.Planta}}</label>
+        <label style="font-size: 1.2rem" id="lblPlanta">{{otDetalle?.Planta}}</label>
       </div>
       <div class="col s4">
         <label style="font-size: 1.2rem">RUTA: </label>
-        <label style="font-size: 1.2rem" id="lblRuta">{{otDetalle.Ruta}}</label>
+        <label style="font-size: 1.2rem" id="lblRuta">{{otDetalle?.Ruta}}</label>
       </div>
     </div>
     <form class="col s12" [formGroup]="form">
@@ -309,7 +309,9 @@
             <th>OPERACIÓN</th>
             <th>POSICIÓN</th>
             <th>ORIGEN</th>
-            <th>CANTIDAD</th>
+            <th>PZAS.RECUP</th>
+            <th>PZAS.CRIT</th>
+            <th>2DAS FIN</th>
             <th>IMAGEN</th>
             <th>NOTA</th>
             <th>ARCHIVO</th>
@@ -323,7 +325,9 @@
             <td>{{item.Operacion.Nombre}}</td>
             <td>{{item.Posicion.Nombre}}</td>
             <td>{{item.Origen.Nombre}}</td>
-            <td>{{item.Cantidad}}</td>
+            <td>{{item.Recup}}</td>
+            <td>{{item.Criterio}}</td>
+            <td>{{item.Fin}}</td>
             <td>
               <img [src]="item.Imagen" alt="imagen" style="width:40px;height:40px;"
                    *ngIf="item.Imagen !== null">

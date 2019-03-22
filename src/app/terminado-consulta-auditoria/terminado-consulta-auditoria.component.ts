@@ -1,78 +1,67 @@
-import {AfterViewChecked, AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {MatTableDataSource} from '@angular/material';
-import {AuditoriaCalidadService} from '../services/calidad/auditoria-calidad.service';
-import {ClientesService} from '../services/clientes/clientes.service';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {debounceTime, distinctUntilChanged, map, startWith, switchMap} from 'rxjs/operators';
 import {forkJoin, Observable, Subject} from 'rxjs';
-import * as moment from 'moment';
-import 'jquery';
+import {MatTableDataSource} from '@angular/material';
 import {TerminadoService} from '../services/terminado/terminado.service';
 import {OperacionesService} from '../services/terminado/operaciones.service';
 import {PosicionTerminadoService} from '../services/terminado/posicion-terminado.service';
 import {OrigenTerminadoService} from '../services/terminado/origen-terminado.service';
-import {DataTableDirective} from 'angular-datatables';
+import {ClientesService} from '../services/clientes/clientes.service';
 import {ToastrService} from 'ngx-toastr';
-import {debounceTime, distinctUntilChanged, map, startWith, switchMap} from 'rxjs/operators';
+import * as moment from 'moment';
+import {AuditoriaTerminadoService} from '../services/terminado/auditoria-terminado.service';
+import {DataTableDirective} from 'angular-datatables';
 
 declare var $: any;
-import * as M from 'materialize-css/dist/js/materialize';
-import swal from 'sweetalert';
+declare var M: any;
 
 @Component({
-  selector: 'app-calidad-consulta-auditoria',
-  templateUrl: './calidad-consulta-auditoria.component.html',
-  styleUrls: ['./calidad-consulta-auditoria.component.css']
+  selector: 'app-terminado-consulta-auditoria',
+  templateUrl: './terminado-consulta-auditoria.component.html',
+  styleUrls: ['./terminado-consulta-auditoria.component.css']
 })
-export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, AfterViewInit {
+export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, AfterViewInit {
   @ViewChild(DataTableDirective) dtElem: DataTableDirective;
-  selectedFile: ImageSnippet;
-  Det = [];
-  dtOptions = {};
   dtTrigger: Subject<any> = new Subject();
+  dtOptions = {};
 
-  options = [];
   clientes = [];
   marcas = [];
   pos = [];
   cortes = [];
-  plantas = [];
-  estilos = [];
-  ordenTrabajo = '';
-  show_modal = false;
-  isActive = true;
-  otDetalle;
-  items = [];
   idClientes = [];
 
-  clienteID = null;
-  marcaID = null;
-  poID = null;
-
-  defectos = [];
-  operaciones = [];
-  posiciones = [];
-  origenes = [];
+  dataSource: MatTableDataSource<any>;
+  displayedColumns: string[] = [
+    'Cliente', 'Marca', 'PO', 'Corte', 'Planta', 'Estilo', 'Fecha Inicio',
+    'Fecha fin', 'Cantidad', 'Status', 'Opciones'
+  ];
 
   filteredOptions: Observable<any[]>;
   filteredOptionsPlanta: Observable<any>;
   filteredOptionsEstilo: Observable<any>;
-  dataSource: MatTableDataSource<any>;
-  displayedColumns: string[] = [
-    'Cliente', 'Marca', 'PO', 'Corte', 'Planta', 'Estilo', 'Fecha Inicio',
-    'Fecha fin', 'Pzas Recup.', 'Pzas Criterio', '2das Finales', 'Totales',
-    'Status', 'Opciones'
-  ];
+
   form: FormGroup;
   formFilter: FormGroup;
 
-  constructor(private _auditoriaCalidadService: AuditoriaCalidadService,
-              private _defectoTerminadoService: TerminadoService,
+  otDetalle;
+  defectos = [];
+  operaciones = [];
+  posiciones = [];
+  origenes = [];
+  items = [];
+  Det = [];
+
+  selectedFile: ImageSnippet;
+
+  constructor(private _defectoTerminadoService: TerminadoService,
               private _operacionTerminadoService: OperacionesService,
               private _posicionTerminadoService: PosicionTerminadoService,
               private _origenTerminadoService: OrigenTerminadoService,
               private _clientesService: ClientesService,
-              private _toast: ToastrService) {
-  }
+              private _terminadoAuditoriaService: AuditoriaTerminadoService,
+              private _toast: ToastrService) { }
 
   ngOnInit() {
     this.dtOptions = {
@@ -100,17 +89,17 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
     const instances = M.Modal.init(elems, {dismissible: false});
     this.initFormGroupFilter();
     this.initFormGroup();
+
     this._clientesService.listClientes()
       .subscribe((res: Array<any>) => {
         console.log(res);
         this.clientes = res;
       });
-    // this.cargarAuditorias();
   }
 
   ngAfterViewInit(): void {
-    // const elems = document.querySelectorAll('select');
-    // setTimeout(() => M.FormSelect.init(elems, {}), 1000);
+    const elems = document.querySelectorAll('select');
+    setTimeout(() => M.FormSelect.init(elems, {}), 1000);
     this.dtTrigger.next();
   }
 
@@ -163,16 +152,15 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
 
   initFormGroup() {
     this.form = new FormGroup({
+      // Detalle
       'Defecto': new FormControl('', [Validators.required]),
       'Operacion': new FormControl('', [Validators.required]),
       'Posicion': new FormControl('', [Validators.required]),
       'Origen': new FormControl('', [Validators.required]),
+      'Cantidad': new FormControl('', [Validators.required]),
       'Imagen': new FormControl(),
       'Compostura': new FormControl(),
-      'Nota': new FormControl(),
-      'Recup': new FormControl(),
-      'Criterio': new FormControl(),
-      'Fin': new FormControl(),
+      'Nota': new FormControl()
     });
   }
 
@@ -197,10 +185,11 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
   }
 
   obtenerPO() {
+    const clienteID = this.formFilter.controls['IdCliente'].value;
     const filtro = {
-      IdCliente: this.clienteID,
-      Marca: this.marcaID,
-      Auditoria: 'Calidad'
+      IdCliente: clienteID !== null ? clienteID.IdClienteRef : null,
+      Marca: this.formFilter.controls['Marca'].value,
+      Auditoria: 'Terminado'
     };
     this._clientesService.listPO(filtro).subscribe(
       (res: any) => {
@@ -211,31 +200,18 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
   }
 
   obtenerCorte() {
+    const clienteID = this.formFilter.controls['IdCliente'].value;
     const filtro = {
-      IdCliente: this.clienteID,
-      Marca: this.marcaID,
-      PO: this.poID,
-      Auditoria: 'Calidad'
+      IdCliente: clienteID !== null ? clienteID.IdClienteRef : null,
+      Marca: this.formFilter.controls['Marca'].value,
+      PO: this.formFilter.controls['PO'].value,
+      Auditoria: 'Terminado'
     };
     this._clientesService.listCortes(filtro).subscribe(
       (res: any) => {
         this.cortes = res.CorteList;
         console.log(res);
       });
-  }
-
-  filterPlant(val: string) {
-    return this._clientesService.listPlanta(val)
-      .pipe(
-        map((res: any) => res.P)
-      );
-  }
-
-  filterEstilo(val: string) {
-    return this._clientesService.listEstilo(val)
-      .pipe(
-        map((res: any) => res.E)
-      );
   }
 
   buscar() {
@@ -251,7 +227,7 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
       Corte: this.formFilter.controls['Corte'].value !== '' ? this.formFilter.controls['Corte'].value : null,
       Planta: this.formFilter.controls['Planta'].value !== '' ? this.formFilter.controls['Planta'].value : null,
       Estilo: null,
-      Auditoria: 'Calidad'
+      Auditoria: 'Terminado'
     };
     console.log('FILTRO', filtro);
     this._clientesService.busqueda(filtro).subscribe(
@@ -263,19 +239,9 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
   }
 
   reset() {
-    this.otDetalle = {};
-    this.selectedFile = null;
-    this.initFormGroup();
     this.initFormGroupFilter();
+    this.initFormGroup();
     this.dataSource = new MatTableDataSource();
-    this.dtElem.dtInstance.then((dtInstance: DataTables.Api) => {
-      dtInstance.destroy();
-      this.items = [];
-      this.dtTrigger.next();
-    });
-    this.Det = [];
-    this.isActive = false;
-    setTimeout(() => this.isActive = true, 100);
   }
 
   openModal(auditoria) {
@@ -283,19 +249,13 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
     const operaciones$ = this._operacionTerminadoService.listOperaciones();
     const posiciones$ = this._posicionTerminadoService.listPosiciones();
     const origenes$ = this._origenTerminadoService.listOrigenes();
-    this._auditoriaCalidadService.getAuditoriaDetail(auditoria.IdAuditoria)
+    this._terminadoAuditoriaService.getAuditoriaDetail(auditoria.IdAuditoria)
       .subscribe((res: any) => {
         this.otDetalle = res.RES;
         console.log(res);
-        this.show_modal = true;
         this.dtElem.dtInstance.then((dtInstance: DataTables.Api) => {
           dtInstance.destroy();
           this.items = res.RES_DET;
-          this.items.forEach(x => {
-            x.Imagen = x.Aud_Imagen;
-            this.Det.push(x);
-          });
-          console.log('DETALLE DESPUES DE CARGAR MODAL: ', this.Det);
           this.dtTrigger.next();
         });
       });
@@ -312,14 +272,14 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
         },
         error => console.log(error),
         () => {
-          console.log('TERMINE FORKJOIN');
+          const elems = document.querySelectorAll('select');
+          setTimeout(() => M.FormSelect.init(elems, {}), 1000);
         }
       );
   }
 
   validaAgregaAuditoria() {
-    console.log(this.form.value);
-    console.log(this.ordenTrabajo);
+    console.log(this.form.invalid);
     if (!this.form.invalid) {
       const detalle = this.form.value;
       const detalleItem = {
@@ -329,38 +289,16 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
         'IdOperacion': detalle.Defecto.ID,
         'Revisado': false,
         'Compostura': !!detalle.Compostura,
-        // 'cantidad': detalle.Cantidad,
+        'cantidad': detalle.Cantidad,
         'Imagen': detalle.Imagen,
-        'Nota': detalle.Nota,
-        'Recup': detalle.Recup,
-        'Criterio': detalle.Criterio,
-        'Fin': detalle.Fin
+        'Nota': detalle.Nota
       };
       this.Det.push(detalleItem);
       console.log(this.Det);
       this.dtElem.dtInstance.then((dtInstance: DataTables.Api) => {
         // Destroy the table first
-        const defecto = this.form.controls['Defecto'].value;
-        const operacion = this.form.controls['Operacion'].value;
-        const posicion = this.form.controls['Posicion'].value;
-        const origen = this.form.controls['Origen'].value;
-        const recup = this.form.controls['Recup'].value;
-        const criterio = this.form.controls['Criterio'].value;
-        const fin = this.form.controls['Fin'].value;
-        const imagen = this.form.controls['Imagen'].value;
         dtInstance.destroy();
-        const itemTable = {
-          Defecto: defecto.Nombre,
-          Operacion: operacion.Nombre,
-          Posicion: posicion.Nombre,
-          Origen: origen.Nombre,
-          Recup: recup,
-          Criterio: criterio,
-          Fin: fin,
-          Aud_Imagen: imagen,
-          Nota: this.form.controls['Nota'].value
-        };
-        this.items.push(itemTable);
+        this.items.push(this.form.value);
         this.form.reset();
         this.selectedFile = null;
         const elems = document.querySelectorAll('select');
@@ -369,7 +307,7 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
         this.dtTrigger.next();
       });
     } else {
-      this._toast.warning('Error en formulario', '');
+      this._toast.warning('Se debe seleccionar una orden de trabajo valida', '');
     }
   }
 
@@ -383,70 +321,6 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
   }
 
   guardarAuditoria() {
-    if (this.Det.length > 0) {
-      const data = {
-        IdAuditoria: this.otDetalle.IdAuditoria,
-        Det: this.Det
-      };
-      this._auditoriaCalidadService.updateAuditoria(data)
-        .subscribe(
-          res => {
-            this._toast.success('Se actualizo correctamente auditoria calidad', '');
-            console.log(res);
-            const elem = document.querySelector('#modalNewAuditoria');
-            const instance = M.Modal.getInstance(elem);
-            instance.close();
-            this.buscar();
-            this.reset();
-          }
-        );
-    } else {
-      this._toast.warning('La auditoría debe contener al menos un detalle', '');
-    }
-  }
-
-  eliminarAuditoria(id) {
-    console.log(id);
-    swal({
-      text: '¿Estas seguro de eliminar esta auditoria?',
-      buttons: {
-        cancel: {
-          text: 'Cancelar',
-          closeModal: true,
-          value: false,
-          visible: true
-        },
-        confirm: {
-          text: 'Aceptar',
-          value: true,
-        }
-      }
-    })
-      .then((willDelete) => {
-        if (willDelete) {
-          this._auditoriaCalidadService.deleteAuditoria(id)
-            .subscribe(
-              (res: any) => {
-                console.log(res);
-                if (res.Response.StatusCode !== 409) {
-                  swal('Exito', 'Auditoria eliminada con exito', 'success');
-                } else {
-                  swal('Ups! Algo no salio bien', res.Message, 'warning');
-                }
-              },
-              error => {
-                console.log(error);
-                swal('Error al conectar a la base de datos', 'error');
-              }
-            );
-        }
-      });
-  }
-
-  closeModal() {
-    const elem = document.querySelector('#modalNewAuditoria');
-    const instance = M.Modal.getInstance(elem);
-    instance.close();
   }
 
   processFile(imageInput: any, nuevo: boolean) {
@@ -465,6 +339,20 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
     reader.readAsDataURL(file);
   }
 
+  filterPlant(val: string) {
+    return this._clientesService.listPlanta(val)
+      .pipe(
+        map((res: any) => res.P)
+      );
+  }
+
+  filterEstilo(val: string) {
+    return this._clientesService.listEstilo(val)
+      .pipe(
+        map((res: any) => res.E)
+      );
+  }
+
   displayFn(cliente?): string | undefined {
     return cliente ? cliente.Descripcion : undefined;
   }
@@ -475,12 +363,11 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
     return this.clientes.filter(option => option.Descripcion.toLowerCase().indexOf(filterValue) === 0);
   }
 
-
 }
 
 class ImageSnippet {
-  pending = false;
-  status = 'init';
+  pending: boolean = false;
+  status: string = 'init';
 
   constructor(public src: string, public file: File) {
   }

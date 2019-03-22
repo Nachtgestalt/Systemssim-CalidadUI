@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Globals} from '../../Globals';
 
 @Injectable({
@@ -41,16 +41,18 @@ export class ClientesService {
     return this._http.post(url, body, {headers});
   }
 
-  listPlanta() {
+  listPlanta(planta) {
     const url = `${this.URL_CLIENTES}/GetPlanta`;
+    const params = new HttpParams().append('planta', planta);
     const headers = new HttpHeaders().append('content-type', 'application/json');
-    return this._http.get(url, {headers});
+    return this._http.get(url, {headers, params});
   }
 
-  listEstilo() {
+  listEstilo(estilo) {
     const url = `${this.URL_CLIENTES}/GetEstilo`;
+    const params = new HttpParams().append('estilo', estilo);
     const headers = new HttpHeaders().append('content-type', 'application/json');
-    return this._http.get(url, {headers});
+    return this._http.get(url, {headers, params});
   }
 
   busqueda(filtro) {

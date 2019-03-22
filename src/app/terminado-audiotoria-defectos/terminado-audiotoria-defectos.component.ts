@@ -221,33 +221,37 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
   guardarAuditoria() {
     const detalle = JSON.stringify(this.Det);
     console.log(this.Det);
-    const data = {
-      'IdClienteRef': +this.otDetalle.ID_Cliente,
-      'OrdenTrabajo': this.ordenTrabajo,
-      'PO': document.getElementById('lblPO').innerText,
-      'Tela': document.getElementById('lblTela').innerText,
-      'Marca': document.getElementById('lblMarca').innerText,
-      'NumCortada': document.getElementById('lblNoCortada').innerText,
-      'Lavado': document.getElementById('lblLavado').innerText,
-      'Estilo': document.getElementById('lblEstilo').innerText,
-      'Planta': document.getElementById('lblPlanta').innerText,
-      'Ruta': document.getElementById('lblRuta').innerText,
-      'IdUsuario': this.Json_Usuario.ID,
-      'Det': this.Det
-    };
-    this._auditoriaService.createAuditoria(data)
-      .subscribe(
-        res => {
-          this._toast.success('Se agrego correctamente auditoria terminado', '');
-          console.log(res);
-          const elem = document.querySelector('#modalNewAuditoria');
-          const instance = M.Modal.getInstance(elem);
-          instance.close();
-          this.cargarAuditorias();
-          this.reset();
-        },
-        error => this._toast.success('No se agrego correctamente el cierre de auditoría', '')
-      );
+    if (this.Det.length > 0) {
+      const data = {
+        'IdClienteRef': +this.otDetalle.ID_Cliente,
+        'OrdenTrabajo': this.ordenTrabajo,
+        'PO': document.getElementById('lblPO').innerText,
+        'Tela': document.getElementById('lblTela').innerText,
+        'Marca': document.getElementById('lblMarca').innerText,
+        'NumCortada': document.getElementById('lblNoCortada').innerText,
+        'Lavado': document.getElementById('lblLavado').innerText,
+        'Estilo': document.getElementById('lblEstilo').innerText,
+        'Planta': document.getElementById('lblPlanta').innerText,
+        'Ruta': document.getElementById('lblRuta').innerText,
+        'IdUsuario': this.Json_Usuario.ID,
+        'Det': this.Det
+      };
+      this._auditoriaService.createAuditoria(data)
+        .subscribe(
+          res => {
+            this._toast.success('Se agrego correctamente auditoria terminado', '');
+            console.log(res);
+            const elem = document.querySelector('#modalNewAuditoria');
+            const instance = M.Modal.getInstance(elem);
+            instance.close();
+            this.cargarAuditorias();
+            this.reset();
+          },
+          error => this._toast.error('No se agrego correctamente el cierre de auditoría', '')
+        );
+    } else {
+      this._toast.warning('La auditoría debe contener al menos un detalle', '');
+    }
   }
 
   reset() {

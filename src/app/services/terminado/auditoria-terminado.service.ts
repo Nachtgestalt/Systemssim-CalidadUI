@@ -18,6 +18,13 @@ export class AuditoriaTerminadoService {
     return this._http.post(url, body, {headers});
   }
 
+  getAuditoriaDetail(id) {
+    const url = `${this.URL_TERMINADO}/ObtieneAuditoriaDet`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('id', id);
+    return this._http.get(url, {headers, params});
+  }
+
   listOT() {
     const url = `${this.URL_TERMINADO}/ObtenemosOT`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
