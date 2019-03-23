@@ -133,53 +133,55 @@
         </div>
       </div>
       <div class="col s2" style="text-align:right">
-        <label style="font-size: 1.2rem">STATUS: </label>
-        <label style="font-size: 1.2rem" id="lblEstado"></label>
+        <label class="encabezado-detalle f-w-bold">STATUS: ABIERTA</label>
+        <label class="encabezado-detalle" id="lblEstado"></label>
+      </div>
+    </div>
+    <hr class="border">
+    <div class="row">
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">CLIENTE: </label>
+        <label class="encabezado-detalle">{{otDetalle?.Cliente}}</label>
+      </div>
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">PO: </label>
+        <label class="encabezado-detalle" id="lblPO">{{otDetalle?.PO}}</label>
+      </div>
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">TELA: </label>
+        <label class="encabezado-detalle" id="lblTela">{{otDetalle?.Tela_int}}</label>
       </div>
     </div>
     <div class="row">
       <div class="col s4">
-        <label style="font-size: 1.2rem">CLIENTE: </label>
-        <label id="lblCliente" style="font-size: 1.2rem">{{otDetalle.Cliente}}</label>
+        <label class="encabezado-detalle f-w-bold">MARCA: </label>
+        <label class="encabezado-detalle" id="lblMarca">{{otDetalle?.Marca}}</label>
       </div>
       <div class="col s4">
-        <label style="font-size: 1.2rem">PO: </label>
-        <label style="font-size: 1.2rem" id="lblPO">{{otDetalle.PO}}</label>
+        <label class="encabezado-detalle f-w-bold">#CORTADA: </label>
+        <label class="encabezado-detalle" id="lblNoCortada">{{otDetalle?.No_Cortada}}</label>
       </div>
       <div class="col s4">
-        <label style="font-size: 1.2rem">TELA: </label>
-        <label style="font-size: 1.2rem" id="lblTela">{{otDetalle.Tela_int}}</label>
+        <label class="encabezado-detalle f-w-bold">LAVADO: </label>
+        <label class="encabezado-detalle" id="lblLavado">{{otDetalle?.Lavado}}</label>
       </div>
     </div>
     <div class="row">
       <div class="col s4">
-        <label style="font-size: 1.2rem">MARCA: </label>
-        <label style="font-size: 1.2rem" id="lblMarca">{{otDetalle.Marca}}</label>
+        <label class="encabezado-detalle f-w-bold">ESTILO: </label>
+        <label class="encabezado-detalle" id="lblEstilo">{{otDetalle?.Estilo}}</label>
       </div>
       <div class="col s4">
-        <label style="font-size: 1.2rem">#CORTADA: </label>
-        <label style="font-size: 1.2rem" id="lblNoCortada">{{otDetalle.No_Cortada}}</label>
+        <label class="encabezado-detalle f-w-bold">PLANTA: </label>
+        <label class="encabezado-detalle" id="lblPlanta">{{otDetalle?.Planta}}</label>
       </div>
       <div class="col s4">
-        <label style="font-size: 1.2rem">LAVADO: </label>
-        <label style="font-size: 1.2rem" id="lblLavado">{{otDetalle.Lavado}}</label>
+        <label class="encabezado-detalle f-w-bold">RUTA: </label>
+        <label class="encabezado-detalle" id="lblRuta">{{otDetalle?.Ruta}}</label>
       </div>
     </div>
-    <div class="row">
-      <div class="col s4">
-        <label style="font-size: 1.2rem">ESTILO: </label>
-        <label style="font-size: 1.2rem" id="lblEstilo">{{otDetalle.Estilo}}</label>
-      </div>
-      <div class="col s4">
-        <label style="font-size: 1.2rem">PLANTA: </label>
-        <label style="font-size: 1.2rem" id="lblPlanta">{{otDetalle.Planta}}</label>
-      </div>
-      <div class="col s4">
-        <label style="font-size: 1.2rem">RUTA: </label>
-        <label style="font-size: 1.2rem" id="lblRuta">{{otDetalle.Ruta}}</label>
-      </div>
-    </div>
-    <form class="col s12" [formGroup]="form">
+    <hr class="border">
+    <form class="col s12 mt-3" [formGroup]="form">
       <div class="row">
         <mat-form-field class="col s6">
           <mat-label>DEFECTO</mat-label>
@@ -272,7 +274,7 @@
                    (change)="processFile(fileInput, false, 'archivo')">
           </div>
           <div class="file-path-wrapper">
-            <input class="file-path validate" type="text">
+            <input class="file-path validate" type="text" formControlName="NombreArchivo">
           </div>
         </div>
       </div>

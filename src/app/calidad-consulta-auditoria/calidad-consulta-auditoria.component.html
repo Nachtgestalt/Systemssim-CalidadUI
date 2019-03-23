@@ -4,14 +4,6 @@
       <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
         <i class="material-icons left">arrow_back</i>
       </button>
-      &nbsp;&nbsp;
-      <!--<button class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom"-->
-      <!--data-tooltip="Agrega una nueva auditoria de tendido corte" data-target="modalNewAuditoria" type="button"-->
-      <!--name="btnAddAuditoria">-->
-      <!--&lt;!&ndash;(click)="cargarOT()">&ndash;&gt;-->
-      <!--Agregar-->
-      <!--<i class="material-icons right">send</i>-->
-      <!--</button>-->
     </div>
   </div>
   <div class="row">
@@ -167,11 +159,6 @@
         <th mat-header-cell *matHeaderCellDef>Cliente</th>
         <td mat-cell *matCellDef="let element; let i = index">
           {{element.Cliente}}
-          <!--<a class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditDefectoTerminado"-->
-          <!--matTooltip="Edita el defecto  seleccionado">-->
-          <!--&lt;!&ndash;(click)="getInfoDefectoTerminado(defecto.ID)">&ndash;&gt;-->
-          <!--<i class="material-icons right">edit</i>-->
-          <!--</a>-->
         </td>
       </ng-container>
 
@@ -278,55 +265,74 @@
 <!-- MODAL NUEVA AUDITORIA -->
 <div style="width: 80%" id="modalNewAuditoria" class="modal modal-fixed-footer modal-lg">
   <div class="modal-content">
-    <h4>Auditoría Calidad - {{otDetalle?.IdAuditoria}} / Orden de trabajo: {{otDetalle?.OrdenTrabajo}}</h4>
+    <h4>Auditoría Calidad - {{otDetalle?.IdAuditoria}}</h4>
     <div class="row">
-      <div class="col s2" style="text-align:right">
-        <label style="font-size: 1.2rem">STATUS: </label>
-        <label style="font-size: 1.2rem" id="lblEstado"></label>
+      <div class="input-field col s4">
+        <i class="material-icons prefix">details</i>
+        <input id="ddlOT" name="ddlOT" type="text" class="validate"
+               [value]="otDetalle?.OrdenTrabajo" [readonly]="true">
+        <label for="ddlOT">Orden Trabajo</label>
+      </div>
+      <div class="col s2">
+        <label class="encabezado-detalle f-w-bold">STATUS: </label>
+        <label class="encabezado-detalle" id="lblEstado">
+          {{otDetalle?.FechaRegistroFin === null ? 'ABIERTA' : 'CERRADA'}}
+        </label>
+      </div>
+      <div class="col s3"></div>
+      <div class="col s3">
+        <button class="green darken-4 btn tooltiped"
+                *ngIf="otDetalle?.FechaRegistroFin ===null"
+                (click)="cerrarAuditoria()">
+          CERRAR AUDITORIA
+          <i class="material-icons right">lock</i>
+        </button>
+      </div>
+    </div>
+    <hr class="border">
+    <div class="row">
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">CLIENTE: </label>
+        <label id="lblCliente" class="encabezado-detalle">{{otDetalle?.Cliente}}</label>
+      </div>
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">PO: </label>
+        <label class="encabezado-detalle" id="lblPO">{{otDetalle?.PO}}</label>
+      </div>
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">TELA: </label>
+        <label class="encabezado-detalle" id="lblTela">{{otDetalle?.Tela_int}}</label>
       </div>
     </div>
     <div class="row">
       <div class="col s4">
-        <label style="font-size: 1.2rem">CLIENTE: </label>
-        <label id="lblCliente" style="font-size: 1.2rem">{{otDetalle?.Descripcion}}</label>
+        <label class="encabezado-detalle f-w-bold">MARCA: </label>
+        <label class="encabezado-detalle" id="lblMarca">{{otDetalle?.Marca}}</label>
       </div>
       <div class="col s4">
-        <label style="font-size: 1.2rem">PO: </label>
-        <label style="font-size: 1.2rem" id="lblPO">{{otDetalle?.PO}}</label>
+        <label class="encabezado-detalle f-w-bold">#CORTADA: </label>
+        <label class="encabezado-detalle" id="lblNoCortada">{{otDetalle?.No_Cortada}}</label>
       </div>
       <div class="col s4">
-        <label style="font-size: 1.2rem">TELA: </label>
-        <label style="font-size: 1.2rem" id="lblTela">{{otDetalle?.Tela}}</label>
+        <label class="encabezado-detalle f-w-bold">LAVADO: </label>
+        <label class="encabezado-detalle" id="lblLavado">{{otDetalle?.Lavado}}</label>
       </div>
     </div>
     <div class="row">
       <div class="col s4">
-        <label style="font-size: 1.2rem">MARCA: </label>
-        <label style="font-size: 1.2rem" id="lblMarca">{{otDetalle?.Marca}}</label>
+        <label class="encabezado-detalle f-w-bold">ESTILO: </label>
+        <label class="encabezado-detalle" id="lblEstilo">{{otDetalle?.Estilo}}</label>
       </div>
       <div class="col s4">
-        <label style="font-size: 1.2rem">#CORTADA: </label>
-        <label style="font-size: 1.2rem" id="lblNoCortada">{{otDetalle?.NumCortada}}</label>
+        <label class="encabezado-detalle f-w-bold">PLANTA: </label>
+        <label class="encabezado-detalle" id="lblPlanta">{{otDetalle?.Planta}}</label>
       </div>
       <div class="col s4">
-        <label style="font-size: 1.2rem">LAVADO: </label>
-        <label style="font-size: 1.2rem" id="lblLavado">{{otDetalle?.Lavado}}</label>
+        <label class="encabezado-detalle f-w-bold">RUTA: </label>
+        <label class="encabezado-detalle" id="lblRuta">{{otDetalle?.Ruta}}</label>
       </div>
     </div>
-    <div class="row">
-      <div class="col s4">
-        <label style="font-size: 1.2rem">ESTILO: </label>
-        <label style="font-size: 1.2rem" id="lblEstilo">{{otDetalle?.Estilo}}</label>
-      </div>
-      <div class="col s4">
-        <label style="font-size: 1.2rem">PLANTA: </label>
-        <label style="font-size: 1.2rem" id="lblPlanta">{{otDetalle?.Planta}}</label>
-      </div>
-      <div class="col s4">
-        <label style="font-size: 1.2rem">RUTA: </label>
-        <label style="font-size: 1.2rem" id="lblRuta">{{otDetalle?.Ruta}}</label>
-      </div>
-    </div>
+    <hr class="border">
     <form class="col s12" [formGroup]="form" style="margin-top: 1rem;">
       <div class="row">
         <mat-form-field class="col s6">
@@ -391,7 +397,7 @@
           <label for="textarea1">NOTA:</label>
         </div>
       </div>
-      <div class="row">
+      <div class="row" *ngIf="otDetalle?.FechaRegistroFin ===null">
         <div class="col s6">
           <label class="image-upload-container btn btn-bwm">
             <span>
@@ -401,7 +407,7 @@
             <input #imageInput2
                    type="file"
                    accept="image/*"
-                   (change)="processFile(imageInput2, false)">
+                   (change)="processFile(imageInput2, false, 'imagen')">
           </label>
 
           <div *ngIf="selectedFile" class="img-preview-container">
@@ -410,13 +416,26 @@
             </div>
           </div>
         </div>
+        <div class="file-field input-field col s6">
+          <div class="btn">
+            <span>Seleccionar archivo</span>
+            <input type="file" accept="application/pdf"
+                   #fileInput
+                   (change)="processFile(fileInput, false, 'archivo')">
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text" formControlName="NombreArchivo">
+          </div>
+        </div>
       </div>
       <br/>
       <div style="text-align: right">
         <button type="button" name="btnAddCortador"
                 class="btn light-blue darken-4 tooltipped waves-effect waves-light w-100"
                 data-position="bottom" data-tooltip="Agrega elemento a auditoría"
-                (click)="validaAgregaAuditoria()">Agregar
+                (click)="validaAgregaAuditoria()"
+                [disabled]="otDetalle?.FechaRegistroFin!==null"
+        >Agregar
           <i class="material-icons right">send</i>
         </button>
       </div>
@@ -458,6 +477,7 @@
             <td></td>
             <td class="center-align">
               <button class="waves-effect waves-light red darken-4 btn tooltiped bold_sub"
+                      *ngIf="otDetalle?.FechaRegistroFin ===null"
                       matTooltip="Eliminar"
                       (click)="eliminar(i)">
                 <i class="material-icons">delete</i>
@@ -548,35 +568,35 @@
           <td mat-cell *matCellDef="let element; let i = index">
             {{element.Defecto}}
           </td>
-          <td mat-footer-cell *matFooterCellDef> </td>
+          <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
         <!-- Operación Column -->
         <ng-container matColumnDef="Operacion">
           <th mat-header-cell *matHeaderCellDef>OPERACIÓN</th>
           <td mat-cell *matCellDef="let element; let i = index"> {{element.Operacion}} </td>
-          <td mat-footer-cell *matFooterCellDef> </td>
+          <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
         <!-- Posicion Column -->
         <ng-container matColumnDef="Posicion">
           <th mat-header-cell *matHeaderCellDef> POSICION</th>
           <td mat-cell *matCellDef="let element"> {{element.Posicion}} </td>
-          <td mat-footer-cell *matFooterCellDef> </td>
+          <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
         <!-- Origen Column -->
         <ng-container matColumnDef="Origen">
           <th mat-header-cell *matHeaderCellDef> ORIGEN</th>
           <td mat-cell *matCellDef="let element"> {{element.Origen}} </td>
-          <td mat-footer-cell *matFooterCellDef> </td>
+          <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
         <!-- PZAS.RECUP Column -->
         <ng-container matColumnDef="Recup">
           <th mat-header-cell *matHeaderCellDef> PZAS.RECUP</th>
           <td mat-cell *matCellDef="let element"> {{element.Recup}} </td>
-          <td mat-footer-cell *matFooterCellDef> </td>
+          <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
         <!-- PZAS.CRIT Column -->
@@ -598,23 +618,32 @@
           <th mat-header-cell *matHeaderCellDef> IMAGEN</th>
           <td mat-cell *matCellDef="let element">
             <img [src]="element.Aud_Imagen" alt="imagen" style="width:40px;height:40px;"
-                 *ngIf="element.Aud_Imagen !== null">
+                 class="cursor"
+                 matTooltip="Descargar imagen"
+                 *ngIf="element.Aud_Imagen !== null" (click)="openPDF(element.Aud_Imagen, 'imagen')">
           </td>
-          <td mat-footer-cell *matFooterCellDef> </td>
+          <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
         <!-- Nota column-->
         <ng-container matColumnDef="Nota">
           <th mat-header-cell *matHeaderCellDef> NOTA</th>
           <td mat-cell *matCellDef="let element"> {{element.Nota}} </td>
-          <td mat-footer-cell *matFooterCellDef> </td>
+          <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
         <!-- Archivo Column -->
         <ng-container matColumnDef="Archivo">
           <th mat-header-cell *matHeaderCellDef> ARCHIVO</th>
-          <td mat-cell *matCellDef="let element"> {{element.Archivo ? element.Archivo : ''}} </td>
-          <td mat-footer-cell *matFooterCellDef> </td>
+          <td mat-cell *matCellDef="let element">
+            <i class="material-icons prefix cursor" *ngIf="element.Archivo"
+               (click)="openPDF(element.Archivo, 'archivo')"
+               matTooltip="Descargar archivo">
+              attach_file
+            </i>
+            <p *ngIf="!element.Archivo">No hay archivo</p>
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumnsDetalle"></tr>
@@ -627,9 +656,10 @@
     <div class="row">
       <div class="col s6"></div>
       <div class="col s6" style="text-align: right">
-        <button type="button" class="btn-flat mr-3" (click)="closeModal()">
+        <button type="button" class="btn-flat mr-3" (click)="imprimirDetalle()">
           <i class="material-icons left">print</i>
-          IMPRIMIR</button>
+          IMPRIMIR
+        </button>
       </div>
     </div>
   </div>

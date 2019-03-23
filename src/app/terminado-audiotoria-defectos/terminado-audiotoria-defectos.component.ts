@@ -131,7 +131,8 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
       'Imagen': new FormControl(),
       'Compostura': new FormControl(true, [Validators.required]),
       'Nota': new FormControl(),
-      'Archivo': new FormControl()
+      'Archivo': new FormControl(),
+      'NombreArchivo': new FormControl(),
     });
   }
 

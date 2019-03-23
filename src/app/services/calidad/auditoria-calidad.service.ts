@@ -32,6 +32,13 @@ export class AuditoriaCalidadService {
     return this._http.delete(url, {headers, params});
   }
 
+  cierreAuditoria(id) {
+    const url = `${this.URL_CALIDAD}/CierreAuditoria`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('IdAuditoria', id);
+    return this._http.get(url, {headers, params});
+  }
+
   listOT() {
     const url = `${Globals.UriRioSulApi}AuditoriaTerminado/ObtenemosOT`;
     const headers = new HttpHeaders().append('content-type', 'application/json');

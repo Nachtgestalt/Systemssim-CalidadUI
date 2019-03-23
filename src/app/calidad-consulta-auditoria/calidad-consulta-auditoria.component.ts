@@ -101,6 +101,7 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
         },
       }
     };
+    $('#lblModulo').text('Calidad - Consulta auditoría calidad');
     const tooltips = document.querySelectorAll('.tooltipped');
     const instancesTooltip = M.Tooltip.init(tooltips, {});
     // $('.tooltipped').tooltip();
@@ -181,6 +182,8 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
       'Recup': new FormControl(),
       'Criterio': new FormControl(),
       'Fin': new FormControl(),
+      'Archivo': new FormControl(),
+      'NombreArchivo': new FormControl(),
     });
   }
 
@@ -294,6 +297,12 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
     this._auditoriaCalidadService.getAuditoriaDetail(auditoria.IdAuditoria)
       .subscribe((res: any) => {
         this.otDetalle = res.RES;
+        setTimeout(() => M.updateTextFields(), 100);
+        if (this.otDetalle.FechaRegistroFin !== null) {
+          this.form.disable();
+        } else {
+          this.form.enable();
+        }
         console.log(res);
         this.show_modal = true;
         this.dtElem.dtInstance.then((dtInstance: DataTables.Api) => {
@@ -342,7 +351,8 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
         'Nota': detalle.Nota,
         'Recup': detalle.Recup,
         'Criterio': detalle.Criterio,
-        'Fin': detalle.Fin
+        'Fin': detalle.Fin,
+        'Archivo': detalle.Archivo
       };
       this.Det.push(detalleItem);
       console.log(this.Det);
@@ -391,25 +401,41 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
   }
 
   guardarAuditoria() {
-    if (this.Det.length > 0) {
-      const data = {
-        IdAuditoria: this.otDetalle.IdAuditoria,
-        Det: this.Det
-      };
-      this._auditoriaCalidadService.updateAuditoria(data)
-        .subscribe(
-          res => {
-            this._toast.success('Se actualizo correctamente auditoria calidad', '');
-            console.log(res);
-            const elem = document.querySelector('#modalNewAuditoria');
-            const instance = M.Modal.getInstance(elem);
-            instance.close();
-            this.buscar();
-            this.reset();
-          }
-        );
+    if (this.otDetalle.FechaRegistroFin !== null) {
+      const elem = document.querySelector('#modalNewAuditoria');
+      const instance = M.Modal.getInstance(elem);
+      instance.close();
+      this.buscar();
+      this.reset();
     } else {
-      this._toast.warning('La auditoría debe contener al menos un detalle', '');
+      if (this.Det.length > 0) {
+        const data = {
+          IdAuditoria: this.otDetalle.IdAuditoria,
+          Det: this.Det
+        };
+        this._auditoriaCalidadService.updateAuditoria(data)
+          .subscribe(
+            (res: any) => {
+              if (res.Response.StatusCode === 200) {
+                this._toast.success('Se actualizo correctamente auditoria calidad', '');
+                console.log(res);
+                const elem = document.querySelector('#modalNewAuditoria');
+                const instance = M.Modal.getInstance(elem);
+                instance.close();
+                this.buscar();
+                this.reset();
+              } else {
+                this._toast.warning('Ups! Algo no salio bien', '');
+              }
+            },
+            error => {
+              console.log(error);
+              this._toast.error('Error al conectar a la base de datos', '');
+            }
+          );
+      } else {
+        this._toast.warning('La auditoría debe contener al menos un detalle', '');
+      }
     }
   }
 
@@ -452,22 +478,65 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
       });
   }
 
+  cerrarAuditoria() {
+    swal({
+      text: '¿Estas seguro de cerrar esta auditoria?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._auditoriaCalidadService.cierreAuditoria(this.otDetalle.IdAuditoria)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res === null) {
+                  this._toast.success('Auditoria cerrada con exito', '');
+                  this.closeModal();
+                  this.buscar();
+                } else {
+                  this._toast.warning('Ups! Algo no salio bien', '');
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
+  }
+
   closeModal() {
     const elem = document.querySelector('#modalNewAuditoria');
     const instance = M.Modal.getInstance(elem);
+    this.Det = [];
     instance.close();
   }
 
-  processFile(imageInput: any, nuevo: boolean) {
+  processFile(imageInput: any, nuevo: boolean, tipo) {
     const file: File = imageInput.files[0];
     const reader = new FileReader();
     console.log(file);
 
     reader.addEventListener('load', (event: any) => {
-
-      this.selectedFile = new ImageSnippet(event.target.result, file);
-      this.selectedFile.pending = true;
-      this.form.get('Imagen').patchValue(event.target.result);
+      if (tipo === 'imagen') {
+        this.form.get('Imagen').patchValue(event.target.result);
+        this.selectedFile = new ImageSnippet(event.target.result, file);
+        this.selectedFile.pending = true;
+      } else if (tipo === 'archivo') {
+        this.form.get('Archivo').patchValue(event.target.result);
+      }
       // nuevo ? this.form.get('Imagen').patchValue(event.target.result) : this.formEdit.get('Imagen').patchValue(event.target.result);
     });
 
@@ -497,6 +566,45 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
         this.otDetalle = res.RES;
         console.log(res);
       });
+  }
+
+  openPDF(data, tipo?) {
+    const linkSource = data;
+    let fileName = '';
+    const downloadLink = document.createElement('a');
+    if (tipo === 'pdf') {
+      fileName = 'archivo.pdf';
+    } else {
+      let extension = this.base64MimeType(data);
+      console.log('EXTENSION: ', extension);
+      fileName = `imagen.${extension}`;
+      console.log(fileName);
+    }
+
+    downloadLink.href = linkSource;
+    downloadLink.download = fileName;
+    console.log(downloadLink.download);
+    downloadLink.click();
+  }
+
+  base64MimeType(encoded) {
+    let result = null;
+
+    if (typeof encoded !== 'string') {
+      return result;
+    }
+
+    let mime = encoded.match(/data:image+\/([a-zA-Z0-9-.+]+).*,.*/);
+
+    if (mime && mime.length) {
+      result = mime[1];
+    }
+
+    return result;
+  }
+
+  imprimirDetalle() {
+
   }
 
   closeModalDetalle() {

@@ -131,6 +131,8 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
       'Recup': new FormControl(),
       'Criterio': new FormControl(),
       'Fin': new FormControl(),
+      'Archivo': new FormControl(),
+      'NombreArchivo': new FormControl(),
     });
   }
 
@@ -192,7 +194,8 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
         'Nota': detalle.Nota,
         'Recup': detalle.Recup,
         'Criterio': detalle.Criterio,
-        'Fin': detalle.Fin
+        'Fin': detalle.Fin,
+        'Archivo': detalle.Archivo
       };
       this.Det.push(detalleItem);
       console.log(this.Det);
@@ -250,7 +253,10 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
             this.cargarAuditorias();
             this.reset();
           },
-          error => this._toast.error('No se agrego correctamente el cierre de auditoría', '')
+          error => {
+            console.log(error);
+            this._toast.error('No se agrego correctamente el cierre de auditoría', '')
+          }
         );
     } else {
       this._toast.warning('La auditoría debe contener al menos un detalle', '');
@@ -271,16 +277,19 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
     setTimeout(() => M.FormSelect.init(elems, {}), 500);
   }
 
-  processFile(imageInput: any, nuevo: boolean) {
+  processFile(imageInput: any, nuevo: boolean, tipo) {
     const file: File = imageInput.files[0];
     const reader = new FileReader();
     console.log(file);
 
     reader.addEventListener('load', (event: any) => {
-
-      this.selectedFile = new ImageSnippet(event.target.result, file);
-      this.selectedFile.pending = true;
-      this.form.get('Imagen').patchValue(event.target.result);
+      if (tipo === 'imagen') {
+        this.form.get('Imagen').patchValue(event.target.result);
+        this.selectedFile = new ImageSnippet(event.target.result, file);
+        this.selectedFile.pending = true;
+      } else if ( tipo === 'archivo') {
+        this.form.get('Archivo').patchValue(event.target.result);
+      }
       // nuevo ? this.form.get('Imagen').patchValue(event.target.result) : this.formEdit.get('Imagen').patchValue(event.target.result);
     });
 

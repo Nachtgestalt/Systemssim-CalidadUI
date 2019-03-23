@@ -174,7 +174,8 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
       'Imagen': new FormControl(),
       'Compostura': new FormControl(null, [Validators.required]),
       'Nota': new FormControl(),
-      'Archivo': new FormControl()
+      'Archivo': new FormControl(),
+      'NombreArchivo': new FormControl()
     });
   }
 
@@ -274,6 +275,12 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
     this._terminadoAuditoriaService.getAuditoriaDetail(auditoria.IdAuditoria)
       .subscribe((res: any) => {
         this.otDetalle = res.RES;
+        setTimeout(() => M.updateTextFields(), 100);
+        if (this.otDetalle.FechaRegistroFin !== null) {
+          this.form.disable();
+        } else {
+          this.form.enable();
+        }
         console.log(res);
         this.dtElem.dtInstance.then((dtInstance: DataTables.Api) => {
           dtInstance.destroy();
@@ -364,25 +371,33 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
   }
 
   guardarAuditoria() {
-    if (this.Det.length > 0) {
-      const data = {
-        IdAuditoria: this.otDetalle.IdAuditoria,
-        Det: this.Det
-      };
-      this._terminadoAuditoriaService.updateAuditoria(data)
-        .subscribe(
-          res => {
-            this._toast.success('Se actualizo correctamente auditoria calidad', '');
-            console.log(res);
-            const elem = document.querySelector('#modalNewAuditoria');
-            const instance = M.Modal.getInstance(elem);
-            instance.close();
-            this.buscar();
-            this.reset();
-          }
-        );
+    if (this.otDetalle.FechaRegistroFin !== null) {
+      const elem = document.querySelector('#modalNewAuditoria');
+      const instance = M.Modal.getInstance(elem);
+      instance.close();
+      this.buscar();
+      this.reset();
     } else {
-      this._toast.warning('La auditoría debe contener al menos un detalle', '');
+      if (this.Det.length > 0) {
+        const data = {
+          IdAuditoria: this.otDetalle.IdAuditoria,
+          Det: this.Det
+        };
+        this._terminadoAuditoriaService.updateAuditoria(data)
+          .subscribe(
+            res => {
+              this._toast.success('Se actualizo correctamente auditoria calidad', '');
+              console.log(res);
+              const elem = document.querySelector('#modalNewAuditoria');
+              const instance = M.Modal.getInstance(elem);
+              instance.close();
+              this.buscar();
+              this.reset();
+            }
+          );
+      } else {
+        this._toast.warning('La auditoría debe contener al menos un detalle', '');
+      }
     }
   }
 
@@ -464,7 +479,7 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
         this.form.get('Imagen').patchValue(event.target.result);
         this.selectedFile = new ImageSnippet(event.target.result, file);
         this.selectedFile.pending = true;
-      } else if ( tipo === 'archivo') {
+      } else if (tipo === 'archivo') {
         this.form.get('Archivo').patchValue(event.target.result);
       }
       // nuevo ? this.form.get('Imagen').patchValue(event.target.result) : this.formEdit.get('Imagen').patchValue(event.target.result);
@@ -473,14 +488,36 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
     reader.readAsDataURL(file);
   }
 
-  openPDF(data) {
+  openPDF(data, tipo?) {
     const linkSource = data;
+    let fileName = '';
     const downloadLink = document.createElement('a');
-    const fileName = 'archivo.pdf';
+    if (tipo === 'pdf') {
+      fileName = 'archivo.pdf';
+    } else {
+      let extension = this.base64MimeType(data);
+      fileName = `imagen.${extension}`;
+    }
 
     downloadLink.href = linkSource;
     downloadLink.download = fileName;
     downloadLink.click();
+  }
+
+  base64MimeType(encoded) {
+    let result = null;
+
+    if (typeof encoded !== 'string') {
+      return result;
+    }
+
+    let mime = encoded.match(/data:image+\/([a-zA-Z0-9-.+]+).*,.*/);
+
+    if (mime && mime.length) {
+      result = mime[1];
+    }
+
+    return result;
   }
 
   imprimirDetalle() {
@@ -504,7 +541,7 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
 
   cerrarAuditoria() {
     swal({
-      text: '¿Estas seguro de eliminar esta auditoria?',
+      text: '¿Estas seguro de cerrar esta auditoria?',
       buttons: {
         cancel: {
           text: 'Cancelar',
@@ -562,7 +599,7 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
   private _filter(name: string) {
     const filterValue = name.toLowerCase();
 
-    return this.clientes.filter(option => option.Descripcion.toLowerCase().indexOf(filterValue) === 0);
+    return this.clientes.filter(option => option.Descripcion.toLowerCase().includes(filterValue) === true);
   }
 
 }
