@@ -16,6 +16,9 @@ import swal from 'sweetalert';
 
 declare var $: any;
 declare var M: any;
+import * as jspdf from 'jspdf';
+
+import html2canvas from 'html2canvas';
 
 @Component({
   selector: 'app-terminado-consulta-auditoria',
@@ -36,7 +39,7 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
   dataSource: MatTableDataSource<any>;
   displayedColumns: string[] = [
     'Cliente', 'Marca', 'PO', 'Corte', 'Planta', 'Estilo', 'Fecha Inicio',
-    'Fecha fin', 'Cantidad', 'Status', 'Opciones'
+    'Fecha fin', 'Composturas', '2das', 'Status', 'Opciones'
   ];
 
   filteredOptions: Observable<any[]>;
@@ -56,13 +59,21 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
 
   selectedFile: ImageSnippet;
 
+  tituloModalDetalle = '';
+  totalDetalle = 0;
+
+  dataSourceDetalle: MatTableDataSource<any>;
+  displayedColumnsDetalle: string[] = [
+    'Defecto', 'Operacion', 'Posicion', 'Origen', 'Cantidad', 'Imagen', 'Nota', 'Archivo'];
+
   constructor(private _defectoTerminadoService: TerminadoService,
               private _operacionTerminadoService: OperacionesService,
               private _posicionTerminadoService: PosicionTerminadoService,
               private _origenTerminadoService: OrigenTerminadoService,
               private _clientesService: ClientesService,
               private _terminadoAuditoriaService: AuditoriaTerminadoService,
-              private _toast: ToastrService) { }
+              private _toast: ToastrService) {
+  }
 
   ngOnInit() {
     this.dtOptions = {
@@ -86,6 +97,7 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
       }
     };
     $('.tooltipped').tooltip();
+    $('#lblModulo').text('Terminado - Consulta auditoría terminado');
     const elems = document.querySelectorAll('.modal');
     const instances = M.Modal.init(elems, {dismissible: false});
     this.initFormGroupFilter();
@@ -160,8 +172,9 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
       'Origen': new FormControl('', [Validators.required]),
       'Cantidad': new FormControl('', [Validators.required]),
       'Imagen': new FormControl(),
-      'Compostura': new FormControl(),
-      'Nota': new FormControl()
+      'Compostura': new FormControl(null, [Validators.required]),
+      'Nota': new FormControl(),
+      'Archivo': new FormControl()
     });
   }
 
@@ -302,10 +315,11 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
         'IdPosicion': detalle.Posicion.ID,
         'IdOperacion': detalle.Defecto.ID,
         'Revisado': false,
-        'Compostura': !!detalle.Compostura,
+        'Compostura': detalle.Compostura,
         'cantidad': detalle.Cantidad,
         'Imagen': detalle.Imagen,
-        'Nota': detalle.Nota
+        'Nota': detalle.Nota,
+        'Archivo': detalle.Archivo
       };
       this.Det.push(detalleItem);
       console.log(this.Det);
@@ -396,14 +410,15 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
               (res: any) => {
                 console.log(res);
                 if (res.Response.StatusCode !== 409) {
-                  swal('Exito', 'Auditoria eliminada con exito', 'success');
+                  this._toast.success('Auditoria eliminada con exito', '');
+                  this.buscar();
                 } else {
-                  swal('Ups! Algo no salio bien', res.Message, 'warning');
+                  this._toast.warning('Ups! Algo no salio bien', '');
                 }
               },
               error => {
                 console.log(error);
-                swal('Error al conectar a la base de datos', 'error');
+                this._toast.error('Error al conectar a la base de datos', '');
               }
             );
         }
@@ -417,20 +432,113 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
     instance.close();
   }
 
-  processFile(imageInput: any, nuevo: boolean) {
+  openModalDetalle(auditoria, tipo) {
+    this.tituloModalDetalle = tipo.toUpperCase();
+    const modalDetalle = document.querySelector('#modal-detalle');
+    M.Modal.init(modalDetalle);
+    const modalInstance = M.Modal.getInstance(modalDetalle);
+    modalInstance.open();
+    this.totalDetalle = auditoria.total;
+
+    this._terminadoAuditoriaService.getAuditoriaDetail(auditoria.IdAuditoria, tipo)
+      .subscribe((res: any) => {
+        this.dataSourceDetalle = new MatTableDataSource(res.RES_DET);
+        this.otDetalle = res.RES;
+        console.log(res);
+      });
+  }
+
+  closeModalDetalle() {
+    const modalDetalle = document.querySelector('#modal-detalle');
+    const modalInstance = M.Modal.getInstance(modalDetalle);
+    modalInstance.close();
+  }
+
+  processFile(imageInput: any, nuevo: boolean, tipo) {
     const file: File = imageInput.files[0];
     const reader = new FileReader();
     console.log(file);
 
     reader.addEventListener('load', (event: any) => {
-
-      this.selectedFile = new ImageSnippet(event.target.result, file);
-      this.selectedFile.pending = true;
-      this.form.get('Imagen').patchValue(event.target.result);
+      if (tipo === 'imagen') {
+        this.form.get('Imagen').patchValue(event.target.result);
+        this.selectedFile = new ImageSnippet(event.target.result, file);
+        this.selectedFile.pending = true;
+      } else if ( tipo === 'archivo') {
+        this.form.get('Archivo').patchValue(event.target.result);
+      }
       // nuevo ? this.form.get('Imagen').patchValue(event.target.result) : this.formEdit.get('Imagen').patchValue(event.target.result);
     });
 
     reader.readAsDataURL(file);
+  }
+
+  openPDF(data) {
+    const linkSource = data;
+    const downloadLink = document.createElement('a');
+    const fileName = 'archivo.pdf';
+
+    downloadLink.href = linkSource;
+    downloadLink.download = fileName;
+    downloadLink.click();
+  }
+
+  imprimirDetalle() {
+    const data = document.getElementById('modal-detalle');
+    html2canvas(data).then(canvas => {
+      // Few necessary setting options
+      const imgWidth = 208;
+      const pageHeight = 295;
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+      const heightLeft = imgHeight;
+
+      const contentDataURL = canvas.toDataURL('image/png');
+      const pdf = new jspdf('l', 'mm', 'a4'); // A4 size page of PDF
+      const width = pdf.internal.pageSize.getWidth();
+      const height = pdf.internal.pageSize.getHeight();
+      const position = 0;
+      pdf.addImage(contentDataURL, 'JPEG', 0, 0, width, height);
+      pdf.save(`Detalle Aud-${this.otDetalle.IdAuditoria}.pdf`); // Generated PDF
+    });
+  }
+
+  cerrarAuditoria() {
+    swal({
+      text: '¿Estas seguro de eliminar esta auditoria?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._terminadoAuditoriaService.cierreAuditoria(this.otDetalle.IdAuditoria)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res === null) {
+                  this._toast.success('Auditoria cerrada con exito', '');
+                  this.closeModal();
+                  this.buscar();
+                } else {
+                  this._toast.warning('Ups! Algo no salio bien', '');
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
   }
 
   filterPlant(val: string) {
@@ -460,8 +568,8 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
 }
 
 class ImageSnippet {
-  pending: boolean = false;
-  status: string = 'init';
+  pending = false;
+  status = 'init';
 
   constructor(public src: string, public file: File) {
   }

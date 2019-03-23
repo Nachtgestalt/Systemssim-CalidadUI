@@ -337,7 +337,6 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <div class="col s"></div>
       </div>
       <div class="row">
         <mat-form-field class="col s6">
@@ -358,13 +357,6 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <!--<div class="input-field col s6">-->
-        <!--<select id="ddlDefecto" formControlName="Posicion">-->
-        <!--<option value="0" disabled selected>SELECCIONE...</option>-->
-        <!--<option *ngFor="let posicion of posiciones" [ngValue]="posicion">{{posicion.Nombre}}</option>-->
-        <!--</select>-->
-        <!--<label>POSICIÓN:</label>-->
-        <!--</div>-->
       </div>
       <div class="row">
         <mat-form-field class="col s6">
@@ -629,6 +621,16 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumnsDetalle;"></tr>
         <tr mat-footer-row *matFooterRowDef="displayedColumnsDetalle"></tr>
       </table>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6"></div>
+      <div class="col s6" style="text-align: right">
+        <button type="button" class="btn-flat mr-3" (click)="closeModal()">
+          <i class="material-icons left">print</i>
+          IMPRIMIR</button>
+      </div>
     </div>
   </div>
 </div>

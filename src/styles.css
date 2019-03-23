@@ -38,8 +38,12 @@ table {
   overflow-y: hidden !important;
 }
 
-input[type="file"] {
+label input[type="file"] {
   display: none;
+}
+
+.cursor {
+  cursor: pointer;
 }
 
 .bold_sub {
@@ -98,6 +102,16 @@ input[type="file"] {
   border: 5px solid #fff;
   border-color: #fff transparent #fff transparent;
   animation: lds-dual-ring 1.2s linear infinite;
+}
+
+.table-container {
+  position: relative;
+  max-height: 500px;
+  overflow: auto;
+}
+
+pr-3 {
+  padding-right: 1rem;
 }
 
 .mr-3 {

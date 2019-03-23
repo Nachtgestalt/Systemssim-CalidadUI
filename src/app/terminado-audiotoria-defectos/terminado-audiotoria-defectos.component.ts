@@ -129,8 +129,9 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
       'Origen': new FormControl('', [Validators.required]),
       'Cantidad': new FormControl('', [Validators.required]),
       'Imagen': new FormControl(),
-      'Compostura': new FormControl(),
-      'Nota': new FormControl()
+      'Compostura': new FormControl(true, [Validators.required]),
+      'Nota': new FormControl(),
+      'Archivo': new FormControl()
     });
   }
 
@@ -186,10 +187,11 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
         'IdPosicion': detalle.Posicion.ID,
         'IdOperacion': detalle.Defecto.ID,
         'Revisado': false,
-        'Compostura': !!detalle.Compostura,
+        'Compostura': detalle.Compostura,
         'cantidad': detalle.Cantidad,
         'Imagen': detalle.Imagen,
-        'Nota': detalle.Nota
+        'Nota': detalle.Nota,
+        'Archivo': detalle.Archivo
       };
       this.Det.push(detalleItem);
       console.log(this.Det);
@@ -268,16 +270,19 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
     setTimeout(() => M.FormSelect.init(elems, {}), 500);
   }
 
-  processFile(imageInput: any, nuevo: boolean) {
+  processFile(imageInput: any, nuevo: boolean, tipo) {
     const file: File = imageInput.files[0];
     const reader = new FileReader();
     console.log(file);
 
     reader.addEventListener('load', (event: any) => {
-
-      this.selectedFile = new ImageSnippet(event.target.result, file);
-      this.selectedFile.pending = true;
-      this.form.get('Imagen').patchValue(event.target.result);
+      if (tipo === 'imagen') {
+        this.form.get('Imagen').patchValue(event.target.result);
+        this.selectedFile = new ImageSnippet(event.target.result, file);
+        this.selectedFile.pending = true;
+      } else if ( tipo === 'archivo') {
+        this.form.get('Archivo').patchValue(event.target.result);
+      }
       // nuevo ? this.form.get('Imagen').patchValue(event.target.result) : this.formEdit.get('Imagen').patchValue(event.target.result);
     });
 

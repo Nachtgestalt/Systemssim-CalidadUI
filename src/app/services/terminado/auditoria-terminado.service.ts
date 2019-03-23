@@ -25,17 +25,27 @@ export class AuditoriaTerminadoService {
     return this._http.put(url, body, {headers});
   }
 
-  deleteAuditoria(id) {
-    const url = `${this.URL_TERMINADO}/ActualizaAuditoriaDet`;
+  cierreAuditoria(id) {
+    const url = `${this.URL_TERMINADO}/CierreAuditoria`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
-    const params = new HttpParams().append('IdAuditoriaDet', id);
+    const params = new HttpParams().append('IdAuditoria', id);
+    return this._http.get(url, {headers, params});
+  }
+
+  deleteAuditoria(id) {
+    const url = `${this.URL_TERMINADO}/EliminaAuditoria`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('IdAuditoria', id);
     return this._http.delete(url, {headers, params});
   }
 
-  getAuditoriaDetail(id) {
+  getAuditoriaDetail(id, tipo?) {
     const url = `${this.URL_TERMINADO}/ObtieneAuditoriaDet`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
-    const params = new HttpParams().append('id', id);
+    let params = new HttpParams().append('id', id);
+    if (tipo) {
+      params = params.append('tipo', tipo);
+    }
     return this._http.get(url, {headers, params});
   }
 

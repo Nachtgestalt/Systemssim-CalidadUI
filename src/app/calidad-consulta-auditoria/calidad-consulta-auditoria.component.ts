@@ -438,17 +438,14 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
                 console.log(res);
                 if (res.Response.StatusCode !== 409) {
                   this._toast.success('Auditoria eliminada con exito', '');
-                  // swal('Exito', 'Auditoria eliminada con exito', 'success');
                   this.buscar();
                 } else {
                   this._toast.warning('Ups! Algo no salio bien', '');
-                  // swal('Ups! Algo no salio bien', res.Message, 'warning');
                 }
               },
               error => {
                 console.log(error);
                 this._toast.error('Error al conectar a la base de datos', '');
-                // swal('Error al conectar a la base de datos', 'error');
               }
             );
         }
