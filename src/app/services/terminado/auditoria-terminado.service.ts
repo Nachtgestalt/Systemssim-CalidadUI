@@ -67,5 +67,4 @@ export class AuditoriaTerminadoService {
     const headers = new HttpHeaders().append('content-type', 'application/json');
     return this._http.get(url, {headers});
   }
-
 }

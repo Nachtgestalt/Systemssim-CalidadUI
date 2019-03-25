@@ -71,7 +71,7 @@
                  (focus)="obtenerMarcas()"
                  (blur)="obtenerPO()">
           <mat-autocomplete #marca="matAutocomplete">
-            <mat-option *ngFor="let marca of marcas" [value]="marca">
+            <mat-option *ngFor="let marca of filteredOptionsMarca | async" [value]="marca">
               {{marca}}
             </mat-option>
           </mat-autocomplete>
@@ -247,6 +247,7 @@
                   (click)="openModal(element)">
             <i class="material-icons center">edit</i>
           </button>
+          <!--TODO: *ngIf="element.Fecha_f === '0001-01-01T00:00:00'"-->
           <button type="button" name="btnAddCortador"
                   class="btn red darken-4"
                   matTooltip="Eliminar"
@@ -656,7 +657,7 @@
     <div class="row">
       <div class="col s6"></div>
       <div class="col s6" style="text-align: right">
-        <button type="button" class="btn-flat mr-3" (click)="imprimirDetalle()">
+        <button type="button" class="btn-flat mr-3" (click)="imprimirDetalle(otDetalle)">
           <i class="material-icons left">print</i>
           IMPRIMIR
         </button>

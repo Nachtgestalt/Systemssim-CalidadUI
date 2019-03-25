@@ -219,7 +219,7 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
         (res: any) => {
           console.log(res);
           if (res.Message.IsSuccessStatusCode) {
-            this._toast.success('Se inactivó correctamente el defecto terminado', '');
+            this._toast.success('Se inactivó correctamente la posición', '');
             $('#modalEnablePosicionTerminado').modal('close');
             this.getPosicionesTerminado();
           }

@@ -17,6 +17,8 @@ import {debounceTime, distinctUntilChanged, map, startWith, switchMap} from 'rxj
 declare var $: any;
 import * as M from 'materialize-css/dist/js/materialize';
 import swal from 'sweetalert';
+import {ReportesService} from '../services/reportes/reportes.service';
+import {DomSanitizer} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-calidad-consulta-auditoria',
@@ -52,10 +54,12 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
   operaciones = [];
   posiciones = [];
   origenes = [];
+  tipoDetalleAud = null;
 
   filteredOptions: Observable<any[]>;
   filteredOptionsPlanta: Observable<any>;
   filteredOptionsEstilo: Observable<any>;
+  filteredOptionsMarca: Observable<any>;
   dataSource: MatTableDataSource<any>;
   dataSourceDetalle: MatTableDataSource<any>;
   displayedColumns: string[] = [
@@ -77,7 +81,10 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
               private _posicionTerminadoService: PosicionTerminadoService,
               private _origenTerminadoService: OrigenTerminadoService,
               private _clientesService: ClientesService,
-              private _toast: ToastrService) {
+              private _reporteService: ReportesService,
+              private _toast: ToastrService,
+              private domSanitizer: DomSanitizer
+              ) {
   }
 
   ngOnInit() {
@@ -168,6 +175,15 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
           }
         )
       );
+
+    this.filteredOptionsMarca = this.formFilter.controls['Marca'].valueChanges
+      .pipe(
+        // startWith<null>(null),
+        map((value: any) => {
+            return this.filterMarca(value);
+          }
+        )
+      );
   }
 
   initFormGroup() {
@@ -200,7 +216,7 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
       this.idClientes = [];
     }
     console.log(idCliente);
-    this._clientesService.listMarcas(this.idClientes.length > 0 ? this.idClientes : null)
+    this._clientesService.listMarcas(this.idClientes.length > 0 ? this.idClientes : null, 'Calidad')
       .subscribe((res: any) => {
         this.marcas = res.Marcas;
         console.log(res);
@@ -550,8 +566,15 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
   private _filter(name: string) {
     const filterValue = name.toLowerCase();
 
-    return this.clientes.filter(option => option.Descripcion.toLowerCase().indexOf(filterValue) === 0);
+    return this.clientes.filter(option => option.Descripcion.toLowerCase().includes(filterValue) === true);
   }
+
+  filterMarca(name) {
+    const filterValue = name.toLowerCase();
+
+    return this.marcas.filter(option => option.toLowerCase().includes(filterValue) === true);
+  }
+
 
   openModalDetalle(auditoria) {
     const modalDetalle = document.querySelector('#modal-detalle');
@@ -603,8 +626,19 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
     return result;
   }
 
-  imprimirDetalle() {
-
+  imprimirDetalle(auditoria) {
+    console.log(auditoria);
+    this._reporteService.getReporte(auditoria.IdAuditoria, 'Calidad')
+      .subscribe(
+        imprimirResp => {
+          console.log('RESULTADO IMPRIMIR RECIB0: ', imprimirResp);
+          const pdfResult: any = this.domSanitizer.bypassSecurityTrustResourceUrl(
+            URL.createObjectURL(imprimirResp)
+          );
+          // printJS(pdfResult.changingThisBreaksApplicationSecurity);
+          window.open(pdfResult.changingThisBreaksApplicationSecurity);
+          console.log(pdfResult);
+        });
   }
 
   closeModalDetalle() {

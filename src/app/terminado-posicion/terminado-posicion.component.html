@@ -46,11 +46,13 @@
           <tbody>
           <tr *ngFor="let posicion of posiciones; let i = index">
             <td>
-              <a class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditPosicionTerminado"
-                 matTooltip="Edita la posición  seleccionada"
-                 (click)="getInfoPosicionTerminado(posicion.ID)">
+              <button class="waves-effect waves-light btn tooltipped modal-trigger"
+                      data-target="modalEditPosicionTerminado"
+                      matTooltip="Edita la posición  seleccionada"
+                      (click)="getInfoPosicionTerminado(posicion.ID)"
+                      [disabled]="posicion.Activo === false">
                 <i class="material-icons right">edit</i>
-              </a>
+              </button>
             </td>
             <td>{{i + 1}}</td>
             <td>{{posicion.Clave}}</td>

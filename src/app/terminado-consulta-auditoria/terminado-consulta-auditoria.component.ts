@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {debounceTime, distinctUntilChanged, map, startWith, switchMap} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, map, startWith, switchMap, withLatestFrom} from 'rxjs/operators';
 import {forkJoin, Observable, Subject} from 'rxjs';
 import {MatTableDataSource} from '@angular/material';
 import {TerminadoService} from '../services/terminado/terminado.service';
@@ -19,6 +19,8 @@ declare var M: any;
 import * as jspdf from 'jspdf';
 
 import html2canvas from 'html2canvas';
+import {ReportesService} from '../services/reportes/reportes.service';
+import {DomSanitizer} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-terminado-consulta-auditoria',
@@ -44,6 +46,7 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
 
   filteredOptions: Observable<any[]>;
   filteredOptionsPlanta: Observable<any>;
+  filteredOptionsMarca: Observable<any>;
   filteredOptionsEstilo: Observable<any>;
 
   form: FormGroup;
@@ -61,10 +64,11 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
 
   tituloModalDetalle = '';
   totalDetalle = 0;
-
+  tipoDetalleAud = null;
   dataSourceDetalle: MatTableDataSource<any>;
   displayedColumnsDetalle: string[] = [
     'Defecto', 'Operacion', 'Posicion', 'Origen', 'Cantidad', 'Imagen', 'Nota', 'Archivo'];
+  updateField = new Subject();
 
   constructor(private _defectoTerminadoService: TerminadoService,
               private _operacionTerminadoService: OperacionesService,
@@ -72,7 +76,9 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
               private _origenTerminadoService: OrigenTerminadoService,
               private _clientesService: ClientesService,
               private _terminadoAuditoriaService: AuditoriaTerminadoService,
-              private _toast: ToastrService) {
+              private _reporteService: ReportesService,
+              private _toast: ToastrService,
+              private domSanitizer: DomSanitizer) {
   }
 
   ngOnInit() {
@@ -161,6 +167,15 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
           }
         )
       );
+
+    this.filteredOptionsMarca = this.formFilter.controls['Marca'].valueChanges
+      .pipe(
+        withLatestFrom(this.updateField),
+        map(([value, marcas]) => {
+          console.log(value, marcas);
+          return value ? this.filterMarca(value) : marcas;
+        })
+      );
   }
 
   initFormGroup() {
@@ -192,8 +207,9 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
       this.idClientes = [];
     }
     console.log(idCliente);
-    this._clientesService.listMarcas(this.idClientes.length > 0 ? this.idClientes : null)
+    this._clientesService.listMarcas(this.idClientes.length > 0 ? this.idClientes : null, 'Terminado')
       .subscribe((res: any) => {
+        this.updateField.next(res.Marcas);
         this.marcas = res.Marcas;
         console.log(res);
       });
@@ -448,6 +464,7 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
   }
 
   openModalDetalle(auditoria, tipo) {
+    this.tipoDetalleAud = tipo;
     this.tituloModalDetalle = tipo.toUpperCase();
     const modalDetalle = document.querySelector('#modal-detalle');
     M.Modal.init(modalDetalle);
@@ -520,23 +537,19 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
     return result;
   }
 
-  imprimirDetalle() {
-    const data = document.getElementById('modal-detalle');
-    html2canvas(data).then(canvas => {
-      // Few necessary setting options
-      const imgWidth = 208;
-      const pageHeight = 295;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      const heightLeft = imgHeight;
-
-      const contentDataURL = canvas.toDataURL('image/png');
-      const pdf = new jspdf('l', 'mm', 'a4'); // A4 size page of PDF
-      const width = pdf.internal.pageSize.getWidth();
-      const height = pdf.internal.pageSize.getHeight();
-      const position = 0;
-      pdf.addImage(contentDataURL, 'JPEG', 0, 0, width, height);
-      pdf.save(`Detalle Aud-${this.otDetalle.IdAuditoria}.pdf`); // Generated PDF
-    });
+  imprimirDetalle(auditoria) {
+    console.log(auditoria);
+    this._reporteService.getReporte(auditoria.IdAuditoria, 'Terminado', this.tipoDetalleAud)
+      .subscribe(
+        imprimirResp => {
+          console.log('RESULTADO IMPRIMIR RECIB0: ', imprimirResp);
+          const pdfResult: any = this.domSanitizer.bypassSecurityTrustResourceUrl(
+            URL.createObjectURL(imprimirResp)
+          );
+          // printJS(pdfResult.changingThisBreaksApplicationSecurity);
+          window.open(pdfResult.changingThisBreaksApplicationSecurity);
+          console.log(pdfResult);
+        });
   }
 
   cerrarAuditoria() {
@@ -590,6 +603,12 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
       .pipe(
         map((res: any) => res.E)
       );
+  }
+
+  filterMarca(name) {
+    const filterValue = name.toLowerCase();
+
+    return this.marcas.filter(option => option.toLowerCase().includes(filterValue) === true);
   }
 
   displayFn(cliente?): string | undefined {

@@ -234,7 +234,7 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
         (res: any) => {
           console.log(res);
           if (res.Message.IsSuccessStatusCode) {
-            this._toast.success('Se inactivó correctamente el defecto terminado', '');
+            this._toast.success('Se inactivó correctamente el defecto', '');
             $('#modalEnableDefectoTerminado').modal('close');
             this.getDefectosTerminado();
           }

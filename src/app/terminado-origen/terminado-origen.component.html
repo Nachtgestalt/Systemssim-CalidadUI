@@ -46,11 +46,13 @@
           <tbody>
           <tr *ngFor="let origen of origenes; let i = index">
             <td>
-              <a class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditOrigenTerminado"
-                 matTooltip="Edita el origen seleccionado"
-                 (click)="getInfoOrigenTerminado(origen.ID)">
+              <button class="waves-effect waves-light btn tooltipped modal-trigger"
+                      data-target="modalEditOrigenTerminado"
+                      matTooltip="Edita el origen seleccionado"
+                      (click)="getInfoOrigenTerminado(origen.ID)"
+                      [disabled]="origen.Activo === false">
                 <i class="material-icons right">edit</i>
-              </a>
+              </button>
             </td>
             <td>{{i + 1}}</td>
             <td>{{origen.Clave}}</td>

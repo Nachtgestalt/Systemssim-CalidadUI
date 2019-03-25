@@ -219,7 +219,7 @@ export class TerminadoOrigenComponent implements OnInit, OnDestroy, AfterViewIni
         (res: any) => {
           console.log(res);
           if (res.Message.IsSuccessStatusCode) {
-            this._toast.success('Se inactivó correctamente el defecto terminado', '');
+            this._toast.success('Se inactivó correctamente el origen', '');
             $('#modalEnableOrigenTerminado').modal('close');
             this.getOrigenesTerminado();
           }

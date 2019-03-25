@@ -51,11 +51,13 @@
           <tbody>
           <tr *ngFor="let operacion of operaciones; let i = index">
             <td>
-              <a class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditOperacionTerminado"
-                 matTooltip="Edita la operación  seleccionada"
-                 (click)="getInfoOperacionTerminado(operacion.ID)">
+              <button class="waves-effect waves-light btn tooltipped modal-trigger"
+                      data-target="modalEditOperacionTerminado"
+                      matTooltip="Edita la operación  seleccionada"
+                      (click)="getInfoOperacionTerminado(operacion.ID)"
+                      [disabled]="operacion.Activo === false">
                 <i class="material-icons right">edit</i>
-              </a>
+              </button>
             </td>
             <td>{{i + 1}}</td>
             <td>{{operacion.Clave}}</td>

@@ -17,11 +17,11 @@ export class ClientesService {
     return this._http.get(url, {headers});
   }
 
-  listMarcas(idCliente) {
+  listMarcas(idCliente, modulo) {
     const url = `${this.URL_CLIENTES}/GetMarca`;
     const body = {
       IdCliente: idCliente,
-      Auditoria: 'Calidad'
+      Auditoria: modulo
     };
     const headers = new HttpHeaders().append('content-type', 'application/json');
     return this._http.post(url, body, {headers});
