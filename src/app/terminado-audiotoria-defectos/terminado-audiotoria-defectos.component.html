@@ -236,9 +236,13 @@
       </div>
       <div class="row">
         <div class="input-field col s6">
-          <input id="cantidad" class="validate" type="number" style="text-align: right;"
-                 formControlName="Cantidad"/>
+          <input id="cantidad" class="validate" type="text" style="text-align: right;"
+                 inputmode="numeric" pattern="[0-9]*"
+                 formControlName="Cantidad" digitOnly/>
           <label for="cantidad">CANTIDAD:</label>
+          <small style="float: right">
+            {{form.controls['Cantidad'].value ? (form.controls['Cantidad'].value | numberFormat) : ''}}
+          </small>
         </div>
       </div>
       <div class="row">
@@ -266,17 +270,17 @@
             </div>
           </div>
         </div>
-        <div class="file-field input-field col s6">
-          <div class="btn">
-            <span>Seleccionar archivo</span>
-            <input type="file" accept="application/pdf"
-                   #fileInput
-                   (change)="processFile(fileInput, false, 'archivo')">
-          </div>
-          <div class="file-path-wrapper">
-            <input class="file-path validate" type="text" formControlName="NombreArchivo">
-          </div>
-        </div>
+<!--        <div class="file-field input-field col s6">-->
+<!--          <div class="btn">-->
+<!--            <span>Seleccionar archivo</span>-->
+<!--            <input type="file" accept="application/pdf"-->
+<!--                   #fileInput-->
+<!--                   (change)="processFile(fileInput, false, 'archivo')">-->
+<!--          </div>-->
+<!--          <div class="file-path-wrapper">-->
+<!--            <input class="file-path validate" type="text" formControlName="NombreArchivo">-->
+<!--          </div>-->
+<!--        </div>-->
       </div>
       <br/>
       <div style="text-align: right">
@@ -301,7 +305,6 @@
             <th>CANTIDAD</th>
             <th>IMAGEN</th>
             <th>NOTA</th>
-            <th>ARCHIVO</th>
             <th></th>
           </tr>
           </thead>
@@ -312,13 +315,12 @@
             <td>{{item.Operacion.Nombre}}</td>
             <td>{{item.Posicion.Nombre}}</td>
             <td>{{item.Origen.Nombre}}</td>
-            <td>{{item.Cantidad}}</td>
+            <td style="text-align: right">{{item.Cantidad | numberFormat}}</td>
             <td>
               <img [src]="item.Imagen" alt="imagen" style="width:40px;height:40px;"
                    *ngIf="item.Imagen !== null">
             </td>
             <td>{{item.Nota}}</td>
-            <td></td>
             <td class="center-align">
               <button class="waves-effect waves-light red darken-4 btn tooltiped bold_sub"
                       matTooltip="Eliminar"

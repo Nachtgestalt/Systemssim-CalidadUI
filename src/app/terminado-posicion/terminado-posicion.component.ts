@@ -7,6 +7,7 @@ import {PosicionTerminadoService} from '../services/terminado/posicion-terminado
 
 import 'jquery';
 import {Router} from '@angular/router';
+import swal from 'sweetalert';
 declare var $: any;
 
 @Component({
@@ -222,6 +223,10 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
             this._toast.success('Se inactivó correctamente la posición', '');
             $('#modalEnablePosicionTerminado').modal('close');
             this.getPosicionesTerminado();
+          } else {
+            const mensaje = res.Hecho.split(',');
+            this._toast.warning(mensaje[0], mensaje[2]);
+            $('#modalEnablePosicionTerminado').modal('close');
           }
         },
         error1 => {
@@ -230,6 +235,47 @@ export class TerminadoPosicionComponent implements OnInit, OnDestroy, AfterViewI
         }
       );
   }
+
+  eliminar(posicion) {
+    console.log('eliminar: ', posicion);
+    swal({
+      text: '¿Estas seguro de eliminar esta posición?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._terminadoPosicionService.deletePosicion(posicion.ID)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Posición eliminada con exito', '');
+                  this.getPosicionesTerminado();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
+  }
+
 
   cambiarID(id) {
     this.idPosicion = id;

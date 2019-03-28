@@ -6,6 +6,7 @@ import {TerminadoService} from '../services/terminado/terminado.service';
 import {Subject} from 'rxjs';
 import {DataTableDirective} from 'angular-datatables';
 import {Router} from '@angular/router';
+import swal from 'sweetalert';
 
 declare var $: any;
 
@@ -190,6 +191,10 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
           if (res.Message.IsSuccessStatusCode) {
             this.formEdit.patchValue(res.Vst_Terminado);
             this.selectedFileEdit = res.Vst_Terminado.Imagen;
+            console.log('SELECTED FILE', this.selectedFile);
+            if (this.selectedFileEdit) {
+              this.noMostrar = true;
+            }
             this.updateTextFields();
           }
         },
@@ -219,6 +224,7 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
             $('#modalEditDefectoTerminado').modal('close');
             this.getDefectosTerminado();
             this.initFormGroupEdit();
+            this.selectedFile = null;
           }
         },
         error1 => {
@@ -244,6 +250,46 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
           this._toast.error('No se pudo establecer conexión a la base de datos', '');
         }
       );
+  }
+
+  eliminar(defecto) {
+    console.log('eliminar: ', defecto);
+    swal({
+      text: '¿Estas seguro de eliminar este defecto?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._terminadoService.deleteDefecto(defecto.ID)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Defecto eliminado con exito', '');
+                  this.getDefectosTerminado();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
   }
 
   cambiarID(id) {
@@ -277,7 +323,7 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
 
       this.selectedFile = new ImageSnippet(event.target.result, file);
       this.selectedFile.pending = true;
-      nuevo ? this.form.get('Imagen').patchValue(event.target.result) : this.formEdit.get('Imagen').patchValue(event.target.result);
+      nuevo ? this.form.get('Imagen').patchValue(file) : this.formEdit.get('Imagen').patchValue(file);
       this.noMostrar = false;
     });
 

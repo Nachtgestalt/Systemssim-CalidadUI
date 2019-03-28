@@ -18,7 +18,7 @@ export class PosicionTerminadoService {
     return this._http.post(url, body, {headers});
   }
 
-  listPosiciones(clave='', nombre='') {
+  listPosiciones(clave = '', nombre = '', activo?) {
     const url = `${this.URL_TERMINADO}/ObtienePosicionT`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams();
@@ -28,7 +28,17 @@ export class PosicionTerminadoService {
     if (nombre !== '') {
       params = params.append('Nombre', nombre);
     }
+    if (activo) {
+      params = params.append('Activo', activo);
+    }
     return this._http.get(url, {headers, params});
+  }
+
+  deletePosicion(id) {
+    const url = `${this.URL_TERMINADO}/Posicion`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('ID', id);
+    return this._http.delete(url, {headers, params});
   }
 
   getPosicion(id) {
@@ -49,6 +59,6 @@ export class PosicionTerminadoService {
     const url = `${this.URL_TERMINADO}/ActivaInactivaPosicionT`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);
-    return this._http.get(url, {headers, params});
+    return this._http.put(url, null, {headers, params});
   }
 }

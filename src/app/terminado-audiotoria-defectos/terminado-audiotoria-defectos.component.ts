@@ -86,10 +86,10 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
 
     const elems = document.querySelectorAll('.modal');
     const instances = M.Modal.init(elems, {dismissible: false});
-    const defectos$ = this._defectoTerminadoService.listDefectos();
-    const operaciones$ = this._operacionTerminadoService.listOperaciones();
-    const posiciones$ = this._posicionTerminadoService.listPosiciones();
-    const origenes$ = this._origenTerminadoService.listOrigenes();
+    const defectos$ = this._defectoTerminadoService.listDefectos('', '', 'True');
+    const operaciones$ = this._operacionTerminadoService.listOperaciones('', '', 'True');
+    const posiciones$ = this._posicionTerminadoService.listPosiciones('', '', 'True');
+    const origenes$ = this._origenTerminadoService.listOrigenes('', '', 'True');
 
     this.cargarAuditorias();
 
@@ -129,7 +129,7 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
       'Origen': new FormControl('', [Validators.required]),
       'Cantidad': new FormControl('', [Validators.required]),
       'Imagen': new FormControl(),
-      'Compostura': new FormControl(true, [Validators.required]),
+      'Compostura': new FormControl(null, [Validators.required]),
       'Nota': new FormControl(),
       'Archivo': new FormControl(),
       'NombreArchivo': new FormControl(),
@@ -189,7 +189,7 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
         'IdOperacion': detalle.Defecto.ID,
         'Revisado': false,
         'Compostura': detalle.Compostura,
-        'cantidad': detalle.Cantidad,
+        'cantidad': +detalle.Cantidad,
         'Imagen': detalle.Imagen,
         'Nota': detalle.Nota,
         'Archivo': detalle.Archivo
@@ -250,7 +250,7 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
             this.cargarAuditorias();
             this.reset();
           },
-          error => this._toast.error('No se agrego correctamente el cierre de auditoría', '')
+          error => this._toast.error('Error al conectar a la base de datos', '')
         );
     } else {
       this._toast.warning('La auditoría debe contener al menos un detalle', '');

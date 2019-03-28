@@ -63,6 +63,14 @@ import { QualityPageComponent } from './pages/quality-page/quality-page.componen
 import { CalidadAuditoriaComponent } from './calidad-auditoria/calidad-auditoria.component';
 import { CalidadConsultaAuditoriaComponent } from './calidad-consulta-auditoria/calidad-consulta-auditoria.component';
 import { TerminadoConsultaAuditoriaComponent } from './terminado-consulta-auditoria/terminado-consulta-auditoria.component';
+import {DigitOnlyModule} from '@uiowa/digit-only';
+
+import { registerLocaleData } from '@angular/common';
+import localeMx from '@angular/common/locales/es-MX';
+import { NumberFormatPipe } from './pipes/number-format.pipe';
+
+// the second parameter 'fr' is optional
+registerLocaleData(localeMx);
 
 @NgModule({
   declarations: [
@@ -118,6 +126,7 @@ import { TerminadoConsultaAuditoriaComponent } from './terminado-consulta-audito
     CalidadAuditoriaComponent,
     CalidadConsultaAuditoriaComponent,
     TerminadoConsultaAuditoriaComponent,
+    NumberFormatPipe,
   ],
   entryComponents: [
     AddEditOperacionTerminadoComponent
@@ -131,6 +140,7 @@ import { TerminadoConsultaAuditoriaComponent } from './terminado-consulta-audito
     HttpClientModule,
     AngularFontAwesomeModule,
     DataTablesModule,
+    DigitOnlyModule,
     ToastrModule.forRoot({
       timeOut: 3000,
       positionClass: 'toast-bottom-right',

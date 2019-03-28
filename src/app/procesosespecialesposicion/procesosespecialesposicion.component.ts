@@ -28,13 +28,13 @@ export class ProcesosespecialesposicionComponent implements OnInit {
   GetPosicionProcesosEspeciales() {
     let sOptions = '';
     let _request = '';
-    if ($('#CLAVE_CORTADOR').val() !== '' && $('#NOMBRE_CORTADOR').val() === '') {
-      _request += '?Clave=' +  $('#CLAVE_CORTADOR').val();
-    } else if ($('#NOMBRE_CORTADOR').val() !== '' && $('#CLAVE_CORTADOR').val() === '') {
-      _request += '?Nombre=' +  $('#NOMBRE_CORTADOR').val();
-    } else {
-      _request += '?Nombre=' +  $('#NOMBRE_CORTADOR').val() + '?Clave=' +  $('#CLAVE_CORTADOR').val();
-    }
+    // if ($('#CLAVE_CORTADOR').val() !== '' && $('#NOMBRE_CORTADOR').val() === '') {
+    //   _request += '?Clave=' +  $('#CLAVE_CORTADOR').val();
+    // } else if ($('#NOMBRE_CORTADOR').val() !== '' && $('#CLAVE_CORTADOR').val() === '') {
+    //   _request += '?Nombre=' +  $('#NOMBRE_CORTADOR').val();
+    // } else {
+    //   _request += '?Nombre=' +  $('#NOMBRE_CORTADOR').val() + '?Clave=' +  $('#CLAVE_CORTADOR').val();
+    // }
     $.ajax({
       url: Globals.UriRioSulApi + 'ProcesosEspeciales/ObtienePosicion' + _request,
       dataType: 'json',
@@ -56,7 +56,7 @@ export class ProcesosespecialesposicionComponent implements OnInit {
             } else {
               sOptions += '<td style="text-align: center">NO</td>';
             }
-            if (json.Vst_Cortadores[i].Activo === true) {
+            if (json.Vst_ProcesosEspeciales[i].Activo === true) {
               // tslint:disable-next-line:max-line-length
               sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_ProcesosEspeciales[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnablePosicionProcesosEspeciales" data-tooltiped="Activa / Inactiva la posición del cortador seleccionado"><strong><u>Inactivar</u></strong></a></td>';
             } else {

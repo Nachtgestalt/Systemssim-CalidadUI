@@ -7,6 +7,7 @@ import {OperacionesService} from '../services/terminado/operaciones.service';
 
 import 'jquery';
 import {Router} from '@angular/router';
+import swal from 'sweetalert';
 declare var $: any;
 
 @Component({
@@ -220,6 +221,10 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
             this._toast.success('Se inactivó correctamente la operación', '');
             $('#modalEnableOperacionTerminado').modal('close');
             this.getOperacionesTerminado();
+          } else {
+            const mensaje = res.Hecho.split(',');
+            this._toast.warning(mensaje[0], mensaje[2]);
+            $('#modalEnableOperacionTerminado').modal('close');
           }
         },
         error1 => {
@@ -227,6 +232,46 @@ export class TerminadoOperacionesComponent implements OnInit, OnDestroy, AfterVi
           this._toast.error('No se pudo establecer conexión a la base de datos', '');
         }
       );
+  }
+
+  eliminar(operacion) {
+    console.log('eliminar: ', operacion);
+    swal({
+      text: '¿Estas seguro de eliminar esta operación?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._terminadoOperacionesService.deleteOperacion(operacion.ID)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Operación eliminada con exito', '');
+                  this.getOperacionesTerminado();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
   }
 
   cambiarID(id) {

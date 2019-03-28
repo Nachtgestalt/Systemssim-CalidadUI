@@ -138,6 +138,11 @@ pr-3 {
   font-weight: bold;
 }
 
+.alinear-der {
+  text-align: right !important;
+}
+
+
 hr.border {
   border: 1px solid black;
 }

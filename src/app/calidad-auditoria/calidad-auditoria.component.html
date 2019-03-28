@@ -218,19 +218,31 @@
       </div>
       <div class="row">
         <div class="input-field col s4">
-          <input id="recuperadas" class="validate" type="number" style="text-align: right;"
+          <input id="recuperadas" class="validate" type="text" style="text-align: right;"
+                 inputmode="numeric" pattern="[0-9]*" digitOnly
                  formControlName="Recup"/>
           <label for="recuperadas">Pzas Recuperadas</label>
+          <small style="float: right">
+            {{form.controls['Recup'].value ? (form.controls['Recup'].value | numberFormat) : ''}}
+          </small>
         </div>
         <div class="input-field col s4">
-          <input id="criterio" class="validate" type="number" style="text-align: right;"
+          <input id="criterio" class="validate" type="text" style="text-align: right;"
+                 inputmode="numeric" pattern="[0-9]*" digitOnly
                  formControlName="Criterio"/>
           <label for="criterio">Pzas Criterio</label>
+          <small style="float: right">
+            {{form.controls['Criterio'].value ? (form.controls['Criterio'].value | numberFormat) : ''}}
+          </small>
         </div>
         <div class="input-field col s4">
-          <input id="segundas" class="validate" type="number" style="text-align: right;"
+          <input id="segundas" class="validate" type="text" style="text-align: right;"
+                 inputmode="numeric" pattern="[0-9]*" digitOnly
                  formControlName="Fin"/>
           <label for="segundas">2das Fin</label>
+          <small style="float: right">
+            {{form.controls['Fin'].value ? (form.controls['Fin'].value | numberFormat) : ''}}
+          </small>
         </div>
       </div>
       <div class="row">
@@ -306,9 +318,9 @@
             <td>{{item.Operacion.Nombre}}</td>
             <td>{{item.Posicion.Nombre}}</td>
             <td>{{item.Origen.Nombre}}</td>
-            <td>{{item.Recup}}</td>
-            <td>{{item.Criterio}}</td>
-            <td>{{item.Fin}}</td>
+            <td class="alinear-der">{{item.Recup | numberFormat}}</td>
+            <td class="alinear-der">{{item.Criterio | numberFormat}}</td>
+            <td class="alinear-der">{{item.Fin | numberFormat}}</td>
             <td>
               <img [src]="item.Imagen" alt="imagen" style="width:40px;height:40px;"
                    *ngIf="item.Imagen !== null">

@@ -22,6 +22,7 @@ export class LavanderiadefectosComponent implements OnInit {
     $('#modalEditDefectoLavanderia').modal();
     $('#modalEnableDefectoLavanderia').modal();
     $('#lblModulo').text('Lavandería - Defectos');
+    this.GetDefectosLavanderia();
   }
 
   GetDefectosLavanderia() {
@@ -43,24 +44,24 @@ export class LavanderiadefectosComponent implements OnInit {
       success: function (json) {
         if (json.Message.IsSuccessStatusCode) {
           let index = 1;
-          for (let i = 0; i < json.Vst_Cortadores.length; i++) {
+          for (let i = 0; i < json.Vst_Lavanderia.length; i++) {
             sOptions += '<tr>';
             // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(' + json.Vst_Cortadores[i].ID + '); DisposeEditDefectoCortador(); GetInfoDefectoLavanderia();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditDefectoCortador" data-position="bottom" data-tooltip="Edita el defecto  seleccionado"><i class="material-icons right">edit</i></a></td>';
+            sOptions += '<td><a onclick="javascript: SetId(' + json.Vst_Lavanderia[i].ID + '); DisposeEditDefectoCortador(); GetInfoDefectoLavanderia();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditDefectoCortador" data-position="bottom" data-tooltip="Edita el defecto  seleccionado"><i class="material-icons right">edit</i></a></td>';
             sOptions += '<td>' + index + '</td>';
-            sOptions += '<td>' + json.Vst_Cortadores[i].Clave + '</td>';
-            sOptions += '<td>' + json.Vst_Cortadores[i].Nombre + '</td>';
-            if (json.Vst_Cortadores[i].Activo) {
+            sOptions += '<td>' + json.Vst_Lavanderia[i].Clave + '</td>';
+            sOptions += '<td>' + json.Vst_Lavanderia[i].Nombre + '</td>';
+            if (json.Vst_Lavanderia[i].Activo) {
               sOptions += '<td style="text-align: center">SI</td>';
             } else {
               sOptions += '<td style="text-align: center">NO</td>';
             }
-            if (json.Vst_Cortadores[i].Activo === true) {
+            if (json.Vst_Lavanderia[i].Activo === true) {
               // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Cortadores[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableDefectoCortador" data-tooltiped="Activa / Inactiva el cortador seleccionado"><strong><u>Inactivar</u></strong></a></td>';
+              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Lavanderia[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableDefectoCortador" data-tooltiped="Activa / Inactiva el cortador seleccionado"><strong><u>Inactivar</u></strong></a></td>';
             } else {
               // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Cortadores[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableDefectoCortador" data-tooltiped="Activa / Inactiva el cortador seleccionado"><strong><u>Activar</u></strong></a></td>';
+              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Lavanderia[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableDefectoCortador" data-tooltiped="Activa / Inactiva el cortador seleccionado"><strong><u>Activar</u></strong></a></td>';
             }
             sOptions += '</tr>';
             index ++;

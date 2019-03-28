@@ -18,7 +18,7 @@ export class OrigenTerminadoService {
     return this._http.post(url, body, {headers});
   }
 
-  listOrigenes(clave='', nombre='') {
+  listOrigenes(clave = '', nombre = '', activo?) {
     const url = `${this.URL_TERMINADO}/ObtieneOrigenT`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams();
@@ -28,7 +28,17 @@ export class OrigenTerminadoService {
     if (nombre !== '') {
       params = params.append('Nombre', nombre);
     }
+    if (activo) {
+      params = params.append('Activo', activo);
+    }
     return this._http.get(url, {headers, params});
+  }
+
+  deleteOrigen(id) {
+    const url = `${this.URL_TERMINADO}/Origen`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('ID', id);
+    return this._http.delete(url, {headers, params});
   }
 
   getOrigen(id) {
@@ -49,6 +59,6 @@ export class OrigenTerminadoService {
     const url = `${this.URL_TERMINADO}/ActivaInactivaOrigenT`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);
-    return this._http.get(url, {headers, params});
+    return this._http.put(url, null, {headers, params});
   }
 }

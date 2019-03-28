@@ -67,7 +67,7 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
   tipoDetalleAud = null;
   dataSourceDetalle: MatTableDataSource<any>;
   displayedColumnsDetalle: string[] = [
-    'Defecto', 'Operacion', 'Posicion', 'Origen', 'Cantidad', 'Imagen', 'Nota', 'Archivo'];
+    'Defecto', 'Operacion', 'Posicion', 'Origen', 'Cantidad', 'Imagen', 'Nota'];
   updateField = new Subject();
 
   constructor(private _defectoTerminadoService: TerminadoService,
@@ -440,7 +440,7 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
             .subscribe(
               (res: any) => {
                 console.log(res);
-                if (res.Response.StatusCode !== 409) {
+                if (res.Response.IsSuccessStatusCode) {
                   this._toast.success('Auditoria eliminada con exito', '');
                   this.buscar();
                 } else {
@@ -480,6 +480,33 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
       });
   }
 
+  openImage(imagen) {
+    const base64ImageData = imagen;
+    let extension = this.base64MimeType(imagen);
+    console.log(extension);
+    const contentType = `image/${extension}`;
+
+    const byteCharacters = atob(base64ImageData.substr(`data:${contentType};base64,`.length));
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+      const slice = byteCharacters.slice(offset, offset + 1024);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+    const blob = new Blob(byteArrays, {type: contentType});
+    const blobUrl = URL.createObjectURL(blob);
+
+    window.open(blobUrl, '_blank');
+  }
+
   closeModalDetalle() {
     const modalDetalle = document.querySelector('#modal-detalle');
     const modalInstance = M.Modal.getInstance(modalDetalle);
@@ -503,6 +530,14 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
     });
 
     reader.readAsDataURL(file);
+  }
+
+  editar(i) {
+    let item = this.Det[i];
+    console.log(item);
+    // this.Det.splice(index, 1);
+    // this.items.splice(index, 1);
+    // this.dtTrigger.next();
   }
 
   openPDF(data, tipo?) {

@@ -52,7 +52,7 @@
     function SetId(Id) {
       $('#HDN_ID').val(Id);
     }
-    
+
     function GetClientsTable() {
       //debugger;
       var Tbody = document.getElementById("tbdy_Clientes_Ref");
@@ -230,7 +230,7 @@
             });
             $('.tooltipped').tooltip();
           }
-        }, 
+        },
         error: function () {
           console.log('No se pudo establecer conexión a la base de datos');
         }
@@ -465,7 +465,7 @@
               sOptions += '<td>' + json.Vst_Oper_Conf[i].Nombre + '</td>';
               sOptions += '</tr>';
               Index++;
-            }            
+            }
             $('#tlbOperacionEdtDefecto').html('');
             $('#tlbOperacionEdtDefecto').html('<tbody id="tdby_edt_Posicion">' + sOptions + '</tbody>');
             $('#tlbOperacionEdtDefecto').append('<thead><th>No.</th><th>Clave Operación</th><th>Nombre Operación</th></thead>');
@@ -513,7 +513,7 @@
               sOptions += '<td>' + json.Vst_Oper_Conf[i].Nombre + '</td>';
               sOptions += '</tr>';
               Index++;
-            }            
+            }
             $('#tlbOperacionEdtDefecto').html('');
             $('#tlbOperacionEdtDefecto').html('<tbody id="tdby_edt_Posicion">' + sOptions + '</tbody>');
             $('#tlbOperacionEdtDefecto').append('<thead><th>No.</th><th>Clave Defecto</th><th>Nombre Defecto</th></thead>');
@@ -561,7 +561,7 @@
               sOptions += '<td>' + json.Vst_Oper_Conf[i].Nombre + '</td>';
               sOptions += '</tr>';
               Index++;
-            }            
+            }
             $('#tlbOperacionEdtDefecto').html('');
             $('#tlbOperacionEdtDefecto').html('<tbody id="tdby_edt_Posicion">' + sOptions + '</tbody>');
             $('#tlbOperacionEdtDefecto').append('<thead><th>No.</th><th>Clave Defecto</th><th>Nombre Defecto</th></thead>');
@@ -849,7 +849,7 @@
 
     function OnChangeClientOT(IdClienteRef) {
       // debugger;
-      var sOptions = "";  
+      var sOptions = "";
       var DDl = $("#ddlOT");
       if (IdClienteRef != "0") {
         $.ajax({
@@ -875,7 +875,7 @@
           error: function () {
             console.log('No se ha podido establecer conexión');
           }
-        }); 
+        });
       }
     }
 
@@ -937,7 +937,7 @@
           error: function () {
             console.log('No se ha podido establecer conexión');
           }
-      }); 
+      });
       }
     }
 
@@ -967,7 +967,7 @@
           }
       });
     }
-  
+
     function GetAuditoriaCortePorId(IdAuditoriaCorte) {
       $.ajax({
         url: UriRioSulApi + 'Cortadores/AuditoriaCorte/ObtieneAuditoriaCortePorId?IdAuditoria=' + IdAuditoriaCorte,
@@ -977,7 +977,7 @@
           async: false,
           success: function (json) {
             if (json.Message.IsSuccessStatusCode) {
-              
+
             }
           },
           error: function () {

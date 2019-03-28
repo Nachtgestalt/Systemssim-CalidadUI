@@ -7,6 +7,7 @@ import {PosicionTerminadoService} from '../services/terminado/posicion-terminado
 import 'jquery';
 import {OrigenTerminadoService} from '../services/terminado/origen-terminado.service';
 import {Router} from '@angular/router';
+import swal from 'sweetalert';
 declare var $: any;
 
 @Component({
@@ -222,6 +223,10 @@ export class TerminadoOrigenComponent implements OnInit, OnDestroy, AfterViewIni
             this._toast.success('Se inactivó correctamente el origen', '');
             $('#modalEnableOrigenTerminado').modal('close');
             this.getOrigenesTerminado();
+          } else {
+            const mensaje = res.Hecho.split(',');
+            this._toast.warning(mensaje[0], mensaje[2]);
+            $('#modalEnablePosicionTerminado').modal('close');
           }
         },
         error1 => {
@@ -230,6 +235,47 @@ export class TerminadoOrigenComponent implements OnInit, OnDestroy, AfterViewIni
         }
       );
   }
+
+  eliminar(origen) {
+    console.log('eliminar: ', origen);
+    swal({
+      text: '¿Estas seguro de eliminar este origen?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._terminadoOrigenService.deleteOrigen(origen.ID)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Origen eliminado con exito', '');
+                  this.getOrigenesTerminado();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
+  }
+
 
   cambiarID(id) {
     this.idOrigen = id;

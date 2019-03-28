@@ -131,7 +131,7 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
       'Recup': new FormControl(),
       'Criterio': new FormControl(),
       'Fin': new FormControl(),
-      'Archivo': new FormControl(),
+      'Archivo': new FormControl(''),
       'NombreArchivo': new FormControl(),
     });
   }
@@ -192,9 +192,9 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
         // 'cantidad': detalle.Cantidad,
         'Imagen': detalle.Imagen,
         'Nota': detalle.Nota,
-        'Recup': detalle.Recup,
-        'Criterio': detalle.Criterio,
-        'Fin': detalle.Fin,
+        'Recup': +detalle.Recup,
+        'Criterio': +detalle.Criterio,
+        'Fin': +detalle.Fin,
         'Archivo': detalle.Archivo
       };
       this.Det.push(detalleItem);
@@ -242,10 +242,11 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
         'IdUsuario': this.Json_Usuario.ID,
         'Det': this.Det
       };
+      console.log(data);
       this._auditoriaCalidadService.createAuditoria(data)
         .subscribe(
           res => {
-            this._toast.success('Se agrego correctamente auditoria terminado', '');
+            this._toast.success('Se agrego correctamente auditoria calidad', '');
             console.log(res);
             const elem = document.querySelector('#modalNewAuditoria');
             const instance = M.Modal.getInstance(elem);
@@ -255,7 +256,7 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
           },
           error => {
             console.log(error);
-            this._toast.error('No se agrego correctamente el cierre de auditoría', '')
+            this._toast.error('Error al conectar a la base de datos', '');
           }
         );
     } else {

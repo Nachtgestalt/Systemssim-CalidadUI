@@ -208,38 +208,38 @@
 
       <!-- Pzas Recup. -->
       <ng-container matColumnDef="Pzas Recup.">
-        <th mat-header-cell *matHeaderCellDef> Pzas Recup.</th>
-        <td mat-cell *matCellDef="let element" (dblclick)="openModalDetalle(element)"> {{element.pzas_r}} </td>
+        <th mat-header-cell *matHeaderCellDef class="alinear-der"> Pzas Recup.</th>
+        <td mat-cell *matCellDef="let element" (dblclick)="openModalDetalle(element)" class="right-align"> {{element.pzas_r | numberFormat}} </td>
       </ng-container>
 
       <!-- Pzas Criterio Column -->
       <ng-container matColumnDef="Pzas Criterio">
-        <th mat-header-cell *matHeaderCellDef> Pzas Criterio</th>
-        <td mat-cell *matCellDef="let element" (dblclick)="openModalDetalle(element)"> {{element.pzas_c}} </td>
+        <th mat-header-cell *matHeaderCellDef class="alinear-der"> Pzas Criterio</th>
+        <td mat-cell *matCellDef="let element" (dblclick)="openModalDetalle(element)" class="right-align"> {{element.pzas_c | numberFormat}} </td>
       </ng-container>
 
       <!-- 2das Finales Column -->
       <ng-container matColumnDef="2das Finales">
-        <th mat-header-cell *matHeaderCellDef> 2das Finales</th>
-        <td mat-cell *matCellDef="let element" (dblclick)="openModalDetalle(element)"> {{element.pzas_2}} </td>
+        <th mat-header-cell *matHeaderCellDef class="alinear-der"> 2das Finales</th>
+        <td mat-cell *matCellDef="let element" (dblclick)="openModalDetalle(element)" class="right-align"> {{element.pzas_2 | numberFormat}} </td>
       </ng-container>
 
       <!-- Totales Finales Column -->
       <ng-container matColumnDef="Totales">
-        <th mat-header-cell *matHeaderCellDef> Totales</th>
-        <td mat-cell *matCellDef="let element"> {{element.total}} </td>
+        <th mat-header-cell *matHeaderCellDef class="alinear-der"> Totales</th>
+        <td mat-cell *matCellDef="let element" class="right-align"> {{element.total | numberFormat}} </td>
       </ng-container>
 
       <!-- Status Finales Column -->
       <ng-container matColumnDef="Status">
-        <th mat-header-cell *matHeaderCellDef> Status</th>
-        <td mat-cell *matCellDef="let element"> {{element.status}} </td>
+        <th mat-header-cell *matHeaderCellDef class="alinear-der"> Status</th>
+        <td mat-cell *matCellDef="let element" class="alinear-der"> {{element.status}} </td>
       </ng-container>
 
       <!-- Status Finales Column -->
       <ng-container matColumnDef="Opciones">
         <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let element">
+        <td mat-cell *matCellDef="let element" class="alinear-der">
           <button type="button" name="btnAddCortador"
                   class="btn light-blue darken-4 modal-trigger mr-3"
                   data-target="modalNewAuditoria"
@@ -377,19 +377,31 @@
       </div>
       <div class="row">
         <div class="input-field col s4">
-          <input id="recuperadas" class="validate" type="number" style="text-align: right;"
+          <input id="recuperadas" class="validate" type="text" style="text-align: right;"
+                 inputmode="numeric" pattern="[0-9]*" digitOnly
                  formControlName="Recup"/>
           <label for="recuperadas">Pzas Recuperadas</label>
+          <small style="float: right">
+            {{form.controls['Recup'].value ? (form.controls['Recup'].value | numberFormat) : ''}}
+          </small>
         </div>
         <div class="input-field col s4">
-          <input id="criterio" class="validate" type="number" style="text-align: right;"
+          <input id="criterio" class="validate" type="text" style="text-align: right;"
+                 inputmode="numeric" pattern="[0-9]*" digitOnly
                  formControlName="Criterio"/>
           <label for="criterio">Pzas Criterio</label>
+          <small style="float: right">
+            {{form.controls['Criterio'].value ? (form.controls['Criterio'].value | numberFormat) : ''}}
+          </small>
         </div>
         <div class="input-field col s4">
-          <input id="segundas" class="validate" type="number" style="text-align: right;"
+          <input id="segundas" class="validate" type="text" style="text-align: right;"
+                 inputmode="numeric" pattern="[0-9]*" digitOnly
                  formControlName="Fin"/>
           <label for="segundas">2das Fin</label>
+          <small style="float: right">
+            {{form.controls['Fin'].value ? (form.controls['Fin'].value | numberFormat) : ''}}
+          </small>
         </div>
       </div>
       <div class="row">
@@ -467,12 +479,14 @@
             <td>{{item.Operacion}}</td>
             <td>{{item.Posicion}}</td>
             <td>{{item.Origen}}</td>
-            <td>{{item.Recup}}</td>
-            <td>{{item.Criterio}}</td>
-            <td>{{item.Fin}}</td>
+            <td class="alinear-der">{{item.Recup | numberFormat}}</td>
+            <td class="alinear-der">{{item.Criterio | numberFormat}}</td>
+            <td class="alinear-der">{{item.Fin | numberFormat}}</td>
             <td>
               <img [src]="item.Aud_Imagen" alt="imagen" style="width:40px;height:40px;"
-                   *ngIf="item.Aud_Imagen !== null">
+                   class="cursor"
+                   matTooltip="Descargar imagen"
+                   *ngIf="item.Aud_Imagen !== null && item.Aud_Imagen !== ''" (click)="openImage(item.Aud_Imagen)">
             </td>
             <td>{{item.Nota}}</td>
             <td></td>
@@ -595,48 +609,48 @@
 
         <!-- PZAS.RECUP Column -->
         <ng-container matColumnDef="Recup">
-          <th mat-header-cell *matHeaderCellDef> PZAS.RECUP</th>
-          <td mat-cell *matCellDef="let element"> {{element.Recup}} </td>
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> PZAS.RECUP</th>
+          <td mat-cell *matCellDef="let element" class="right-align"> {{element.Recup | numberFormat}} </td>
           <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
         <!-- PZAS.CRIT Column -->
         <ng-container matColumnDef="Criterio">
-          <th mat-header-cell *matHeaderCellDef> PZAS.CRIT</th>
-          <td mat-cell *matCellDef="let element"> {{element.Criterio}} </td>
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> PZAS.CRIT</th>
+          <td mat-cell *matCellDef="let element" class="right-align"> {{element.Criterio | numberFormat}} </td>
           <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold"> TOTAL</td>
         </ng-container>
 
         <!-- 2DAS FIN Column -->
         <ng-container matColumnDef="2das">
-          <th mat-header-cell *matHeaderCellDef> 2DAS FIN</th>
-          <td mat-cell *matCellDef="let element"> {{element.Fin}} </td>
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> 2DAS FIN</th>
+          <td mat-cell *matCellDef="let element" class="right-align"> {{element.Fin |numberFormat}} </td>
           <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold"> {{totalDetall}} </td>
         </ng-container>
 
         <!-- Imagen Column -->
         <ng-container matColumnDef="Imagen">
-          <th mat-header-cell *matHeaderCellDef> IMAGEN</th>
-          <td mat-cell *matCellDef="let element">
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> IMAGEN</th>
+          <td mat-cell *matCellDef="let element" class="alinear-der">
             <img [src]="element.Aud_Imagen" alt="imagen" style="width:40px;height:40px;"
                  class="cursor"
-                 matTooltip="Descargar imagen"
-                 *ngIf="element.Aud_Imagen !== null" (click)="openPDF(element.Aud_Imagen, 'imagen')">
+                 matTooltip="Ver imagen"
+                 *ngIf="element.Aud_Imagen !== null && element.Aud_Imagen !== ''" (click)="openImage(element.Aud_Imagen)">
           </td>
           <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
         <!-- Nota column-->
         <ng-container matColumnDef="Nota">
-          <th mat-header-cell *matHeaderCellDef> NOTA</th>
-          <td mat-cell *matCellDef="let element"> {{element.Nota}} </td>
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> NOTA</th>
+          <td mat-cell *matCellDef="let element" class="alinear-der"> {{element.Nota}} </td>
           <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
         <!-- Archivo Column -->
         <ng-container matColumnDef="Archivo">
-          <th mat-header-cell *matHeaderCellDef> ARCHIVO</th>
-          <td mat-cell *matCellDef="let element">
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> ARCHIVO</th>
+          <td mat-cell *matCellDef="let element" class="alinear-der">
             <i class="material-icons prefix cursor" *ngIf="element.Archivo"
                (click)="openPDF(element.Archivo, 'archivo')"
                matTooltip="Descargar archivo">

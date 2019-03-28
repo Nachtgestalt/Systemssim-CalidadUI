@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { Globals } from '../Globals';
+import {Component, OnInit} from '@angular/core';
+import {Globals} from '../Globals';
+
 declare var $: any;
 declare var jQuery: any;
 import 'jquery';
-import { ToastrService } from '../../../node_modules/ngx-toastr';
+import {ToastrService} from '../../../node_modules/ngx-toastr';
 
 @Component({
   selector: 'app-auditoriaprocesosespeciales',
@@ -14,7 +15,8 @@ export class AuditoriaprocesosespecialesComponent implements OnInit {
 
   constructor(
     private _toast: ToastrService
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
     $('.tooltipped').tooltip();
@@ -24,6 +26,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit {
     this.GetDefectos();
     this.GetOperaciones();
     this.GetPosicion();
+    this.GetAuditoriaProcEsp();
     $('#lblModulo').text('Procesos Especiales - Auditoría');
   }
 
@@ -59,11 +62,11 @@ export class AuditoriaprocesosespecialesComponent implements OnInit {
   ValidateAddProcEspAuditoria() {
     if ($('#ddlCliente')[0].value === '0') {
       this._toast.warning('Se debe seleccionar un cliente valido', '');
-    } else if ($('#ddlOT').val() === '0' ) {
+    } else if ($('#ddlOT').val() === '0') {
       this._toast.warning('Se debe seleccionar una orden de trabajo valida', '');
     } else if ($('#ddlDefecto')[0].value === '0') {
       this._toast.warning('Se debe seleccionar una posición valida', '');
-    }  else if ($('#AUDIT_CANTIDAD')[0].value === '' || $('#AUDIT_CANTIDAD')[0].value <= 0) {
+    } else if ($('#AUDIT_CANTIDAD')[0].value === '' || $('#AUDIT_CANTIDAD')[0].value <= 0) {
       this._toast.warning('Se debe ingresar una cantidad valida', '');
     } else if ($('#ddlOperacion')[0].value === '0') {
       this._toast.warning('Se debe seleccionar una operación valida', '');
@@ -92,7 +95,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit {
       sOptions += '<tr>';
       sOptions += '<td>' + _iindex + '</td>';
       sOptions += '<td style="display: none;">' + $('#ddlPosicion')[0].value + '</td>';
-      sOptions += '<td>' +  $('#ddlPosicion option:selected').text() + '</td>';
+      sOptions += '<td>' + $('#ddlPosicion option:selected').text() + '</td>';
       sOptions += '<td style="display: none;">' + $('#ddlOperacion')[0].value + '</td>';
       sOptions += '<td>' + $('#ddlOperacion option:selected').text() + '</td>';
       sOptions += '<td style="display: none;">' + $('#ddlDefecto')[0].value + '</td>';
@@ -118,7 +121,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit {
           'excelHtml5',
           'csvHtml5',
           'pdfHtml5'
-         ]
+        ]
       });
       $('.tooltipped').tooltip();
       this.DisposeNewProcesosEspeciales();
@@ -140,10 +143,10 @@ export class AuditoriaprocesosespecialesComponent implements OnInit {
             if (i === 0) {
               $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
               // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[i].ID ).text(json.Vst_ProcesosEspeciales[i].Nombre));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[i].ID).text(json.Vst_ProcesosEspeciales[i].Nombre));
             } else {
               // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[i].ID ).text(json.Vst_ProcesosEspeciales[i].Nombre));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[i].ID).text(json.Vst_ProcesosEspeciales[i].Nombre));
             }
           }
           $(ddl).formSelect();
@@ -199,9 +202,9 @@ export class AuditoriaprocesosespecialesComponent implements OnInit {
           for (let index = 0; index < json.Vst_ProcesosEspeciales.length; index++) {
             if (index === 0) {
               $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Confeccion[index].ID).text(json.Vst_Confeccion[index].Nombre));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[index].ID).text(json.Vst_Confeccion[index].Nombre));
             } else {
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Confeccion[index].ID).text(json.Vst_Confeccion[index].Nombre));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[index].ID).text(json.Vst_Confeccion[index].Nombre));
             }
           }
           $(ddl).formSelect();
@@ -315,7 +318,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit {
               'excelHtml5',
               'csvHtml5',
               'pdfHtml5'
-             ]
+            ]
           });
           $('.tooltipped').tooltip();
         }
@@ -331,20 +334,20 @@ export class AuditoriaprocesosespecialesComponent implements OnInit {
     $.ajax({
       // tslint:disable-next-line:max-line-length
       url: Globals.UriRioSulApi + 'AuditoriaCorte/ObtieneOrdenesTrabajoDynamics?IdClienteRef=' + $('#ddlCliente').val() + '&OrdenT=' + $('#ddlOT').val(),
-          dataType: 'json',
-          contents: 'application/json; charset=utf-8',
-          method: 'get',
-          async: false,
-          success: function (json) {
-            if (json.Message.IsSuccessStatusCode) {
-              for (let index = 0; index < json.OrdenTrabajo.length; index++) {
-                Result = true;
-              }
-            }
-          },
-          error: function () {
-            console.log('No se ha podido establecer conexión');
+      dataType: 'json',
+      contents: 'application/json; charset=utf-8',
+      method: 'get',
+      async: false,
+      success: function (json) {
+        if (json.Message.IsSuccessStatusCode) {
+          for (let index = 0; index < json.OrdenTrabajo.length; index++) {
+            Result = true;
           }
+        }
+      },
+      error: function () {
+        console.log('No se ha podido establecer conexión');
+      }
     });
     return Result;
   }

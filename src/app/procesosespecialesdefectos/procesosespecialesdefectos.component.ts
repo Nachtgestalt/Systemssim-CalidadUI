@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { Globals } from '../Globals';
+import {Component, OnInit} from '@angular/core';
+import {Globals} from '../Globals';
+
 declare var $: any;
 declare var jQuery: any;
 import 'jquery';
-import { ToastrService } from '../../../node_modules/ngx-toastr';
+import {ToastrService} from '../../../node_modules/ngx-toastr';
 
 @Component({
   selector: 'app-procesosespecialesdefectos',
@@ -14,7 +15,8 @@ export class ProcesosespecialesdefectosComponent implements OnInit {
 
   constructor(
     private _toast: ToastrService
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
     $('.tooltipped').tooltip();
@@ -28,13 +30,13 @@ export class ProcesosespecialesdefectosComponent implements OnInit {
   GetDefectosProcesosEspeciales() {
     let sOptions = '';
     let _request = '';
-    if ($('#CLAVE_PROCESO_ESPECIAL').val() !== '' && $('#NOMBRE_PROCESO_ESPECIAL').val() === '') {
-      _request += '?Clave=' +  $('#CLAVE_PROCESO_ESPECIAL').val();
-    } else if ($('#NOMBRE_CORTADOR').val() !== '' && $('#CLAVE_PROCESO_ESPECIAL').val() === '') {
-      _request += '?Nombre=' +  $('#NOMBRE_PROCESO_ESPECIAL').val();
-    } else {
-      _request += '?Nombre=' +  $('#NOMBRE_PROCESO_ESPECIAL').val() + '?Clave=' +  $('#CLAVE_PROCESO_ESPECIAL').val();
-    }
+    // if ($('#CLAVE_PROCESO_ESPECIAL').val() !== '' && $('#NOMBRE_PROCESO_ESPECIAL').val() === '') {
+    //   _request += '?Clave=' +  $('#CLAVE_PROCESO_ESPECIAL').val();
+    // } else if ($('#NOMBRE_CORTADOR').val() !== '' && $('#CLAVE_PROCESO_ESPECIAL').val() === '') {
+    //   _request += '?Nombre=' +  $('#NOMBRE_PROCESO_ESPECIAL').val();}
+
+    _request += '?Nombre=' + $('#NOMBRE_PROCESO_ESPECIAL').val() + '?Clave=' + $('#CLAVE_PROCESO_ESPECIAL').val();
+
     $.ajax({
       url: Globals.UriRioSulApi + 'ProcesosEspeciales/ObtieneDefectoProseso' + _request,
       dataType: 'json',
@@ -64,7 +66,7 @@ export class ProcesosespecialesdefectosComponent implements OnInit {
               sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_ProcesosEspeciales[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableDefectoProcesosEspeciales" data-tooltiped="Activa / Inactiva el proceso especial seleccionado"><strong><u>Activar</u></strong></a></td>';
             }
             sOptions += '</tr>';
-            index ++;
+            index++;
           }
           $('#tlbDefectoProcesosEspeciales').html('');
           $('#tlbDefectoProcesosEspeciales').html('<tbody>' + sOptions + '</tbody>');
@@ -84,7 +86,7 @@ export class ProcesosespecialesdefectosComponent implements OnInit {
               'excelHtml5',
               'csvHtml5',
               'pdfHtml5'
-             ]
+            ]
           });
           $('.tooltipped').tooltip();
         }
@@ -154,7 +156,7 @@ export class ProcesosespecialesdefectosComponent implements OnInit {
             Nombre: $('#NOMBRE_NEW_PROCESOS_ESPECIALES').val(),
             Descripcion: $('#DESCRIPCION_NEW_PROCESOS_ESPECIALES').val(),
             Observaciones: $('#OBSERVACIONES_NEW_PROCESOS_ESPECIALES').val(),
-            Imagen:  ($('#blah')[0].src === 'http://placehold.it/180' ? '' : $('#blah')[0].src)
+            Imagen: ($('#blah')[0].src === 'http://placehold.it/180' ? '' : $('#blah')[0].src)
           }),
           success: function (json) {
             if (json.Message.IsSuccessStatusCode) {

@@ -215,14 +215,14 @@
       <ng-container matColumnDef="Composturas">
         <th mat-header-cell *matHeaderCellDef> Composturas</th>
         <td mat-cell *matCellDef="let element"
-            (dblclick)="openModalDetalle(element, 'Compostura')"> {{element.pzas_c}} </td>
+            (dblclick)="openModalDetalle(element, 'Compostura')"> {{element.pzas_c | numberFormat}} </td>
       </ng-container>
 
       <!-- 2das terminado Column-->
       <ng-container matColumnDef="2das">
         <th mat-header-cell *matHeaderCellDef> Sgdas. Term.</th>
         <td mat-cell *matCellDef="let element"
-            (dblclick)="openModalDetalle(element, 'Segundas')"> {{element.pzas_2}} </td>
+            (dblclick)="openModalDetalle(element, 'Segundas')"> {{element.pzas_2 | numberFormat}} </td>
       </ng-container>
 
       <!-- Status Finales Column -->
@@ -233,8 +233,8 @@
 
       <!-- Status Finales Column -->
       <ng-container matColumnDef="Opciones">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let element">
+        <th mat-header-cell *matHeaderCellDef class="alinear-der"></th>
+        <td mat-cell *matCellDef="let element" class="alinear-der">
           <button type="button" name="btnAddCortador"
                   class="btn light-blue darken-4 tooltipped waves-effect waves-light modal-trigger mr-3"
                   data-target="modalNewAuditoria"
@@ -391,9 +391,13 @@
       </div>
       <div class="row">
         <div class="input-field col s6">
-          <input id="cantidad" class="validate" type="number" style="text-align: right;"
-                 formControlName="Cantidad"/>
+          <input id="cantidad" class="validate" type="text" style="text-align: right;"
+                 inputmode="numeric" pattern="[0-9]*"
+                 formControlName="Cantidad" digitOnly/>
           <label for="cantidad">CANTIDAD:</label>
+          <small style="float: right">
+            {{form.controls['Cantidad'].value ? (form.controls['Cantidad'].value | numberFormat) : ''}}
+          </small>
         </div>
       </div>
       <div class="row">
@@ -421,17 +425,6 @@
             </div>
           </div>
         </div>
-        <div class="file-field input-field col s6">
-          <div class="btn">
-            <span>Seleccionar archivo</span>
-            <input type="file" accept="application/pdf"
-                   #fileInput
-                   (change)="processFile(fileInput, false, 'archivo')">
-          </div>
-          <div class="file-path-wrapper">
-            <input class="file-path validate" type="text" formControlName="NombreArchivo">
-          </div>
-        </div>
       </div>
       <br/>
       <div style="text-align: right">
@@ -457,7 +450,7 @@
             <th>CANTIDAD</th>
             <th>IMAGEN</th>
             <th>NOTA</th>
-            <th>ARCHIVO</th>
+<!--            <th>ARCHIVO</th>-->
             <th></th>
           </tr>
           </thead>
@@ -468,13 +461,16 @@
             <td>{{item.Operacion}}</td>
             <td>{{item.Posicion}}</td>
             <td>{{item.Origen}}</td>
-            <td>{{item.Cantidad}}</td>
+            <td style="text-align: right">{{item.Cantidad | numberFormat}}</td>
             <td>
               <img [src]="item.Aud_Imagen" alt="imagen" style="width:40px;height:40px;"
-                   *ngIf="item.Aud_Imagen !== null">
+                   class="cursor"
+                   matTooltip="Ver imagen"
+                   (click)="openImage(item.Aud_Imagen)"
+                   *ngIf="item.Aud_Imagen !== null && item.Aud_Imagen !== ''">
             </td>
             <td>{{item.Nota}}</td>
-            <td></td>
+<!--            <td></td>-->
             <td class="center-align">
               <button class="waves-effect waves-light red darken-4 btn tooltiped bold_sub"
                       *ngIf="otDetalle?.FechaRegistroFin ===null"
@@ -596,7 +592,7 @@
         <!-- PZAS.RECUP Column -->
         <ng-container matColumnDef="Cantidad">
           <th mat-header-cell *matHeaderCellDef> CANTIDAD</th>
-          <td mat-cell *matCellDef="let element"> {{element.Cantidad}} </td>
+          <td mat-cell *matCellDef="let element"> {{element.Cantidad | numberFormat}} </td>
           <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
@@ -606,8 +602,8 @@
           <td mat-cell *matCellDef="let element">
             <img [src]="element.Aud_Imagen" alt="imagen" style="width:40px;height:40px;"
                  class="cursor"
-                 matTooltip="Descargar imagen"
-                 *ngIf="element.Aud_Imagen !== null" (click)="openPDF(element.Aud_Imagen, 'imagen')">
+                 matTooltip="Ver imagen"
+                 *ngIf="element.Aud_Imagen !== null && element.Aud_Imagen !== ''" (click)="openImage(element.Aud_Imagen)">
           </td>
           <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
@@ -616,20 +612,6 @@
         <ng-container matColumnDef="Nota">
           <th mat-header-cell *matHeaderCellDef> NOTA</th>
           <td mat-cell *matCellDef="let element"> {{element.Nota}} </td>
-          <td mat-footer-cell *matFooterCellDef></td>
-        </ng-container>
-
-        <!-- Archivo Column -->
-        <ng-container matColumnDef="Archivo">
-          <th mat-header-cell *matHeaderCellDef> ARCHIVO</th>
-          <td mat-cell *matCellDef="let element">
-            <i class="material-icons prefix cursor" *ngIf="element.Archivo"
-               (click)="openPDF(element)"
-               matTooltip="Descargar archivo">
-              attach_file
-            </i>
-            <p *ngIf="!element.Archivo">No hay archivo</p>
-          </td>
           <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 

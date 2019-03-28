@@ -44,7 +44,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr *ngFor="let origen of origenes; let i = index">
+          <tr *ngFor="let origen of origenes; let i = index" matTooltip="Doble click para eliminar" (dblclick)="eliminar(origen)">
             <td>
               <button class="waves-effect waves-light btn tooltipped modal-trigger"
                       data-target="modalEditOrigenTerminado"

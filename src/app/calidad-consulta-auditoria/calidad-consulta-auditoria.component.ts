@@ -84,7 +84,7 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
               private _reporteService: ReportesService,
               private _toast: ToastrService,
               private domSanitizer: DomSanitizer
-              ) {
+  ) {
   }
 
   ngOnInit() {
@@ -198,7 +198,7 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
       'Recup': new FormControl(),
       'Criterio': new FormControl(),
       'Fin': new FormControl(),
-      'Archivo': new FormControl(),
+      'Archivo': new FormControl(''),
       'NombreArchivo': new FormControl(),
     });
   }
@@ -365,9 +365,9 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
         // 'cantidad': detalle.Cantidad,
         'Imagen': detalle.Imagen,
         'Nota': detalle.Nota,
-        'Recup': detalle.Recup,
-        'Criterio': detalle.Criterio,
-        'Fin': detalle.Fin,
+        'Recup': +detalle.Recup,
+        'Criterio': +detalle.Criterio,
+        'Fin': +detalle.Fin,
         'Archivo': detalle.Archivo
       };
       this.Det.push(detalleItem);
@@ -531,6 +531,33 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
             );
         }
       });
+  }
+
+  openImage(imagen) {
+    const base64ImageData = imagen;
+    let extension = this.base64MimeType(imagen);
+    console.log(extension);
+    const contentType = `image/${extension}`;
+
+    const byteCharacters = atob(base64ImageData.substr(`data:${contentType};base64,`.length));
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+      const slice = byteCharacters.slice(offset, offset + 1024);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+    const blob = new Blob(byteArrays, {type: contentType});
+    const blobUrl = URL.createObjectURL(blob);
+
+    window.open(blobUrl, '_blank');
   }
 
   closeModal() {
