@@ -13,17 +13,9 @@ export class TerminadoService {
 
   createDefecto(defecto) {
     const url = `${this.URL_TERMINADO}/NuevoDefectoTerminado`;
-    const formData: FormData = new FormData();
-    formData.append('IdSubModulo', defecto.IdSubModulo);
-    formData.append('IdUsuario', defecto.IdUsuario);
-    formData.append('Clave', defecto.Clave);
-    formData.append('Nombre', defecto.Nombre);
-    formData.append('Descripcion', defecto.Descripcion);
-    formData.append('Observaciones', defecto.Observaciones);
-    formData.append('Imagen', defecto.Imagen, defecto.Imagen.name);
-    // const body = JSON.stringify(defecto);
-    // const headers = new HttpHeaders().append('content-type', 'application/json');
-    return this._http.post(url, formData);
+    const body = JSON.stringify(defecto);
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.post(url, body,  {headers});
   }
 
   listDefectos(clave = '', nombre = '', activo?) {
@@ -59,10 +51,11 @@ export class TerminadoService {
   }
 
   updateDefecto(defecto) {
+    console.log(defecto);
     const url = `${this.URL_TERMINADO}/ActualizaDefecto`;
     const body = JSON.stringify(defecto);
     const headers = new HttpHeaders().append('content-type', 'application/json');
-    return this._http.post(url, body, {headers});
+    return this._http.put(url, body, {headers});
   }
 
   inactivaActiva(id) {
@@ -70,6 +63,5 @@ export class TerminadoService {
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);
     return this._http.put(url, null, {headers, params});
-
   }
 }

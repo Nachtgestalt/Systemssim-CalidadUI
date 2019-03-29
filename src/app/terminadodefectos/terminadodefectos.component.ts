@@ -321,13 +321,21 @@ export class TerminadodefectosComponent implements OnInit, OnDestroy, AfterViewI
 
     reader.addEventListener('load', (event: any) => {
 
-      this.selectedFile = new ImageSnippet(event.target.result, file);
-      this.selectedFile.pending = true;
-      nuevo ? this.form.get('Imagen').patchValue(file) : this.formEdit.get('Imagen').patchValue(file);
+      this.selectedFile = event.target.result;
+      // this.selectedFile.pending = true;
+      nuevo ? this.form.get('Imagen').patchValue(event.target.result) : this.formEdit.get('Imagen').patchValue(event.target.result);
       this.noMostrar = false;
     });
 
     reader.readAsDataURL(file);
+  }
+
+  cancelarModal() {
+    this.initFormGroup();
+    this.initFormGroupEdit();
+    this.selectedFileEdit = null;
+    this.selectedFile = null;
+    this.noMostrar = false;
   }
 }
 

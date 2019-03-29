@@ -36,7 +36,7 @@ export class AuditoriaCalidadService {
     const url = `${this.URL_CALIDAD}/CierreAuditoria`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('IdAuditoria', id);
-    return this._http.get(url, {headers, params});
+    return this._http.put(url, null, {headers, params});
   }
 
   listOT() {

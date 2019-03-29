@@ -119,8 +119,8 @@
                  (change)="processFile(imageInput, true)">
         </label>
         <div *ngIf="selectedFile" class="img-preview-container">
-          <div class="img-preview{{selectedFile.status === 'fail' ? '-error' : ''}}"
-               [ngStyle]="{'background-image': 'url('+ selectedFile.src + ')'}">
+          <div class="img-preview"
+               [ngStyle]="{'background-image': 'url('+ selectedFile + ')'}">
           </div>
         </div>
       </div>
@@ -129,7 +129,7 @@
   <div class="modal-footer">
     <div class="row">
       <div class="col s6" style="text-align: left">
-        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+        <a class="modal-close waves-effect waves-green btn-flat" (click)="cancelarModal()">Cancelar</a>
       </div>
       <div class="col s6" style="text-align: right">
         <a (click)="NewDefectoTerminado()" class="waves-effect waves-green btn-flat">Aceptar</a>
@@ -182,18 +182,17 @@
         </div>
 
         <div *ngIf="selectedFile" class="img-preview-container">
-          <div class="img-preview{{selectedFile.status === 'fail' ? '-error' : ''}}"
-               [ngStyle]="{'background-image': 'url('+ selectedFile.src + ')'}">
+          <div class="img-preview"
+               [ngStyle]="{'background-image': 'url('+ selectedFile + ')'}">
           </div>
         </div>
       </div>
-      <!--<app-carga-imagenes></app-carga-imagenes>-->
     </form>
   </div>
   <div class="modal-footer">
     <div class="row">
       <div class="col s6" style="text-align: left">
-        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+        <a class="modal-close waves-effect waves-green btn-flat" (click)="cancelarModal()">Cancelar</a>
       </div>
       <div class="col s6" style="text-align: right">
         <button type="button" (click)="editDefectoTerminado()" class="waves-effect waves-green btn-flat">Aceptar

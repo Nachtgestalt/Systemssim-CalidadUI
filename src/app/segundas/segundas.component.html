@@ -1,44 +1,89 @@
 <div class="card-panel">
+  <div id="Preloader" class="row" style="text-align: center; display: block;">
+    <div class="preloader-wrapper big active">
+      <div class="spinner-layer spinner-blue-only">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div>
+        <div class="gap-patch">
+          <div class="circle"></div>
+        </div>
+        <div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="row">
     <form class="col s12">
       <div class="row">
         <div class="input-field col s3">
           <i class="material-icons prefix">account_box</i>
-          <input class="validate" id="BUSQUEDA_SEG" type="text" />
+          <input class="validate" id="BUSQUEDA_SEG" type="text"/>
           <label for="BUSQUEDA_SEG">Estilo</label>
         </div>
         <div class="col s9" style="text-align: right">
-          <button class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar segundas por filtro seleccionado" type="button" (click)="GetSegundas();" name="btnSearchSegunda">Buscar
+          <button class="btn tooltipped waves-effect waves-light" data-position="bottom"
+                  data-tooltip="Consultar segundas por filtro seleccionado" type="button" (click)="GetSegundas();"
+                  name="btnSearchSegunda">Buscar
             <i class="material-icons right">search</i>
           </button>
         </div>
       </div>
       <div class="row">
-        <table id="tlbsegundas" class="row-border hover">
+        <table id="tlbsegundas" class="row-border hover"
+               datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
           <thead>
-            <tr>
-              <th></th>
-              <th>No.</th>
-              <th>Estilo</th>
-              <th>Descripcion</th>
-              <th>Tela</th>
-              <th>Corte</th>
-              <th>Confección</th>
-              <th>Lavandería</th>
-              <th>Procesos Esp.</th>
-              <th>Terminado</th>
-            </tr>
+          <tr>
+            <th></th>
+            <th>No.</th>
+            <th>Estilo</th>
+            <th>Descripcion</th>
+            <th>Tela</th>
+            <th>Corte</th>
+            <th>Confección</th>
+            <th>Lavandería</th>
+            <th>Procesos Esp.</th>
+            <th>Terminado</th>
+            <th>Costo Estilo</th>
+            <th>Costo Segundas</th>
+          </tr>
           </thead>
+          <tbody>
+          <tr *ngFor="let segunda of segundas; let i = index">
+            <td>
+              <button class="btn modal-trigger"
+                      data-target="modalPorcentajes"
+                      matTooltip="Agrega porcentajes de segundas al estilo"
+                      (click)="editSegunda(segunda)">
+                <i class="material-icons right">edit</i>'
+              </button>
+            </td>
+            <td>{{i}}</td>
+            <td>{{segunda.Estilo}}</td>
+            <td>{{segunda.Descripcion}}</td>
+            <td>{{segunda.Porcentaje_Tela}}</td>
+            <td>{{segunda.Porcentaje_Corte}}</td>
+            <td>{{segunda.Porcentaje_Confeccion}}</td>
+            <td>{{segunda.Porcentaje_Lavanderia}}</td>
+            <td>{{segunda.Porcentaje_ProcesosEspeciales}}</td>
+            <td>{{segunda.Porcentaje_Terminado}}</td>
+            <td>{{segunda.Costo_Estilo}}</td>
+            <td>{{segunda.Costo_Segunda}}</td>
+          </tr>
+          </tbody>
         </table>
       </div>
-      <br />
+      <br/>
       <div class="row" style="text-align: right">
         <div class="col s12">
           <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
             <i class="material-icons left">arrow_back</i>
           </button>
           &nbsp;&nbsp;
-          <button class="btn tooltipped waves-effect waves-light modal-trigger" data-target="modalSegundas" data-position="bottom" (click)="GetSegundasDynamic()" data-tooltip="Agrega un nuevo porcentaje de segundas" type="button" name="btnAddUser">Agregar
+          <button class="btn tooltipped waves-effect waves-light modal-trigger" data-target="modalSegundas"
+                  data-position="bottom" (click)="GetSegundasDynamic()"
+                  data-tooltip="Agrega un nuevo porcentaje de segundas" type="button" name="btnAddUser">Agregar
             <i class="material-icons right">send</i>
           </button>
         </div>
@@ -46,52 +91,163 @@
     </form>
   </div>
 </div>
+
 <!-- Porcentaje de segundas -->
 <div id="modalPorcentajes" class="modal modal-fixed-footer" style="height: 50%">
+  <div class="modal-content">
+    <h4>Asigna Porcentajes</h4>
+    <form [formGroup]="formEdit">
+      <div class="row">
+        <div class="input-field col s3">
+          <i class="material-icons prefix">turned_in_not</i>
+          <input id="SEG_TELA" step="any" type="number" class="validate"
+                 formControlName="Porcentaje_Tela">
+          <label for="SEG_TELA">Tela</label>
+        </div>
+        <div class="input-field col s3">
+          <i class="material-icons prefix">content_cut</i>
+          <input id="SEG_CORTE" step="any" type="number" class="validate"
+                 formControlName="Porcentaje_Corte">
+          <label for="SEG_CORTE">Corte</label>
+        </div>
+        <div class="input-field col s3">
+          <i class="material-icons prefix">burst_mode</i>
+          <input id="SEG_CONFECCION" type="number" step="any" class="validate"
+                 formControlName="Porcentaje_Confeccion">
+          <label for="SEG_CONFECCION">Confección</label>
+        </div>
+        <div class="input-field col s3">
+          <i class="material-icons prefix">local_laundry_service</i>
+          <input id="SEG_LAVANDERIA" step="any" type="number" class="validate"
+                 formControlName="Porcentaje_Lavanderia">
+          <label for="SEG_LAVANDERIA">Lavandería</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s3">
+          <i class="material-icons prefix">perm_data_setting</i>
+          <input id="SEG_PROC_ESP" step="any" type="number" class="validate"
+                 formControlName="Porcentaje_ProcesosEspeciales">
+          <label for="SEG_PROC_ESP">Procesos Especiales</label>
+        </div>
+        <div class="input-field col s3">
+          <i class="material-icons prefix">flag</i>
+          <input id="SEG_TERMINADO" step="any" type="number" class="validate"
+                 formControlName="Porcentaje_Terminado">
+          <label for="SEG_TERMINADO">Terminado</label>
+        </div>
+        <div class="input-field col s3">
+          <i class="material-icons prefix">attach_money</i>
+          <input id="SEG_COSTO_ESTILO" step="any" type="number" class="validate"
+                 formControlName="Costo_Estilo">
+          <label for="SEG_COSTO_ESTILO">Costo Estilo</label>
+        </div>
+        <div class="input-field col s3">
+          <i class="material-icons prefix">attach_money</i>
+          <input id="SEG_SEGUNDA" step="any" type="number" class="validate"
+                 formControlName="Costo_Segunda">
+          <label for="SEG_SEGUNDA">Costo Segunda</label>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="UpdateSegunda()" class="waves-effect waves-green btn-flat">Agregar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Update Enabled User -->
+<div id="modalSegundas" class="modal">
+  <div class="modal-content">
+    <div class="row">
+      <table id="tlbSegundasDynamic" class="row-border hover">
+        <thead>
+        <th></th>
+        <th>No.</th>
+        <th>Estilo</th>
+        <th>Descripcion</th>
+        </thead>
+      </table>
+    </div>
+    <div id="SegPreloader" class="row" style="text-align: center; display: block;">
+      <div class="preloader-wrapper big active">
+        <div class="spinner-layer spinner-blue-only">
+          <div class="circle-clipper left">
+            <div class="circle"></div>
+          </div>
+          <div class="gap-patch">
+            <div class="circle"></div>
+          </div>
+          <div class="circle-clipper right">
+            <div class="circle"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s12" style="text-align: right">
+        <a class="modal-close waves-effect waves-green btn-flat">Cerrar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Porcentaje de segundas -->
+<div id="modalPorcentajesEdt" class="modal modal-fixed-footer" style="height: 50%">
   <div class="modal-content">
     <h4>Asigna Porcentajes</h4>
     <div class="row">
       <div class="input-field col s3">
         <i class="material-icons prefix">turned_in_not</i>
         <input id="SEG_TELA" step="any" type="number" class="validate">
-        <label for="SEG_TELA">Tela</label>
+        <label class="active" for="SEG_TELA">Tela</label>
       </div>
       <div class="input-field col s3">
         <i class="material-icons prefix">content_cut</i>
         <input id="SEG_CORTE" step="any" type="number" class="validate">
-        <label for="SEG_CORTE">Corte</label>
+        <label class="active" for="SEG_CORTE">Corte</label>
       </div>
       <div class="input-field col s3">
         <i class="material-icons prefix">burst_mode</i>
         <input id="SEG_CONFECCION" type="number" step="any" class="validate">
-        <label for="SEG_CONFECCION">Confección</label>
+        <label class="active" for="SEG_CONFECCION">Confección</label>
       </div>
       <div class="input-field col s3">
         <i class="material-icons prefix">local_laundry_service</i>
         <input id="SEG_LAVANDERIA" step="any" type="number" class="validate">
-        <label for="SEG_LAVANDERIA">Lavandería</label>
+        <label class="active" for="SEG_LAVANDERIA">Lavandería</label>
       </div>
     </div>
     <div class="row">
       <div class="input-field col s3">
         <i class="material-icons prefix">perm_data_setting</i>
         <input id="SEG_PROC_ESP" step="any" type="number" class="validate">
-        <label for="SEG_PROC_ESP">Procesos Especiales</label>
+        <label class="active" for="SEG_PROC_ESP">Procesos Especiales</label>
       </div>
       <div class="input-field col s3">
         <i class="material-icons prefix">flag</i>
         <input id="SEG_TERMINADO" step="any" type="number" class="validate">
-        <label for="SEG_TERMINADO">Terminado</label>
+        <label class="active" for="SEG_TERMINADO">Terminado</label>
       </div>
       <div class="input-field col s3">
         <i class="material-icons prefix">attach_money</i>
         <input id="SEG_COSTO_ESTILO" step="any" type="number" class="validate">
-        <label for="SEG_COSTO_ESTILO">Costo Estilo</label>
+        <label class="active" for="SEG_COSTO_ESTILO">Costo Estilo</label>
       </div>
       <div class="input-field col s3">
         <i class="material-icons prefix">attach_money</i>
         <input id="SEG_SEGUNDA" step="any" type="number" class="validate">
-        <label for="SEG_SEGUNDA">Costo Segunda</label>
+        <label class="active" for="SEG_SEGUNDA">Costo Segunda</label>
       </div>
     </div>
   </div>
@@ -106,101 +262,3 @@
     </div>
   </div>
 </div>
-
-<!-- Update Enabled User -->
-<div id="modalSegundas" class="modal">
-    <div class="modal-content">
-      <div class="row">
-        <table id="tlbSegundasDynamic" class="row-border hover">
-          <thead>
-            <th></th>
-            <th>No.</th>
-            <th>Estilo</th>
-            <th>Descripcion</th>
-          </thead>
-        </table>
-      </div>
-      <div id="SegPreloader" class="row" style="text-align: center; display: block;" >
-          <div class="preloader-wrapper big active">
-              <div class="spinner-layer spinner-blue-only">
-                <div class="circle-clipper left">
-                  <div class="circle"></div>
-                </div><div class="gap-patch">
-                  <div class="circle"></div>
-                </div><div class="circle-clipper right">
-                  <div class="circle"></div>
-                </div>
-              </div>
-          </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <div class="row">
-        <div class="col s12" style="text-align: right">
-          <a class="waves-effect waves-green btn-flat">Cerrar</a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-<!-- Porcentaje de segundas -->
-<div id="modalPorcentajesEdt" class="modal modal-fixed-footer" style="height: 50%">
-    <div class="modal-content">
-      <h4>Asigna Porcentajes</h4>
-      <div class="row">
-        <div class="input-field col s3">
-          <i class="material-icons prefix">turned_in_not</i>
-          <input id="SEG_TELA" step="any" type="number" class="validate">
-          <label class="active" for="SEG_TELA">Tela</label>
-        </div>
-        <div class="input-field col s3">
-          <i class="material-icons prefix">content_cut</i>
-          <input id="SEG_CORTE" step="any" type="number" class="validate">
-          <label class="active" for="SEG_CORTE">Corte</label>
-        </div>
-        <div class="input-field col s3">
-          <i class="material-icons prefix">burst_mode</i>
-          <input id="SEG_CONFECCION" type="number" step="any" class="validate">
-          <label class="active" for="SEG_CONFECCION">Confección</label>
-        </div>
-        <div class="input-field col s3">
-          <i class="material-icons prefix">local_laundry_service</i>
-          <input id="SEG_LAVANDERIA" step="any" type="number" class="validate">
-          <label class="active" for="SEG_LAVANDERIA">Lavandería</label>
-        </div>
-      </div>
-      <div class="row">
-        <div class="input-field col s3">
-          <i class="material-icons prefix">perm_data_setting</i>
-          <input id="SEG_PROC_ESP" step="any" type="number" class="validate">
-          <label class="active" for="SEG_PROC_ESP">Procesos Especiales</label>
-        </div>
-        <div class="input-field col s3">
-          <i class="material-icons prefix">flag</i>
-          <input id="SEG_TERMINADO" step="any" type="number" class="validate">
-          <label class="active" for="SEG_TERMINADO">Terminado</label>
-        </div>
-        <div class="input-field col s3">
-          <i class="material-icons prefix">attach_money</i>
-          <input id="SEG_COSTO_ESTILO" step="any" type="number" class="validate">
-          <label class="active" for="SEG_COSTO_ESTILO">Costo Estilo</label>
-        </div>
-        <div class="input-field col s3">
-          <i class="material-icons prefix">attach_money</i>
-          <input id="SEG_SEGUNDA" step="any" type="number" class="validate">
-          <label class="active" for="SEG_SEGUNDA">Costo Segunda</label>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <div class="row">
-        <div class="col s6" style="text-align: left">
-          <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
-        </div>
-        <div class="col s6" style="text-align: right">
-          <a (click)="ValidateAddSegunda()" class="waves-effect waves-green btn-flat">Agregar</a>
-        </div>
-      </div>
-    </div>
-  </div>
