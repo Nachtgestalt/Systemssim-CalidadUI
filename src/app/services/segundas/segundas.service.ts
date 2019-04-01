@@ -12,6 +12,14 @@ export class SegundasService {
   constructor(private _http: HttpClient) {
   }
 
+  createSegundas(segunda) {
+    const url = `${this.URL_SEGUNDAS}/GuardaSegundaPorcentajes`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const body = JSON.stringify(segunda);
+    // const params = new HttpParams().append('Key', atob(Globals.PasswordKey));
+    return this._http.post(url, body, {headers});
+  }
+
   listSegundas(param = '') {
     const url = `${this.URL_SEGUNDAS}/ObtieneEstilosApp`;
     const headers = new HttpHeaders().append('content-type', 'application/json');

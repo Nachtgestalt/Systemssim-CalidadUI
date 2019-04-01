@@ -166,7 +166,7 @@ export class SegundasComponent implements OnInit, OnDestroy, AfterViewInit {
           this.GetSegundas();
           this.closeModalPorcentajes();
         } else {
-          this._toast.warning('Error al actualizar', 'Exito');
+          this._toast.warning('Error al actualizar', '');
         }
         console.log(res);
       },
@@ -179,7 +179,7 @@ export class SegundasComponent implements OnInit, OnDestroy, AfterViewInit {
 
   closeModalPorcentajes() {
     this.initFormGroupEdit();
-    $('#modalPorcentajes').modal('close');
+    $('#modalPorcentajesEdt').modal('close');
   }
 
   ValidateAddSegunda() {
@@ -210,36 +210,55 @@ export class SegundasComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   SaveSegunda(estilo, Descripcion) {
-    let Mensaje = '';
-    $.ajax({
-      url: Globals.UriRioSulApi + 'CatalogoSegundas/GuardaSegundaPorcentajes',
-      type: 'POST',
-      contentType: 'application/json; charset=utf-8',
-      data: JSON.stringify({
-        'Estilo': estilo,
-        'Descripcion': Descripcion,
-        'Porcentaje_Tela': $('#SEG_TELA').val(),
-        'Porcentaje_Corte': $('#SEG_CORTE').val(),
-        'Porcentaje_Confeccion': $('#SEG_CONFECCION').val(),
-        'Porcentaje_Lavanderia': $('#SEG_LAVANDERIA').val(),
-        'Porcentaje_ProcesosEspeciales': $('#SEG_PROC_ESP').val(),
-        'Porcentaje_Terminado': $('#SEG_TERMINADO').val(),
-        'Costo_Estilo': $('#SEG_COSTO_ESTILO').val(),
-        'Costo_Segunda': $('#SEG_SEGUNDA').val()
-      }),
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          $('#modalPorcentajes').modal('close');
-          Mensaje = 'Se agrego correctamente los porcentajes de segunda';
+    // debugger;
+    let payload = {
+      'Estilo': estilo,
+      'Descripcion': Descripcion,
+      'Porcentaje_Tela': $('#SEG_TELA').val(),
+      'Porcentaje_Corte': $('#SEG_CORTE').val(),
+      'Porcentaje_Confeccion': $('#SEG_CONFECCION').val(),
+      'Porcentaje_Lavanderia': $('#SEG_LAVANDERIA').val(),
+      'Porcentaje_ProcesosEspeciales': $('#SEG_PROC_ESP').val(),
+      'Porcentaje_Terminado': $('#SEG_TERMINADO').val(),
+      'Costo_Estilo': $('#SEG_COSTO_ESTILO').val(),
+      'Costo_Segunda': $('#SEG_SEGUNDA').val()
+    };
+    this._segundasService.createSegundas(payload)
+      .subscribe(
+        (res: any) => {
+          if (res.Message.IsSuccessStatusCode) {
+            $('#modalPorcentajes').modal('close');
+            this._toast.success('Se agrego correctamente los porcentajes de segunda', '');
+          } else {
+            this._toast.success('Algo no ha salido bien', '');
+          }
+        },
+        error => {
+          console.log(error);
+          this._toast.error('No se pudo establecer conexión con la base de datos', '');
         }
-      },
-      error: function () {
-        console.log('No se pudo establecer conexión con la base de datos');
-      }
-    });
-    if (Mensaje !== '') {
-      this._toast.success(Mensaje, '');
-    }
+      );
+    // var Mensaje = '';
+    // $.ajax({
+    //   url: Globals.UriRioSulApi + 'CatalogoSegundas/GuardaSegundaPorcentajes',
+    //   type: 'POST',
+    //   contentType: 'application/json; charset=utf-8',
+    //   data: JSON.stringify({
+    //
+    //   }),
+    //   success: function (json) {
+    //     if (json.Message.IsSuccessStatusCode) {
+    //       $('#modalPorcentajes').modal('close');
+    //       Mensaje = 'Se agrego correctamente los porcentajes de segunda';
+    //     }
+    //   },
+    //   error: function () {
+    //     console.log('No se pudo establecer conexión con la base de datos');
+    //   }
+    // });
+    // if (Mensaje !== '') {
+    //   this._toast.success(Mensaje, '');
+    // }
   }
 
   GetSegundas() {
