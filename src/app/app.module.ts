@@ -68,6 +68,7 @@ import {DigitOnlyModule} from '@uiowa/digit-only';
 import { registerLocaleData } from '@angular/common';
 import localeMx from '@angular/common/locales/es-MX';
 import { NumberFormatPipe } from './pipes/number-format.pipe';
+import { MarcaClienteComponent } from './marca-cliente/marca-cliente.component';
 
 // the second parameter 'fr' is optional
 registerLocaleData(localeMx);
@@ -127,6 +128,7 @@ registerLocaleData(localeMx);
     CalidadConsultaAuditoriaComponent,
     TerminadoConsultaAuditoriaComponent,
     NumberFormatPipe,
+    MarcaClienteComponent,
   ],
   entryComponents: [
     AddEditOperacionTerminadoComponent
@@ -161,7 +163,8 @@ registerLocaleData(localeMx);
           {path: '', redirectTo: 'clientes', pathMatch: 'full'},
           {path: 'clientes', component: ClientesComponent},
           {path: 'correoselectronicos', component: CorreoselectronicosComponent},
-          {path: 'segundas', component: SegundasComponent}
+          {path: 'segundas', component: SegundasComponent},
+          {path: 'marca-cliente', component: MarcaClienteComponent}
         ]
       },
       {

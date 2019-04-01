@@ -61,4 +61,24 @@ export class ClientesService {
     const headers = new HttpHeaders().append('content-type', 'application/json');
     return this._http.post(url, body, {headers});
   }
+
+  listClienteMarcas() {
+    const url = `${this.URL_CLIENTES}/Marcas`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.get(url, {headers});
+  }
+
+  createClienteMarcas(payload) {
+    const url = `${this.URL_CLIENTES}/ClienteMarcas`;
+    const body = payload;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.post(url, body, {headers});
+  }
+
+  getClienteMarca(id) {
+    const url = `${this.URL_CLIENTES}/ClienteMarcas`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('idCliente', id);
+    return this._http.get(url, {headers, params});
+  }
 }

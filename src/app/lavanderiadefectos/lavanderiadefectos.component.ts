@@ -98,7 +98,7 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
       _request += '?Nombre=' + $('#NOMBRE_CORTADOR').val() + '?Clave=' + $('#CLAVE_CORTADOR').val();
     }
     console.log(_request);
-    this._lavanderiaService.listSegundas()
+    this._lavanderiaService.listDefectos()
       .subscribe(
         (res: any) => {
           if (res.Message.IsSuccessStatusCode) {
@@ -138,7 +138,7 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
     swal(options)
       .then((willDelete) => {
         if (willDelete) {
-          this._lavanderiaService.inactivaActiva(id)
+          this._lavanderiaService.inactivaActivaDefecto(id)
             .subscribe(
               res => {
                 console.log(res);
@@ -233,7 +233,7 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
 
   EditDefectoLavanderia() {
     console.log('EDITAR DEFECTO');
-    this._lavanderiaService.updateSegunda(this.formEdit.value)
+    this._lavanderiaService.updateDefecto(this.formEdit.value)
       .subscribe(
         res => {
           console.log(res);
@@ -276,25 +276,25 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
       }
     };
     swal(options).then((willDelete) => {
-      // if (willDelete) {
-      //   this._terminadoService.deleteDefecto(defecto.ID)
-      //     .subscribe(
-      //       (res: any) => {
-      //         console.log(res);
-      //         if (res.Message.IsSuccessStatusCode) {
-      //           this._toast.success('Defecto eliminado con exito', '');
-      //           this.getDefectosTerminado();
-      //         } else {
-      //           const mensaje = res.Hecho.split(',');
-      //           this._toast.warning(mensaje[0], mensaje[2]);
-      //         }
-      //       },
-      //       error => {
-      //         console.log(error);
-      //         this._toast.error('Error al conectar a la base de datos', '');
-      //       }
-      //     );
-      // }
+      if (willDelete) {
+        this._lavanderiaService.deleteDefecto(defecto.ID, 'Defecto')
+          .subscribe(
+            (res: any) => {
+              console.log(res);
+              if (res.Message.IsSuccessStatusCode) {
+                this._toast.success('Defecto eliminado con exito', '');
+                this.GetDefectosLavanderia();
+              } else {
+                const mensaje = res.Hecho.split(',');
+                this._toast.warning(mensaje[0], mensaje[2]);
+              }
+            },
+            error => {
+              console.log(error);
+              this._toast.error('Error al conectar a la base de datos', '');
+            }
+          );
+      }
     });
   }
 
