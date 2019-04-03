@@ -126,6 +126,8 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
   }
 
   getDefectosActivos() {
+    this.initFormGroup();
+    this.selection = new SelectionModel(true, []);
     this._lavanderiaService.listDefectos('', '', 'True')
       .pipe(
         map((res: any) => {
@@ -257,6 +259,7 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
         (res: any) => {
           console.log(res);
           this.dataSourceEdit = new MatTableDataSource(res.Vst_Lavanderia);
+          this.selection = new SelectionModel(true, []);
           this._lavanderiaService.getOperacion(id)
             .subscribe(
               (res: any) => {

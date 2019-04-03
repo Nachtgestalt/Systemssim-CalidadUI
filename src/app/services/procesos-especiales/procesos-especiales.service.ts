@@ -5,14 +5,14 @@ import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 @Injectable({
   providedIn: 'root'
 })
-export class LavanderiaService {
+export class ProcesosEspecialesService {
 
-  private URL_LAVANDERA = `${Globals.UriRioSulApi}Lavanderia`;
+  private URL_PROCESOS = `${Globals.UriRioSulApi}ProcesosEspeciales`;
 
   constructor(private _http: HttpClient) {}
 
   listDefectos(clave = '', nombre = '', activo?) {
-    const url = `${this.URL_LAVANDERA}/ObtieneDefectoLavanderia`;
+    const url = `${this.URL_PROCESOS}/ObtieneDefectoProseso`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams();
     if (clave !== '') {
@@ -28,14 +28,14 @@ export class LavanderiaService {
   }
 
   updateDefecto(defecto) {
-    const url = `${this.URL_LAVANDERA}/ActualizaDefectoLavanderia`;
+    const url = `${this.URL_PROCESOS}/ActualizaDefectoLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const body = JSON.stringify(defecto);
     return this._http.put(url, body, {headers});
   }
 
   deleteDefecto(id, catalogo) {
-    const url = `${this.URL_LAVANDERA}/EliminaLavanderia`;
+    const url = `${this.URL_PROCESOS}/EliminaLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams().append('IdLavanderia', id);
     params = params.append('tipo', catalogo);
@@ -43,7 +43,7 @@ export class LavanderiaService {
   }
 
   inactivaActivaDefecto(id) {
-    const url = `${this.URL_LAVANDERA}/ActivaInactivaLavanderia`;
+    const url = `${this.URL_PROCESOS}/ActivaInactivaLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('IdLavanderia', id);
     return this._http.put(url, null, {headers, params});
@@ -53,7 +53,7 @@ export class LavanderiaService {
   // ================ Operaciones ===================
 
   listOperaciones(clave = '', nombre = '', activo?) {
-    const url = `${this.URL_LAVANDERA}/OperacionLavanderia`;
+    const url = `${this.URL_PROCESOS}/OperacionLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams();
     if (clave !== '') {
@@ -69,21 +69,21 @@ export class LavanderiaService {
   }
 
   getOperacion(id) {
-    const url = `${this.URL_LAVANDERA}/OperacionLavanderia`;
+    const url = `${this.URL_PROCESOS}/OperacionLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);
     return this._http.get(url, {headers, params});
   }
 
   createOperacion(operacion) {
-    const url = `${this.URL_LAVANDERA}/OperacionLavanderia`;
+    const url = `${this.URL_PROCESOS}/OperacionLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const body = JSON.stringify(operacion);
     return this._http.post(url, body, {headers});
   }
 
   validaOperacionExiste(clave, nombre) {
-    const url = `${this.URL_LAVANDERA}/ValidaOperacionSubModuloLavanderia`;
+    const url = `${this.URL_PROCESOS}/ValidaOperacionSubModuloLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams().append('SubModulo', '13');
     params = params.append('Clave', clave);
@@ -92,14 +92,14 @@ export class LavanderiaService {
   }
 
   inactivaActivaOperacion(id) {
-    const url = `${this.URL_LAVANDERA}/ActivaInactivaOperacionesLavanderia`;
+    const url = `${this.URL_PROCESOS}/ActivaInactivaOperacionesLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('IdLavanderia', id);
     return this._http.put(url, null, {headers, params});
   }
 
   updateOperación(payload, id) {
-    const url = `${this.URL_LAVANDERA}/OperacionLavanderia`;
+    const url = `${this.URL_PROCESOS}/OperacionLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);
     const body = JSON.stringify(payload);
@@ -108,7 +108,7 @@ export class LavanderiaService {
 
   // ================ Posiciones ===================
   listPosiciones(clave = '', nombre = '', activo?) {
-    const url = `${this.URL_LAVANDERA}/PosicionLavanderia`;
+    const url = `${this.URL_PROCESOS}/PosicionLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams();
     if (clave !== '') {
@@ -124,21 +124,21 @@ export class LavanderiaService {
   }
 
   getPosicion(id) {
-    const url = `${this.URL_LAVANDERA}/PosicionLavanderia`;
+    const url = `${this.URL_PROCESOS}/PosicionLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);
     return this._http.get(url, {headers, params});
   }
 
   createPosicion(operacion) {
-    const url = `${this.URL_LAVANDERA}/PosicionLavanderia`;
+    const url = `${this.URL_PROCESOS}/PosicionLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const body = JSON.stringify(operacion);
     return this._http.post(url, body, {headers});
   }
 
   validaPosicionExiste(clave, nombre) {
-    const url = `${this.URL_LAVANDERA}/ValidaOperacionSubModuloLavanderia`;
+    const url = `${this.URL_PROCESOS}/ValidaOperacionSubModuloLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams().append('SubModulo', '13');
     params = params.append('Clave', clave);
@@ -147,18 +147,17 @@ export class LavanderiaService {
   }
 
   inactivaActivaPosicion(id) {
-    const url = `${this.URL_LAVANDERA}/ActivaInactivaPosicionLavanderia`;
+    const url = `${this.URL_PROCESOS}/ActivaInactivaPosicionLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('IdLavanderia', id);
     return this._http.put(url, null, {headers, params});
   }
 
   updatePosicion(payload) {
-    const url = `${this.URL_LAVANDERA}/PosicionLavanderia`;
+    const url = `${this.URL_PROCESOS}/PosicionLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     // const params = new HttpParams().append('ID', id);
     const body = JSON.stringify(payload);
     return this._http.put(url, body, {headers});
   }
-
 }

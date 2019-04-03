@@ -93,6 +93,7 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
 
   initFormGroup() {
     this.form = new FormGroup({
+      'ID': new FormControl(),
       'IdSubModulo': new FormControl(),
       'IdUsuario': new FormControl(),
       'Clave': new FormControl(),
@@ -163,10 +164,26 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
 
   }
 
-  editPosicion(posicion) {
-    console.log(posicion);
-    this.form.patchValue(posicion);
-    setTimeout(() => M.updateTextFields(), 100);
+  editPosicion() {
+    const payload = this.form.value;
+    payload.Operacion = this.selection.selected;
+    this._lavanderiaService.updatePosicion(payload)
+      .subscribe(
+        (res: any) => {
+          console.log(res);
+          if (res.Message.IsSuccessStatusCode) {
+            this._toast.success('Posición actualizada con exito', '');
+            $('#modalEditPosicionLavanderia').modal('close');
+            this.GetPosicionLavanderia();
+          } else {
+            this._toast.warning('Algo no ha salido bien', '');
+          }
+        },
+        error => {
+          console.log(error);
+          this._toast.error('Error al conectar a la base de datos', '');
+        }
+      );
   }
 
   eliminar(posicion) {
@@ -247,6 +264,8 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
   }
 
   getOperacionesActivas() {
+    this.initFormGroup();
+    this.selection = new SelectionModel(true, []);
     this._lavanderiaService.listOperaciones('', '', 'True')
       .pipe(
         map((res: any) => {
@@ -268,21 +287,12 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
 
   getDetalle(id) {
     this.idOperacion = id;
-    this._lavanderiaService.listDefectos('', '', 'True')
-      // .pipe(
-      //   map((res: any) => {
-      //       res.Vst_Lavanderia.forEach(x => {
-      //         delete x.Imagen;
-      //       });
-      //       return res;
-      //     }
-      //   ),
-      //   tap(res => console.log('Despues de eliminar imagen: ', res))
-      // )
+    this._lavanderiaService.listOperaciones('', '', 'True')
       .subscribe(
         (res: any) => {
           console.log(res);
           this.dataSourceEdit = new MatTableDataSource(res.Vst_Lavanderia);
+          this.selection = new SelectionModel(true, []);
           this._lavanderiaService.getPosicion(id)
             .subscribe(
               (res: any) => {
@@ -293,6 +303,8 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
                 const copyDataSourceEdit = [];
                 this.dataSourceEdit.data.forEach((x, i) => {
                   defectos.forEach(y => {
+                    console.log('Operaciones:', x);
+                    console.log('Y:', y);
                     if (y.Clave === x.Clave) {
                       copyDataSourceEdit.push(x);
                     }

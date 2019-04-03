@@ -19,15 +19,42 @@
         </div>
       </div>
       <div class="row">
-        <table id="tlbDefectoProcesosEspeciales" class="row-border hover">
+        <table id="tlbDefectoLavanderia" class="row-border hover"
+               datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
           <thead>
+          <tr>
             <th></th>
+            <th>No.</th>
             <th>Clave Defecto</th>
             <th>Nombre Defecto</th>
             <th>Estatus</th>
             <th></th>
+          </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+          <tr *ngFor="let defecto of defectos; let i = index" (dblclick)="eliminar(defecto)">
+            <td>
+              <button
+                class="btn modal-trigger" data-target="modalEditDefectoLavanderia"
+                matTooltip="Edita el defecto  seleccionado"
+                (click)="editDefecto(defecto)"
+                [disabled]="defecto.Activo === false">
+                <i class="material-icons center">edit</i>
+              </button>
+            </td>
+            <td>{{i}}</td>
+            <td>{{defecto.Clave}}</td>
+            <td>{{defecto.Nombre}}</td>
+            <td>{{defecto.Activo ? 'SI' : 'No'}}</td>
+            <td>
+              <a class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableDefectoCortador"
+                 data-tooltiped="Activa / Inactiva el cortador seleccionado"
+                 (click)="GetEnabledDefectoLavanderia(defecto.ID)">
+                <strong><u>{{defecto.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u></strong>
+              </a>
+            </td>
+          </tr>
+          </tbody>
         </table>
       </div>
       <br />

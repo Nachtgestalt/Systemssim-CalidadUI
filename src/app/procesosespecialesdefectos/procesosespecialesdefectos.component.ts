@@ -1,20 +1,65 @@
-import {Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Globals} from '../Globals';
 
 declare var $: any;
 declare var jQuery: any;
 import 'jquery';
 import {ToastrService} from '../../../node_modules/ngx-toastr';
+import {DataTableDirective} from 'angular-datatables';
+import {Subject} from 'rxjs';
+import {MatTableDataSource} from '@angular/material';
+import {SelectionModel} from '@angular/cdk/collections';
+import {FormControl, FormGroup} from '@angular/forms';
+import {ProcesosEspecialesService} from '../services/procesos-especiales/procesos-especiales.service';
+import swal from 'sweetalert';
 
 @Component({
   selector: 'app-procesosespecialesdefectos',
   templateUrl: './procesosespecialesdefectos.component.html',
   styleUrls: ['./procesosespecialesdefectos.component.css']
 })
-export class ProcesosespecialesdefectosComponent implements OnInit {
+export class ProcesosespecialesdefectosComponent implements OnInit, OnDestroy, AfterViewInit {
+  dtOptions = {
+    language: {
+      // pageLength: 6,
+      processing: 'Procesando...',
+      search: 'Buscar:',
+      lengthMenu: 'Mostrar _MENU_ elementos',
+      info: '_START_ - _END_ de _TOTAL_ elementos',
+      infoEmpty: 'Mostrando ningún elemento.',
+      infoFiltered: '(filtrado _MAX_ elementos total)',
+      infoPostFix: '',
+      loadingRecords: 'Cargando registros...',
+      zeroRecords: 'No se encontraron registros',
+      emptyTable: 'No hay datos disponibles en la tabla',
+      paginate: {
+        first: 'Primero',
+        previous: 'Anterior',
+        next: 'Siguiente',
+        last: 'Último'
+      },
+    }
+  };
+
+  formFilter: FormGroup;
+  form: FormGroup;
+
+  @ViewChild(DataTableDirective) dtElement: DataTableDirective;
+  dtTrigger: Subject<any> = new Subject();
+
+  defectos = [];
+
+  displayedColumns: string[] = ['select', 'posicion', 'clave', 'nombre'];
+  dataSource = new MatTableDataSource<any>([]);
+  selection = new SelectionModel<any>(true, []);
+
+  dataSourceEdit = new MatTableDataSource<any>([]);
+  displayedColumnsEdit: string[] = ['select', 'posicion', 'clave', 'nombre'];
+
 
   constructor(
-    private _toast: ToastrService
+    private _procesosServices: ProcesosEspecialesService,
+    private _toast: ToastrService,
   ) {
   }
 
@@ -24,77 +69,59 @@ export class ProcesosespecialesdefectosComponent implements OnInit {
     $('#modalEditDefectoProcesosEspeciales').modal();
     $('#modalEnableDefectoProcesosEspeciales').modal();
     $('#lblModulo').text('Procesos Especiales - Defectos');
+    this.initFormGroup();
+    this.initFormGroupFilter();
     this.GetDefectosProcesosEspeciales();
   }
 
-  GetDefectosProcesosEspeciales() {
-    let sOptions = '';
-    let _request = '';
-    // if ($('#CLAVE_PROCESO_ESPECIAL').val() !== '' && $('#NOMBRE_PROCESO_ESPECIAL').val() === '') {
-    //   _request += '?Clave=' +  $('#CLAVE_PROCESO_ESPECIAL').val();
-    // } else if ($('#NOMBRE_CORTADOR').val() !== '' && $('#CLAVE_PROCESO_ESPECIAL').val() === '') {
-    //   _request += '?Nombre=' +  $('#NOMBRE_PROCESO_ESPECIAL').val();}
+  ngAfterViewInit(): void {
+    this.dtTrigger.next();
+  }
 
-    _request += '?Nombre=' + $('#NOMBRE_PROCESO_ESPECIAL').val() + '?Clave=' + $('#CLAVE_PROCESO_ESPECIAL').val();
+  ngOnDestroy(): void {
+    // Do not forget to unsubscribe the event
+    this.dtTrigger.unsubscribe();
+  }
 
-    $.ajax({
-      url: Globals.UriRioSulApi + 'ProcesosEspeciales/ObtieneDefectoProseso' + _request,
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          let index = 1;
-          for (let i = 0; i < json.Vst_ProcesosEspeciales.length; i++) {
-            sOptions += '<tr>';
-            // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(' + json.Vst_ProcesosEspeciales[i].ID + '); DisposeEditDefectoProcesosEspeciales(); GetInfoProcesosEspeciales();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditDefectoProcesosEspeciales" data-position="bottom" data-tooltip="Edita el defecto de proceso especial seleccionado"><i class="material-icons right">edit</i></a></td>';
-            sOptions += '<td>' + index + '</td>';
-            sOptions += '<td>' + json.Vst_ProcesosEspeciales[i].Clave + '</td>';
-            sOptions += '<td>' + json.Vst_ProcesosEspeciales[i].Nombre + '</td>';
-            if (json.Vst_ProcesosEspeciales[i].Activo) {
-              sOptions += '<td style="text-align: center">SI</td>';
-            } else {
-              sOptions += '<td style="text-align: center">NO</td>';
-            }
-            if (json.Vst_ProcesosEspeciales[i].Activo === true) {
-              // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_ProcesosEspeciales[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableDefectoProcesosEspeciales" data-tooltiped="Activa / Inactiva el proceso especial seleccionado"><strong><u>Inactivar</u></strong></a></td>';
-            } else {
-              // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_ProcesosEspeciales[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableDefectoProcesosEspeciales" data-tooltiped="Activa / Inactiva el proceso especial seleccionado"><strong><u>Activar</u></strong></a></td>';
-            }
-            sOptions += '</tr>';
-            index++;
-          }
-          $('#tlbDefectoProcesosEspeciales').html('');
-          $('#tlbDefectoProcesosEspeciales').html('<tbody>' + sOptions + '</tbody>');
-          // tslint:disable-next-line:max-line-length
-          $('#tlbDefectoProcesosEspeciales').append('<thead><th></th><th>No.</th><th>Clave Proceso Especial</th><th>Nombre Proceso Especial</th><th>Estatus</th><th></th></thead>');
-          $('#tlbDefectoProcesosEspeciales').DataTable({
-            sorting: true,
-            bDestroy: true,
-            ordering: true,
-            bPaginate: true,
-            pageLength: 6,
-            bInfo: true,
-            dom: 'Bfrtip',
-            processing: true,
-            buttons: [
-              'copyHtml5',
-              'excelHtml5',
-              'csvHtml5',
-              'pdfHtml5'
-            ]
-          });
-          $('.tooltipped').tooltip();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
+  initFormGroupFilter() {
+    this.formFilter = new FormGroup({
+      'Clave': new FormControl(''),
+      'Nombre': new FormControl('')
     });
+  }
+
+  initFormGroup() {
+    this.form = new FormGroup({
+      'ID': new FormControl(),
+      'IdUsuario': new FormControl(),
+      'Clave': new FormControl(),
+      'Nombre': new FormControl(),
+      'Descripcion': new FormControl(),
+      'Observaciones': new FormControl(),
+      'Imagen': new FormControl(),
+    });
+  }
+
+  GetDefectosProcesosEspeciales() {
+    this._procesosServices.listDefectos(this.formFilter.controls['Clave'].value, this.formFilter.controls['Nombre'].value)
+      .subscribe(
+        (res: any) => {
+          if (res.Message.IsSuccessStatusCode) {
+            console.log(res);
+            this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+              // Destroy the table first
+              dtInstance.destroy();
+              this.defectos = res.Vst_ProcesosEspeciales;
+              // Call the dtTrigger to rerender again
+              this.dtTrigger.next();
+            });
+          }
+        },
+        error => {
+          console.log(error);
+          this._toast.error('No se pudo establecer conexion a la base de datos', '');
+        }
+      );
   }
 
   GetEnabledDefectoProcesosEspeciales() {
@@ -236,6 +263,45 @@ export class ProcesosespecialesdefectosComponent implements OnInit {
         this._toast.warning('La clave defecto proceso especial ya se encuentra registrada en el sistema', '');
       }
     }
+  }
+
+  eliminar(defecto) {
+    const options = {
+      text: '¿Estas seguro de eliminar este defecto?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    };
+    swal(options).then((willDelete) => {
+      if (willDelete) {
+        this._procesosServices.deleteDefecto(defecto.ID, 'Defecto')
+          .subscribe(
+            (res: any) => {
+              console.log(res);
+              if (res.Message.IsSuccessStatusCode) {
+                this._toast.success('Defecto eliminado con exito', '');
+                this.GetDefectosProcesosEspeciales();
+              } else {
+                const mensaje = res.Hecho.split(',');
+                this._toast.warning(mensaje[0], mensaje[2]);
+              }
+            },
+            error => {
+              console.log(error);
+              this._toast.error('Error al conectar a la base de datos', '');
+            }
+          );
+      }
+    });
   }
 
   DisposeNewProcesosEspeciales() {
