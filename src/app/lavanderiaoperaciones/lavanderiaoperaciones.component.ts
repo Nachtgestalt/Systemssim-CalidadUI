@@ -265,8 +265,8 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
               (res: any) => {
                 console.log(res);
                 this.form.patchValue(res.Vst_Lavanderia);
-                let defectos = res.Defecto;
-                let copyDataSourceEdit = [];
+                const defectos = res.Defecto;
+                const copyDataSourceEdit = [];
                 this.dataSourceEdit.data.forEach((x, i) => {
                   defectos.forEach(y => {
                     if (y.Clave === x.Clave) {

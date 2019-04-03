@@ -152,21 +152,6 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
             );
         }
       });
-    // $.ajax({
-    //   url: Globals.UriRioSulApi + 'Lavanderia/ActivaInactivaLavanderia?IdLavanderia=' + $('#HDN_ID').val(),
-    //   dataType: 'json',
-    //   contents: 'application/json; charset=utf-8',
-    //   method: 'get',
-    //   async: false,
-    //   success: function (json) {
-    //     if (json.Message.IsSuccessStatusCode) {
-    //       $('#modalEnableDefectoLavanderia').modal('close');
-    //     }
-    //   },
-    //   error: function () {
-    //     console.log('No se pudo establecer coneción a la base de datos');
-    //   }
-    // });
   }
 
   NewDefectoLavanderia() {

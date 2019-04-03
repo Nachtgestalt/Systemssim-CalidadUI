@@ -43,17 +43,17 @@ export class ProcesosEspecialesService {
   }
 
   inactivaActivaDefecto(id) {
-    const url = `${this.URL_PROCESOS}/ActivaInactivaLavanderia`;
+    const url = `${this.URL_PROCESOS}/ActivaInactivaDefectoProcesoEsp`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
-    const params = new HttpParams().append('IdLavanderia', id);
-    return this._http.put(url, null, {headers, params});
+    const params = new HttpParams().append('IdProcesoEspecial', id);
+    return this._http.get(url, {headers, params});
   }
 
 
   // ================ Operaciones ===================
 
   listOperaciones(clave = '', nombre = '', activo?) {
-    const url = `${this.URL_PROCESOS}/OperacionLavanderia`;
+    const url = `${this.URL_PROCESOS}/ObtieneOperacionProcesosEspeciales`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams();
     if (clave !== '') {
@@ -108,7 +108,7 @@ export class ProcesosEspecialesService {
 
   // ================ Posiciones ===================
   listPosiciones(clave = '', nombre = '', activo?) {
-    const url = `${this.URL_PROCESOS}/PosicionLavanderia`;
+    const url = `${this.URL_PROCESOS}/ObtienePosicion`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams();
     if (clave !== '') {
@@ -147,10 +147,10 @@ export class ProcesosEspecialesService {
   }
 
   inactivaActivaPosicion(id) {
-    const url = `${this.URL_PROCESOS}/ActivaInactivaPosicionLavanderia`;
+    const url = `${this.URL_PROCESOS}/ActivaInactivaPosicion`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
-    const params = new HttpParams().append('IdLavanderia', id);
-    return this._http.put(url, null, {headers, params});
+    const params = new HttpParams().append('IdPosicion', id);
+    return this._http.get(url, {headers, params});
   }
 
   updatePosicion(payload) {

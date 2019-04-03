@@ -352,4 +352,8 @@ export class AuditoriaprocesosespecialesComponent implements OnInit {
     return Result;
   }
 
+  reset() {
+
+  }
+
 }

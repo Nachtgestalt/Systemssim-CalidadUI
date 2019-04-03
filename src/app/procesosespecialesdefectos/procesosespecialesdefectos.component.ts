@@ -3,6 +3,7 @@ import {Globals} from '../Globals';
 
 declare var $: any;
 declare var jQuery: any;
+declare var M: any;
 import 'jquery';
 import {ToastrService} from '../../../node_modules/ngx-toastr';
 import {DataTableDirective} from 'angular-datatables';
@@ -48,6 +49,8 @@ export class ProcesosespecialesdefectosComponent implements OnInit, OnDestroy, A
   dtTrigger: Subject<any> = new Subject();
 
   defectos = [];
+  selectedFileEdit;
+  noMostrar = true;
 
   displayedColumns: string[] = ['select', 'posicion', 'clave', 'nombre'];
   dataSource = new MatTableDataSource<any>([]);
@@ -56,7 +59,7 @@ export class ProcesosespecialesdefectosComponent implements OnInit, OnDestroy, A
   dataSourceEdit = new MatTableDataSource<any>([]);
   displayedColumnsEdit: string[] = ['select', 'posicion', 'clave', 'nombre'];
 
-
+  selectedFile;
   constructor(
     private _procesosServices: ProcesosEspecialesService,
     private _toast: ToastrService,
@@ -124,23 +127,39 @@ export class ProcesosespecialesdefectosComponent implements OnInit, OnDestroy, A
       );
   }
 
-  GetEnabledDefectoProcesosEspeciales() {
-    $.ajax({
-      url: Globals.UriRioSulApi + 'ProcesosEspeciales/ActivaInactivaDefectoProcesoEsp?IdProcesoEspecial=' + $('#HDN_ID').val(),
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          $('#modalEnableDefectoProcesosEspeciales').modal('close');
+  GetEnabledDefectoProcesosEspeciales(id) {
+    const options = {
+      text: '¿Estas seguro de modificar este defecto?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
         }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
       }
-    });
-    this.GetDefectosProcesosEspeciales();
+    };
+    swal(options)
+      .then((willDelete) => {
+        if (willDelete) {
+          this._procesosServices.inactivaActivaDefecto(id)
+            .subscribe(
+              res => {
+                console.log(res);
+                this._toast.success('Defecto actualizado con exito', '');
+                this.GetDefectosProcesosEspeciales();
+              },
+              error => {
+                console.log(error);
+                this._toast.error('No se pudo establecer conexión a la base de datos', '');
+              }
+            );
+        }
+      });
   }
 
   NewDefectoProcesosEspeciales() {
@@ -265,6 +284,34 @@ export class ProcesosespecialesdefectosComponent implements OnInit, OnDestroy, A
     }
   }
 
+  editDefecto(defecto) {
+    console.log(defecto);
+    this.form.patchValue(defecto);
+    this.selectedFileEdit = defecto.Imagen;
+    if (this.selectedFileEdit) {
+      this.noMostrar = true;
+    }
+    setTimeout(() => M.updateTextFields(), 100);
+  }
+
+  EditDefectoProcesos() {
+    console.log('EDITAR DEFECTO');
+    this._procesosServices.updateDefecto(this.form.value)
+      .subscribe(
+        res => {
+          console.log(res);
+          this._toast.success('Defecto actualizado con exito', '');
+          this.GetDefectosProcesosEspeciales();
+          this.resetModalEdit();
+          $('#modalEditDefectoProcesosEspeciales').modal('close');
+        },
+        error => {
+          console.log(error);
+          this._toast.error('No se pudo establecer conexión a la base de datos', '');
+        }
+      );
+  }
+
   eliminar(defecto) {
     const options = {
       text: '¿Estas seguro de eliminar este defecto?',
@@ -304,12 +351,35 @@ export class ProcesosespecialesdefectosComponent implements OnInit, OnDestroy, A
     });
   }
 
+  resetModalEdit() {
+    this.initFormGroup();
+    this.selectedFileEdit = null;
+    this.selectedFile = null;
+    this.noMostrar = false;
+  }
+
   DisposeNewProcesosEspeciales() {
     $('#CVE_NEW_PROCESOS_ESPECIALES').val('');
     $('#NOMBRE_NEW_PROCEOS_ESPECIALES').val('');
     $('#DESCRIPCION_NEW_PROCESOS_ESPECIALES').val('');
     $('#OBSERVACIONES_NEW_PROCESOS_ESPECIALES').val('');
     $('#blah')[0].src = 'http://placehold.it/180';
+  }
+
+  processFile(imageInput: any, nuevo: boolean) {
+    const file: File = imageInput.files[0];
+    const reader = new FileReader();
+    console.log(file);
+
+    reader.addEventListener('load', (event: any) => {
+
+      this.selectedFile = event.target.result;
+      // this.selectedFile.pending = true;
+      nuevo ? this.form.get('Imagen').patchValue(event.target.result) : this.form.get('Imagen').patchValue(event.target.result);
+      this.noMostrar = false;
+    });
+
+    reader.readAsDataURL(file);
   }
 
 }

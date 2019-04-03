@@ -106,7 +106,6 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
   }
 
   GetPosicionLavanderia() {
-    // let _request;
     this._lavanderiaService.listPosiciones(this.formFilter.controls['Clave'].value, this.formFilter.controls['Nombre'].value)
       .subscribe(
         (res: any) => {
