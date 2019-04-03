@@ -272,6 +272,7 @@ export class TerminadoConsultaAuditoriaComponent implements OnInit, OnDestroy, A
   reset() {
     this.initFormGroupFilter();
     this.initFormGroup();
+    setTimeout(() => this.form.enable(), 100);
     this.otDetalle = {};
     this.selectedFile = null;
     this.dataSource = new MatTableDataSource();

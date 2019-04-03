@@ -8,6 +8,7 @@
       <button class="btn tooltipped modal-trigger" type="button"
               data-position="bottom" data-tooltip="Agrega una nueva auditoria de calidad"
               data-target="modalNewAuditoria"
+              (click)="reset()"
               name="btnAddAuditoria">
         Agregar
         <i class="material-icons right">send</i>
@@ -31,34 +32,18 @@
       </div>
       <div class="row">
         <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-          <!-- Opciones Column -->
-          <ng-container matColumnDef="Opciones">
-            <th mat-header-cell *matHeaderCellDef></th>
+          <!-- Cliente Column -->
+          <ng-container matColumnDef="Cliente">
+            <th mat-header-cell *matHeaderCellDef>Cliente</th>
             <td mat-cell *matCellDef="let element; let i = index">
-              <!--<a class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditDefectoTerminado"-->
-              <!--matTooltip="Edita el defecto  seleccionado">-->
-              <!--&lt;!&ndash;(click)="getInfoDefectoTerminado(defecto.ID)">&ndash;&gt;-->
-              <!--<i class="material-icons right">edit</i>-->
-              <!--</a>-->
+              {{element.Cliente}}
             </td>
           </ng-container>
 
-          <!-- Numero Column -->
-          <ng-container matColumnDef="Numero">
-            <th mat-header-cell *matHeaderCellDef> No.</th>
-            <td mat-cell *matCellDef="let element; let i = index"> {{i + 1}} </td>
-          </ng-container>
-
-          <!-- Cliente Column -->
-          <ng-container matColumnDef="Cliente">
-            <th mat-header-cell *matHeaderCellDef> Cliente</th>
-            <td mat-cell *matCellDef="let element"> {{element.Descripcion}} </td>
-          </ng-container>
-
-          <!-- Orden de trabajo Column -->
-          <ng-container matColumnDef="OrdenTrabajo">
-            <th mat-header-cell *matHeaderCellDef> Orden Trabajo</th>
-            <td mat-cell *matCellDef="let element"> {{element.OrdenTrabajo}} </td>
+          <!-- Marca Column -->
+          <ng-container matColumnDef="Marca">
+            <th mat-header-cell *matHeaderCellDef>Marca</th>
+            <td mat-cell *matCellDef="let element; let i = index"> {{element.Marca}} </td>
           </ng-container>
 
           <!-- PO Column -->
@@ -67,22 +52,16 @@
             <td mat-cell *matCellDef="let element"> {{element.PO}} </td>
           </ng-container>
 
-          <!-- Marca Column -->
-          <ng-container matColumnDef="Marca">
-            <th mat-header-cell *matHeaderCellDef> Marca</th>
-            <td mat-cell *matCellDef="let element"> {{element.Marca}} </td>
+          <!-- Corte Column -->
+          <ng-container matColumnDef="Corte">
+            <th mat-header-cell *matHeaderCellDef> Corte</th>
+            <td mat-cell *matCellDef="let element"> {{element.Corte}} </td>
           </ng-container>
 
-          <!-- NumCortada Column -->
-          <ng-container matColumnDef="NumCortada">
-            <th mat-header-cell *matHeaderCellDef> NumCortada</th>
-            <td mat-cell *matCellDef="let element"> {{element.NumCortada}} </td>
-          </ng-container>
-
-          <!-- Lavado Column -->
-          <ng-container matColumnDef="Lavado">
-            <th mat-header-cell *matHeaderCellDef> Lavado</th>
-            <td mat-cell *matCellDef="let element"> {{element.Lavado}} </td>
+          <!-- Planta Column -->
+          <ng-container matColumnDef="Planta">
+            <th mat-header-cell *matHeaderCellDef> Planta</th>
+            <td mat-cell *matCellDef="let element"> {{element.Planta}} </td>
           </ng-container>
 
           <!-- Estilo Column -->
@@ -91,10 +70,72 @@
             <td mat-cell *matCellDef="let element"> {{element.Estilo}} </td>
           </ng-container>
 
-          <!-- Planta Column -->
-          <ng-container matColumnDef="Planta">
-            <th mat-header-cell *matHeaderCellDef> Planta</th>
-            <td mat-cell *matCellDef="let element"> {{element.Planta}} </td>
+          <!-- Fecha Inicio Column -->
+          <ng-container matColumnDef="Fecha Inicio">
+            <th mat-header-cell *matHeaderCellDef> Fecha Inicio</th>
+            <td mat-cell *matCellDef="let element"> {{element.Fecha_i | date: 'dd/MM/yyyy'}} </td>
+          </ng-container>
+
+          <!-- Fecha fin de trabajo Column -->
+          <ng-container matColumnDef="Fecha fin">
+            <th mat-header-cell *matHeaderCellDef> Fecha fin</th>
+            <td mat-cell *matCellDef="let element">
+              {{element.Fecha_f === '0001-01-01T00:00:00' ? '' : element.Fecha_f | date: 'dd/MM/yyyy'}}
+            </td>
+          </ng-container>
+
+          <!-- Pzas Recup. -->
+          <ng-container matColumnDef="Pzas Recup.">
+            <th mat-header-cell *matHeaderCellDef class="alinear-der"> Pzas Recup.</th>
+            <td mat-cell *matCellDef="let element" (dblclick)="openModalDetalle(element)"
+                class="right-align"> {{element.pzas_r | numberFormat}} </td>
+          </ng-container>
+
+          <!-- Pzas Criterio Column -->
+          <ng-container matColumnDef="Pzas Criterio">
+            <th mat-header-cell *matHeaderCellDef class="alinear-der"> Pzas Criterio</th>
+            <td mat-cell *matCellDef="let element" (dblclick)="openModalDetalle(element)"
+                class="right-align"> {{element.pzas_c | numberFormat}} </td>
+          </ng-container>
+
+          <!-- 2das Finales Column -->
+          <ng-container matColumnDef="2das Finales">
+            <th mat-header-cell *matHeaderCellDef class="alinear-der"> 2das Finales</th>
+            <td mat-cell *matCellDef="let element" (dblclick)="openModalDetalle(element)"
+                class="right-align"> {{element.pzas_2 | numberFormat}} </td>
+          </ng-container>
+
+          <!-- Totales Finales Column -->
+          <ng-container matColumnDef="Totales">
+            <th mat-header-cell *matHeaderCellDef class="alinear-der"> Totales</th>
+            <td mat-cell *matCellDef="let element" class="right-align"> {{element.total | numberFormat}} </td>
+          </ng-container>
+
+          <!-- Status Finales Column -->
+          <ng-container matColumnDef="Status">
+            <th mat-header-cell *matHeaderCellDef class="alinear-der"> Status</th>
+            <td mat-cell *matCellDef="let element" class="alinear-der"> {{element.status}} </td>
+          </ng-container>
+
+          <!-- Status Finales Column -->
+          <ng-container matColumnDef="Opciones">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let element" class="alinear-der">
+              <button type="button" name="btnAddCortador"
+                      class="btn light-blue darken-4 modal-trigger mr-3"
+                      data-target="modalEditAuditoria"
+                      matTooltip="Ver y/o Editar"
+                      (click)="openModal(element)">
+                <i class="material-icons center">edit</i>
+              </button>
+              <!--TODO: *ngIf="element.Fecha_f === '0001-01-01T00:00:00'"-->
+              <button type="button" name="btnAddCortador"
+                      class="btn red darken-4"
+                      matTooltip="Eliminar"
+                      (click)="eliminarAuditoria(element.IdAuditoria)">
+                <i class="material-icons center">delete_forever</i>
+              </button>
+            </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
@@ -348,6 +389,529 @@
       <div class="col s6" style="text-align: right">
         <a (click)="guardarAuditoria()"
            class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--MODAL EDIT AUDITORIA-->
+<div style="width: 80%" id="modalEditAuditoria" class="modal modal-fixed-footer modal-lg">
+  <div class="modal-content">
+    <h4>Auditoría Calidad - {{otDetalle?.IdAuditoria}}</h4>
+    <div class="row">
+      <div class="input-field col s4">
+        <i class="material-icons prefix">details</i>
+        <input id="ddlOT" name="ddlOT" type="text" class="validate"
+               [value]="otDetalle?.OrdenTrabajo" [readonly]="true">
+        <label for="ddlOT">Orden Trabajo</label>
+      </div>
+      <div class="col s2">
+        <label class="encabezado-detalle f-w-bold">STATUS: </label>
+        <label class="encabezado-detalle" id="lblEstado">
+          {{otDetalle?.FechaRegistroFin === null ? 'ABIERTA' : 'CERRADA'}}
+        </label>
+      </div>
+      <div class="col s3"></div>
+      <div class="col s3">
+        <button class="green darken-4 btn tooltiped"
+                *ngIf="otDetalle?.FechaRegistroFin ===null"
+                (click)="cerrarAuditoria()">
+          CERRAR AUDITORIA
+          <i class="material-icons right">lock</i>
+        </button>
+      </div>
+    </div>
+    <hr class="border">
+    <div class="row">
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">CLIENTE: </label>
+        <label id="lblCliente" class="encabezado-detalle">{{otDetalle?.Cliente}}</label>
+      </div>
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">PO: </label>
+        <label class="encabezado-detalle" id="lblPO">{{otDetalle?.PO}}</label>
+      </div>
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">TELA: </label>
+        <label class="encabezado-detalle" id="lblTela">{{otDetalle?.Tela_int}}</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">MARCA: </label>
+        <label class="encabezado-detalle" id="lblMarca">{{otDetalle?.Marca}}</label>
+      </div>
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">#CORTADA: </label>
+        <label class="encabezado-detalle" id="lblNoCortada">{{otDetalle?.No_Cortada}}</label>
+      </div>
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">LAVADO: </label>
+        <label class="encabezado-detalle" id="lblLavado">{{otDetalle?.Lavado}}</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">ESTILO: </label>
+        <label class="encabezado-detalle" id="lblEstilo">{{otDetalle?.Estilo}}</label>
+      </div>
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">PLANTA: </label>
+        <label class="encabezado-detalle" id="lblPlanta">{{otDetalle?.Planta}}</label>
+      </div>
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">RUTA: </label>
+        <label class="encabezado-detalle" id="lblRuta">{{otDetalle?.Ruta}}</label>
+      </div>
+    </div>
+    <hr class="border">
+    <form class="col s12" [formGroup]="form" style="margin-top: 1rem;">
+      <div class="row">
+        <mat-form-field class="col s6">
+          <mat-label>DEFECTO</mat-label>
+          <mat-select formControlName="Defecto">
+            <mat-option *ngFor="let defecto of defectos" [value]="defecto">
+              {{defecto.Descripcion}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="row">
+        <mat-form-field class="col s6">
+          <mat-label>OPERACIÓN</mat-label>
+          <mat-select formControlName="Operacion">
+            <mat-option *ngFor="let operacion of operaciones" [value]="operacion">
+              {{operacion.Nombre}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="row">
+        <mat-form-field class="col s6">
+          <mat-label>POSICIÓN</mat-label>
+          <mat-select formControlName="Posicion">
+            <mat-option *ngFor="let posicion of posiciones" [value]="posicion">
+              {{posicion.Nombre}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="row">
+        <mat-form-field class="col s6">
+          <mat-label>ORIGEN</mat-label>
+          <mat-select formControlName="Origen">
+            <mat-option *ngFor="let origen of origenes" [value]="origen">
+              {{origen.Nombre}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="row">
+        <div class="input-field col s4">
+          <input id="recuperadas" class="validate" type="text" style="text-align: right;"
+                 inputmode="numeric" pattern="[0-9]*" digitOnly
+                 formControlName="Recup"/>
+          <label for="recuperadas">Pzas Recuperadas</label>
+          <small style="float: right">
+            {{form.controls['Recup'].value ? (form.controls['Recup'].value | numberFormat) : ''}}
+          </small>
+        </div>
+        <div class="input-field col s4">
+          <input id="criterio" class="validate" type="text" style="text-align: right;"
+                 inputmode="numeric" pattern="[0-9]*" digitOnly
+                 formControlName="Criterio"/>
+          <label for="criterio">Pzas Criterio</label>
+          <small style="float: right">
+            {{form.controls['Criterio'].value ? (form.controls['Criterio'].value | numberFormat) : ''}}
+          </small>
+        </div>
+        <div class="input-field col s4">
+          <input id="segundas" class="validate" type="text" style="text-align: right;"
+                 inputmode="numeric" pattern="[0-9]*" digitOnly
+                 formControlName="Fin"/>
+          <label for="segundas">2das Fin</label>
+          <small style="float: right">
+            {{form.controls['Fin'].value ? (form.controls['Fin'].value | numberFormat) : ''}}
+          </small>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <textarea id="textarea1" class="materialize-textarea" formControlName="Nota"></textarea>
+          <label for="textarea1">NOTA:</label>
+        </div>
+      </div>
+      <div class="row" *ngIf="otDetalle?.FechaRegistroFin ===null">
+        <div class="col s6">
+          <label class="image-upload-container btn btn-bwm">
+            <span>
+              <i class="material-icons">image</i>
+              Selecciona imagen
+            </span>
+            <input #imageInput2
+                   type="file"
+                   accept="image/*"
+                   (change)="processFile(imageInput2, false, 'imagen')">
+          </label>
+
+          <div *ngIf="selectedFile" class="img-preview-container">
+            <div class="img-preview{{selectedFile.status === 'fail' ? '-error' : ''}}"
+                 [ngStyle]="{'background-image': 'url('+ selectedFile.src + ')'}">
+            </div>
+          </div>
+        </div>
+        <div class="file-field input-field col s6">
+          <div class="btn">
+            <span>Seleccionar archivo</span>
+            <input type="file" accept="application/pdf"
+                   #fileInput
+                   (change)="processFile(fileInput, false, 'archivo')">
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text" formControlName="NombreArchivo">
+          </div>
+        </div>
+      </div>
+      <br/>
+      <div style="text-align: right">
+        <button type="button" name="btnAddCortador"
+                class="btn light-blue darken-4 tooltipped waves-effect waves-light w-100"
+                data-position="bottom" data-tooltip="Agrega elemento a auditoría"
+                (click)="validaAgregaAuditoriaEdit()"
+                [disabled]="otDetalle?.FechaRegistroFin!==null"
+        >Agregar
+          <i class="material-icons right">send</i>
+        </button>
+      </div>
+      <div class="row">
+        <table mat-table [dataSource]="dataSourceEdit" class="mat-elevation-z8">
+          <!-- Defecto Column -->
+          <ng-container matColumnDef="Defecto">
+            <th mat-header-cell *matHeaderCellDef>DEFECTO</th>
+            <td mat-cell *matCellDef="let element; let i = index">
+              {{element.Defecto}}
+            </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <!-- Operación Column -->
+          <ng-container matColumnDef="Operacion">
+            <th mat-header-cell *matHeaderCellDef>OPERACIÓN</th>
+            <td mat-cell *matCellDef="let element; let i = index"> {{element.Operacion}} </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <!-- Posicion Column -->
+          <ng-container matColumnDef="Posicion">
+            <th mat-header-cell *matHeaderCellDef> POSICION</th>
+            <td mat-cell *matCellDef="let element"> {{element.Posicion}} </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <!-- Origen Column -->
+          <ng-container matColumnDef="Origen">
+            <th mat-header-cell *matHeaderCellDef> ORIGEN</th>
+            <td mat-cell *matCellDef="let element"> {{element.Origen}} </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <!-- PZAS.RECUP Column -->
+          <ng-container matColumnDef="Recup">
+            <th mat-header-cell *matHeaderCellDef class="alinear-der"> PZAS.RECUP</th>
+            <td mat-cell *matCellDef="let element" class="right-align"> {{element.Recup | numberFormat}} </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <!-- PZAS.CRIT Column -->
+          <ng-container matColumnDef="Criterio">
+            <th mat-header-cell *matHeaderCellDef class="alinear-der"> PZAS.CRIT</th>
+            <td mat-cell *matCellDef="let element" class="right-align"> {{element.Criterio | numberFormat}} </td>
+            <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold"></td>
+          </ng-container>
+
+          <!-- 2DAS FIN Column -->
+          <ng-container matColumnDef="2das">
+            <th mat-header-cell *matHeaderCellDef class="alinear-der"> 2DAS FIN</th>
+            <td mat-cell *matCellDef="let element" class="right-align"> {{element.Fin |numberFormat}} </td>
+            <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold"></td>
+          </ng-container>
+
+          <!-- Imagen Column -->
+          <ng-container matColumnDef="Imagen">
+            <th mat-header-cell *matHeaderCellDef class="alinear-der"> IMAGEN</th>
+            <td mat-cell *matCellDef="let element" class="alinear-der">
+              <img [src]="element.Aud_Imagen" alt="imagen" style="width:40px;height:40px;"
+                   class="cursor"
+                   matTooltip="Ver imagen"
+                   *ngIf="element.Aud_Imagen !== null && element.Aud_Imagen !== ''"
+                   (click)="openImage(element.Aud_Imagen)">
+            </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <!-- Nota column-->
+          <ng-container matColumnDef="Nota">
+            <th mat-header-cell *matHeaderCellDef class="alinear-der"> NOTA</th>
+            <td mat-cell *matCellDef="let element" class="alinear-der"> {{element.Nota}} </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <!-- Archivo Column -->
+          <ng-container matColumnDef="Archivo">
+            <th mat-header-cell *matHeaderCellDef class="alinear-der"> ARCHIVO</th>
+            <td mat-cell *matCellDef="let element" class="alinear-der">
+              <i class="material-icons prefix cursor" *ngIf="element.Archivo"
+                 (click)="openPDF(element.Archivo, 'archivo')"
+                 matTooltip="Descargar archivo">
+                attach_file
+              </i>
+              <p *ngIf="!element.Archivo">No hay archivo</p>
+            </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <!-- Opciones column-->
+          <ng-container matColumnDef="Opciones">
+            <th mat-header-cell *matHeaderCellDef class="alinear-der"></th>
+            <td mat-cell *matCellDef="let element; let i = index" class="alinear-der">
+              <button class="waves-effect waves-light red darken-4 btn tooltiped bold_sub"
+                      *ngIf="otDetalle?.FechaRegistroFin ===null"
+                      matTooltip="Eliminar"
+                      (click)="eliminar(i)">
+                <i class="material-icons">delete</i>
+              </button>
+            </td>
+            <td mat-footer-cell *matFooterCellDef></td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumnsEdit"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumnsEdit;"></tr>
+          <tr mat-footer-row *matFooterRowDef="displayedColumnsEdit"></tr>
+        </table>
+<!--        <table-->
+<!--          id="second-table"-->
+<!--          datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="row-border">-->
+<!--          <thead>-->
+<!--          <tr>-->
+<!--            <th>No.</th>-->
+<!--            <th>DEFECTO</th>-->
+<!--            <th>OPERACIÓN</th>-->
+<!--            <th>POSICIÓN</th>-->
+<!--            <th>ORIGEN</th>-->
+<!--            <th>PZAS.REC</th>-->
+<!--            <th>PZAS.CRIT</th>-->
+<!--            <th>2DAS.FIN</th>-->
+<!--            <th>IMAGEN</th>-->
+<!--            <th>NOTA</th>-->
+<!--            <th>ARCHIVO</th>-->
+<!--            <th></th>-->
+<!--          </tr>-->
+<!--          </thead>-->
+<!--          <tbody>-->
+<!--          <tr *ngFor="let item of items; let i = index">-->
+<!--            <td>{{i + 1}}</td>-->
+<!--            <td>{{item.Defecto}}</td>-->
+<!--            <td>{{item.Operacion}}</td>-->
+<!--            <td>{{item.Posicion}}</td>-->
+<!--            <td>{{item.Origen}}</td>-->
+<!--            <td class="alinear-der">{{item.Recup | numberFormat}}</td>-->
+<!--            <td class="alinear-der">{{item.Criterio | numberFormat}}</td>-->
+<!--            <td class="alinear-der">{{item.Fin | numberFormat}}</td>-->
+<!--            <td>-->
+<!--              <img [src]="item.Aud_Imagen" alt="imagen" style="width:40px;height:40px;"-->
+<!--                   class="cursor"-->
+<!--                   matTooltip="Descargar imagen"-->
+<!--                   *ngIf="item.Aud_Imagen !== null && item.Aud_Imagen !== ''" (click)="openImage(item.Aud_Imagen)">-->
+<!--            </td>-->
+<!--            <td>{{item.Nota}}</td>-->
+<!--            <td></td>-->
+<!--            <td class="center-align">-->
+<!--              <button class="waves-effect waves-light red darken-4 btn tooltiped bold_sub"-->
+<!--                      *ngIf="otDetalle?.FechaRegistroFin ===null"-->
+<!--                      matTooltip="Eliminar"-->
+<!--                      (click)="eliminar(i)">-->
+<!--                <i class="material-icons">delete</i>-->
+<!--              </button>-->
+<!--            </td>-->
+<!--          </tr>-->
+<!--          </tbody>-->
+<!--        </table>-->
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat" (click)="closeModal()">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="guardarAuditoriaEdit()"
+           class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="modal-detalle" class="modal modal-fixed-footer modal-lg">
+  <div class="modal-content">
+    <div class="row">
+      <span class="close" (click)="closeModalDetalle()">&times;</span>
+      <h4 class="center-align">AUDITORIA CALIDAD</h4>
+    </div>
+    <div class="row">
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">OT: </label>
+        <label class="encabezado-detalle">{{otDetalle?.OrdenTrabajo}}</label>
+      </div>
+    </div>
+    <hr class="border">
+    <div class="row">
+      <div class="row">
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">CLIENTE: </label>
+          <label id="lblCliente" class="encabezado-detalle">{{otDetalle?.Descripcion}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">PO: </label>
+          <label class="encabezado-detalle" id="lblPO">{{otDetalle?.PO}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">TELA: </label>
+          <label class="encabezado-detalle" id="lblTela">{{otDetalle?.Tela}}</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">MARCA: </label>
+          <label class="encabezado-detalle" id="lblMarca">{{otDetalle?.Marca}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">#CORTADA: </label>
+          <label class="encabezado-detalle" id="lblNoCortada">{{otDetalle?.NumCortada}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">LAVADO: </label>
+          <label class="encabezado-detalle" id="lblLavado">{{otDetalle?.Lavado}}</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">ESTILO: </label>
+          <label class="encabezado-detalle" id="lblEstilo">{{otDetalle?.Estilo}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">PLANTA: </label>
+          <label class="encabezado-detalle" id="lblPlanta">{{otDetalle?.Planta}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">RUTA: </label>
+          <label class="encabezado-detalle" id="lblRuta">{{otDetalle?.Ruta}}</label>
+        </div>
+      </div>
+    </div>
+    <hr class="border">
+    <div class="row mt-3">
+      <table mat-table [dataSource]="dataSourceDetalle" class="mat-elevation-z8">
+        <!-- Defecto Column -->
+        <ng-container matColumnDef="Defecto">
+          <th mat-header-cell *matHeaderCellDef>DEFECTO</th>
+          <td mat-cell *matCellDef="let element; let i = index">
+            {{element.Defecto}}
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Operación Column -->
+        <ng-container matColumnDef="Operacion">
+          <th mat-header-cell *matHeaderCellDef>OPERACIÓN</th>
+          <td mat-cell *matCellDef="let element; let i = index"> {{element.Operacion}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Posicion Column -->
+        <ng-container matColumnDef="Posicion">
+          <th mat-header-cell *matHeaderCellDef> POSICION</th>
+          <td mat-cell *matCellDef="let element"> {{element.Posicion}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Origen Column -->
+        <ng-container matColumnDef="Origen">
+          <th mat-header-cell *matHeaderCellDef> ORIGEN</th>
+          <td mat-cell *matCellDef="let element"> {{element.Origen}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- PZAS.RECUP Column -->
+        <ng-container matColumnDef="Recup">
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> PZAS.RECUP</th>
+          <td mat-cell *matCellDef="let element" class="right-align"> {{element.Recup | numberFormat}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- PZAS.CRIT Column -->
+        <ng-container matColumnDef="Criterio">
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> PZAS.CRIT</th>
+          <td mat-cell *matCellDef="let element" class="right-align"> {{element.Criterio | numberFormat}} </td>
+          <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold"> TOTAL</td>
+        </ng-container>
+
+        <!-- 2DAS FIN Column -->
+        <ng-container matColumnDef="2das">
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> 2DAS FIN</th>
+          <td mat-cell *matCellDef="let element" class="right-align"> {{element.Fin |numberFormat}} </td>
+          <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold"> {{totalDetall}} </td>
+        </ng-container>
+
+        <!-- Imagen Column -->
+        <ng-container matColumnDef="Imagen">
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> IMAGEN</th>
+          <td mat-cell *matCellDef="let element" class="alinear-der">
+            <img [src]="element.Aud_Imagen" alt="imagen" style="width:40px;height:40px;"
+                 class="cursor"
+                 matTooltip="Ver imagen"
+                 *ngIf="element.Aud_Imagen !== null && element.Aud_Imagen !== ''"
+                 (click)="openImage(element.Aud_Imagen)">
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Nota column-->
+        <ng-container matColumnDef="Nota">
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> NOTA</th>
+          <td mat-cell *matCellDef="let element" class="alinear-der"> {{element.Nota}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Archivo Column -->
+        <ng-container matColumnDef="Archivo">
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> ARCHIVO</th>
+          <td mat-cell *matCellDef="let element" class="alinear-der">
+            <i class="material-icons prefix cursor" *ngIf="element.Archivo"
+               (click)="openPDF(element.Archivo, 'archivo')"
+               matTooltip="Descargar archivo">
+              attach_file
+            </i>
+            <p *ngIf="!element.Archivo">No hay archivo</p>
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsDetalle"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsDetalle;"></tr>
+        <tr mat-footer-row *matFooterRowDef="displayedColumnsDetalle"></tr>
+      </table>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6"></div>
+      <div class="col s6" style="text-align: right">
+        <button type="button" class="btn-flat mr-3" (click)="imprimirDetalle(otDetalle)">
+          <i class="material-icons left">print</i>
+          IMPRIMIR
+        </button>
       </div>
     </div>
   </div>

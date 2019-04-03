@@ -5,6 +5,7 @@ import {ClientesService} from '../services/clientes/clientes.service';
 import {MatTableDataSource} from '@angular/material';
 import {SelectionModel} from '@angular/cdk/collections';
 import {ToastrService} from 'ngx-toastr';
+import {switchMap} from 'rxjs/operators';
 
 declare var M: any;
 
@@ -82,26 +83,43 @@ export class MarcaClienteComponent implements OnInit, OnDestroy, AfterViewInit {
       );
   }
 
-  obtenerMarcas(modal, cliente, accion) {
+  obtenerMarcas(modal, cliente) {
     this.idClienteRef = cliente.IdClienteRef;
-    if( accion === 'nuevo') {
+    // if ( accion === 'nuevo') {
       this._clientesService.listClienteMarcas()
+        .pipe(
+          switchMap( (res: any) => {
+            this.dataSource = new MatTableDataSource<any>(res.Marcas);
+            return this._clientesService.getClienteMarca(this.idClienteRef);
+          })
+        )
         .subscribe(
           (res: any) => {
             console.log(res);
-            this.dataSource = new MatTableDataSource<any>(res.Marcas);
+            let marcas = res.Marcas;
+            let copyDataSourceEdit = [];
+            this.dataSource.data.forEach( (x, i) => {
+              marcas.forEach( y => {
+                if ( y.Clave === x.Clave ) {
+                  copyDataSourceEdit.push(x);
+                }
+              });
+            });
+            console.log('Seleccion: ', copyDataSourceEdit);
+            this.selection = new SelectionModel(true, copyDataSourceEdit);
+            // this.dataSource = new MatTableDataSource<any>(res.Marcas);
           }
         );
-    }
-    if (accion === 'editar') {
-      this._clientesService.getClienteMarca(this.idClienteRef)
-        .subscribe(
-          (res: any) => {
-            this.dataSource = new MatTableDataSource(res.Marcas);
-            this.selection = new SelectionModel(true, this.dataSource.data);
-          }
-        );
-    }
+    // }
+    // if (accion === 'editar') {
+    //   this._clientesService.getClienteMarca(this.idClienteRef)
+    //     .subscribe(
+    //       (res: any) => {
+    //         this.dataSource = new MatTableDataSource(res.Marcas);
+    //         this.selection = new SelectionModel(true, this.dataSource.data);
+    //       }
+    //     );
+    // }
     const instance = M.Modal.getInstance(modal);
     instance.open();
   }

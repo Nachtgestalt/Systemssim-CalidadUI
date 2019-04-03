@@ -1,43 +1,78 @@
 <div class="card-panel">
   <div class="row">
-    <form class="col s12">
+    <form class="col s12" [formGroup]="formFilter">
       <div class="row">
         <div class="input-field col s3">
           <i class="material-icons prefix">font_download</i>
-          <input id="CLAVE_CORTADOR" type="text" class="validate">
+          <input id="CLAVE_CORTADOR" type="text" class="validate"
+                 formControlName="Clave">
           <label for="CLAVE_CORTADOR">Clave</label>
         </div>
         <div class="input-field col s3">
           <i class="material-icons prefix">account_box</i>
-          <input id="NOMBRE_CORTADOR" type="text" class="validate">
+          <input id="NOMBRE_CORTADOR" type="text" class="validate"
+                 formControlName="Nombre">
           <label for="NOMBRE_CORTADOR">Nombre</label>
         </div>
         <div class="col s6" style="text-align: right">
-          <button (click)="GetPosicionLavanderia()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar las posiciones po posición del cortador, filtro seleccionado" type="button" name="btnSearchPosicionCortador">Buscar
+          <button (click)="GetPosicionLavanderia()" class="btn tooltipped waves-effect waves-light"
+                  data-position="bottom"
+                  data-tooltip="Consultar las posiciones po posición del cortador, filtro seleccionado" type="button"
+                  name="btnSearchPosicionCortador">Buscar
             <i class="material-icons right">search</i>
           </button>
         </div>
       </div>
       <div class="row">
-        <table id="tlbPosicionProcesosEspeciales" class="row-border hover">
+        <table id="tlbPosicionProcesosEspeciales" class="row-border hover"
+               datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
           <thead>
-          <th></th>
-          <th>Clave Posición</th>
-          <th>Nombre Posición</th>
-          <th>Estatus</th>
-          <th></th>
+          <tr>
+            <th></th>
+            <th>No.</th>
+            <th>Clave Defecto</th>
+            <th>Nombre Defecto</th>
+            <th>Estatus</th>
+            <th></th>
+          </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+          <tr *ngFor="let posicion of posiciones; let i = index" (dblclick)="eliminar(posicion)">
+            <td>
+              <button
+                class="btn modal-trigger" data-target="modalEditPosicionLavanderia"
+                matTooltip="Edita la posición seleccionada"
+                (click)="getDetalle(posicion.ID)"
+                [disabled]="posicion.Activo === false">
+                <i class="material-icons center">edit</i>
+              </button>
+            </td>
+            <td>{{i}}</td>
+            <td>{{posicion.Clave}}</td>
+            <td>{{posicion.Nombre}}</td>
+            <td>{{posicion.Activo ? 'SI' : 'No'}}</td>
+            <td>
+              <a class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableDefectoCortador"
+                 data-tooltiped="Activa / Inactiva el cortador seleccionado"
+                 (click)="GetEnabledPosicionLavanderia(posicion.ID)">
+                <strong><u>{{posicion.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u></strong>
+              </a>
+            </td>
+          </tr>
+          </tbody>
         </table>
       </div>
-      <br />
+      <br/>
       <div class="row" style="text-align: right">
         <div class="col s12">
           <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
             <i class="material-icons left">arrow_back</i>
           </button>
           &nbsp;&nbsp;
-          <button class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega una nueva posición cortador" data-target="modalNewPosicionProcesosEspeciales" type="button" name="btnAddPosicionCortador">Agregar
+          <button class="btn modal-trigger"
+                  data-target="modalNewPosicionLavanderia"
+                  type="button" name="btnAddPosicionCortador"
+                  (click)="getOperacionesActivas()">Agregar
             <i class="material-icons right">send</i>
           </button>
         </div>
@@ -47,62 +82,100 @@
 </div>
 
 <!-- Update Enabled Cortador -->
-<div id="modalEnablePosicionProcesosEspeciales" class="modal">
-  <div class="modal-content">
-    <div style="text-align: center">
-      <p>¿Realmente deseas activar o desactivar la posición del proceso especial-?</p>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <div class="row">
-      <div class="col s6" style="text-align: left">
-        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
-      </div>
-      <div class="col s6" style="text-align: right">
-        <a (click)="GetEnabledPosicionProcesosEspeciales();" class="waves-effect waves-green btn-flat">Aceptar</a>
-      </div>
-    </div>
-  </div>
-</div>
+<!--<div id="modalEnablePosicionProcesosEspeciales" class="modal">-->
+<!--  <div class="modal-content">-->
+<!--    <div style="text-align: center">-->
+<!--      <p>¿Realmente deseas activar o desactivar la posición del proceso especial-?</p>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--  <div class="modal-footer">-->
+<!--    <div class="row">-->
+<!--      <div class="col s6" style="text-align: left">-->
+<!--        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>-->
+<!--      </div>-->
+<!--      <div class="col s6" style="text-align: right">-->
+<!--        <a (click)="GetEnabledPosicionLavanderia();" class="waves-effect waves-green btn-flat">Aceptar</a>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
 
 <!-- Nueva Posición -->
-<div id="modalNewPosicionProcesosEspeciales" class="modal modal-fixed-footer">
+<div id="modalNewPosicionLavanderia" class="modal modal-fixed-footer">
   <div class="modal-content">
-    <h4>Nueva Posición Procesos Especiales</h4>
-    <form class="col s12">
+    <h4>Nueva Posición Lavanderia</h4>
+    <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s4">
           <i class="material-icons prefix">account_box</i>
-          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate">
+          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate"
+          formControlName="Clave">
           <label for="CVE_NEW_CORTADOR">Clave</label>
         </div>
         <div class="input-field col s4">
           <i class="material-icons prefix">account_circle</i>
-          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate">
+          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate"
+          formControlName="Nombre">
           <label for="NOMBRE_NEW_CORTADOR">Nombre:</label>
         </div>
       </div>
       <div class="row">
         <div class="input-field col s6">
           <i class="material-icons prefix">font_download</i>
-          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate">
+          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate"
+          formControlName="Observaciones">
           <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>
         </div>
         <div class="input-field col s6">
           <i class="material-icons prefix">font_download</i>
-          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate">
+          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate"
+          formControlName="Descripcion">
           <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>
         </div>
       </div>
       <div class="row">
-        <table id="tlbPosicionDefecto" class="row-border hover">
-          <thead>
-          <th></th>
-          <th>No.</th>
-          <th>Clave Defecto</th>
-          <th>Nombre Defecto</th>
-          </thead>
-          <tbody id="tdby_Posicion"></tbody>
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+          <!-- Checkbox Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox (change)="$event ? masterToggle() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()"
+                            [aria-label]="checkboxLabel()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="$event ? selection.toggle(row) : null"
+                            [checked]="selection.isSelected(row)"
+                            [aria-label]="checkboxLabel(row)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- Position Column -->
+          <ng-container matColumnDef="posicion">
+            <th mat-header-cell *matHeaderCellDef> No</th>
+            <td mat-cell *matCellDef="let element; let i = index"> {{i + 1}} </td>
+          </ng-container>
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="clave">
+            <th mat-header-cell *matHeaderCellDef> CLAVE</th>
+            <td mat-cell *matCellDef="let element"> {{element.Clave}} </td>
+          </ng-container>
+
+          <!-- Weight Column -->
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef> NOMBRE</th>
+            <td mat-cell *matCellDef="let element"> {{element.Nombre}} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+              (click)="selection.toggle(row)">
+          </tr>
         </table>
       </div>
     </form>
@@ -113,7 +186,100 @@
         <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
       </div>
       <div class="col s6" style="text-align: right">
-        <a (click)="NewPosicionProcesosEspeciales()" onclick="javascript: GetCheckPosicion()" class="waves-effect waves-green btn-flat">Aceptar</a>
+        <a (click)="NewPosicionLavanderia()"
+           class="waves-effect waves-green btn-flat">Aceptar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="modalEditPosicionLavanderia" class="modal modal-fixed-footer">
+  <div class="modal-content">
+    <h4>Nueva Posición Lavanderia</h4>
+    <form class="col s12" [formGroup]="form">
+      <div class="row">
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_box</i>
+          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate"
+                 formControlName="Clave">
+          <label for="CVE_NEW_CORTADOR">Clave</label>
+        </div>
+        <div class="input-field col s4">
+          <i class="material-icons prefix">account_circle</i>
+          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate"
+                 formControlName="Nombre">
+          <label for="NOMBRE_NEW_CORTADOR">Nombre:</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate"
+                 formControlName="Observaciones">
+          <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>
+        </div>
+        <div class="input-field col s6">
+          <i class="material-icons prefix">font_download</i>
+          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate"
+                 formControlName="Descripcion">
+          <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>
+        </div>
+      </div>
+      <div class="row">
+        <table mat-table [dataSource]="dataSourceEdit" class="mat-elevation-z8">
+
+          <!-- Checkbox Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox (change)="$event ? masterToggle() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()"
+                            [aria-label]="checkboxLabel()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="$event ? selection.toggle(row) : null"
+                            [checked]="selection.isSelected(row)"
+                            [aria-label]="checkboxLabel(row)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- Position Column -->
+          <ng-container matColumnDef="posicion">
+            <th mat-header-cell *matHeaderCellDef> No</th>
+            <td mat-cell *matCellDef="let element; let i = index"> {{i + 1}} </td>
+          </ng-container>
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="clave">
+            <th mat-header-cell *matHeaderCellDef> CLAVE</th>
+            <td mat-cell *matCellDef="let element"> {{element.Clave}} </td>
+          </ng-container>
+
+          <!-- Weight Column -->
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef> NOMBRE</th>
+            <td mat-cell *matCellDef="let element"> {{element.Nombre}} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumnsEdit"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumnsEdit;"
+              (click)="selection.toggle(row)">
+          </tr>
+        </table>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6" style="text-align: left">
+        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+      </div>
+      <div class="col s6" style="text-align: right">
+        <a (click)="NewPosicionLavanderia()"
+           class="waves-effect waves-green btn-flat">Aceptar</a>
       </div>
     </div>
   </div>

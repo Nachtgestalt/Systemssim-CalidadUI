@@ -294,6 +294,7 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
     this.selectedFile = null;
     this.initFormGroup();
     this.initFormGroupFilter();
+    setTimeout(() => this.form.enable(), 100);
     this.dataSource = new MatTableDataSource();
     this.dtElem.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.destroy();

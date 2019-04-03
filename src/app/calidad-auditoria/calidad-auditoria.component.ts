@@ -10,6 +10,10 @@ import {MatTableDataSource} from '@angular/material';
 import {forkJoin, Subject} from 'rxjs';
 import 'jquery';
 import {AuditoriaCalidadService} from '../services/calidad/auditoria-calidad.service';
+import {ReportesService} from '../services/reportes/reportes.service';
+import {DomSanitizer} from '@angular/platform-browser';
+import swal from 'sweetalert';
+import {ClientesService} from '../services/clientes/clientes.service';
 
 declare var $: any;
 declare var M: any;
@@ -22,12 +26,16 @@ declare var M: any;
 export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, AfterViewInit, OnDestroy {
 
   @ViewChild(DataTableDirective) dtElement: DataTableDirective;
+  @ViewChild(DataTableDirective) dtElem: DataTableDirective;
 
   constructor(private _defectoTerminadoService: TerminadoService,
               private _operacionTerminadoService: OperacionesService,
               private _posicionTerminadoService: PosicionTerminadoService,
               private _origenTerminadoService: OrigenTerminadoService,
               private _auditoriaCalidadService: AuditoriaCalidadService,
+              private _reporteService: ReportesService,
+              private domSanitizer: DomSanitizer,
+              private _clientesService: ClientesService,
               private _toast: ToastrService) {
   }
 
@@ -42,7 +50,7 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
   ordenesTrabajo = [];
   auditorias = [];
 
-  otDetalle = new OtDetalle();
+  otDetalle;
   mostrarOT = false;
   bloquearOT = false;
   ordenTrabajo = '';
@@ -51,11 +59,25 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
 
   dtOptions = {};
   displayedColumns: string[] = [
-    'Opciones', 'Numero', 'Cliente', 'OrdenTrabajo', 'PO', 'Marca', 'NumCortada', 'Lavado', 'Estilo', 'Planta'
+    'Cliente', 'Marca', 'PO', 'Corte', 'Planta', 'Estilo', 'Fecha Inicio',
+    'Fecha fin', 'Pzas Recup.', 'Pzas Criterio', '2das Finales', 'Totales',
+    'Status', 'Opciones'
   ];
+
+  displayedColumnsDetalle: string[] = [
+    'Defecto', 'Operacion', 'Posicion', 'Origen', 'Recup', 'Criterio', '2das',
+    'Imagen', 'Nota', 'Archivo'];
+  displayedColumnsEdit: string[] = [
+    'Defecto', 'Operacion', 'Posicion', 'Origen', 'Recup', 'Criterio', '2das',
+    'Imagen', 'Nota', 'Archivo', 'Opciones'];
   dataSource: MatTableDataSource<any>;
+  dataSourceDetalle: MatTableDataSource<any>;
+  dataSourceEdit: MatTableDataSource<any>;
   // dataSource = [];
   dtTrigger: Subject<any> = new Subject();
+
+
+  totalDetall = 0;
 
   ngOnInit() {
     this.dtOptions = {
@@ -137,10 +159,21 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
   }
 
   cargarAuditorias() {
-    this._auditoriaCalidadService.listAuditorias().subscribe(
+    const filtro = {
+      Fecha_i: null,
+      Fecha_f: null,
+      IdCliente: null,
+      Marca: null,
+      PO: null,
+      Corte: null,
+      Planta: null,
+      Estilo: null,
+      Auditoria: 'Calidad'
+    };
+    this._clientesService.busqueda(filtro).subscribe(
       (res: any) => {
-        this.dataSource = new MatTableDataSource(res.RES);
         console.log(res);
+        this.dataSource = new MatTableDataSource(res.Auditoria);
       }
     );
   }
@@ -166,7 +199,7 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
         (res: any) => {
           console.log(res);
           if (res.Message.StatusCode === 409) {
-            this.otDetalle = new OtDetalle();
+            this.otDetalle = null;
             this.reset();
             this._toast.warning(res.Message2, '');
           } else {
@@ -216,12 +249,54 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
   }
 
   eliminar(index) {
-    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-      dtInstance.destroy();
-      this.Det.splice(index, 1);
-      this.items.splice(index, 1);
-      this.dtTrigger.next();
-    });
+    this.Det.splice(index, 1);
+    this.items.splice(index, 1);
+    this.dataSourceEdit = new MatTableDataSource(this.items);
+    // this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+    //   dtInstance.destroy();
+    //   this.Det.splice(index, 1);
+    //   this.items.splice(index, 1);
+    //   this.dtTrigger.next();
+    // });
+  }
+
+  guardarAuditoriaEdit() {
+    if (this.otDetalle.FechaRegistroFin !== null) {
+      const elem = document.querySelector('#modalNewAuditoria');
+      const instance = M.Modal.getInstance(elem);
+      instance.close();
+      this.cargarAuditorias();
+      this.reset();
+    } else {
+      if (this.Det.length > 0) {
+        const data = {
+          IdAuditoria: this.otDetalle.IdAuditoria,
+          Det: this.Det
+        };
+        this._auditoriaCalidadService.updateAuditoria(data)
+          .subscribe(
+            (res: any) => {
+              if (res.Response.StatusCode === 200) {
+                this._toast.success('Se actualizo correctamente auditoria calidad', '');
+                console.log(res);
+                const elem = document.querySelector('#modalEditAuditoria');
+                const instance = M.Modal.getInstance(elem);
+                instance.close();
+                this.cargarAuditorias();
+                this.reset();
+              } else {
+                this._toast.warning('Ups! Algo no salio bien', '');
+              }
+            },
+            error => {
+              console.log(error);
+              this._toast.error('Error al conectar a la base de datos', '');
+            }
+          );
+      } else {
+        this._toast.warning('La auditoría debe contener al menos un detalle', '');
+      }
+    }
   }
 
   guardarAuditoria() {
@@ -265,10 +340,12 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
   }
 
   reset() {
-    this.otDetalle = new OtDetalle();
+    this.Det = [];
+    this.otDetalle = null;
     this.bloquearOT = false;
     this.ordenTrabajo = '';
-    this.form.reset();
+    this.initFormGroup();
+    setTimeout(() => this.form.enable(), 100);
     this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.destroy();
       this.items = [];
@@ -288,7 +365,7 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
         this.form.get('Imagen').patchValue(event.target.result);
         this.selectedFile = new ImageSnippet(event.target.result, file);
         this.selectedFile.pending = true;
-      } else if ( tipo === 'archivo') {
+      } else if (tipo === 'archivo') {
         this.form.get('Archivo').patchValue(event.target.result);
       }
       // nuevo ? this.form.get('Imagen').patchValue(event.target.result) : this.formEdit.get('Imagen').patchValue(event.target.result);
@@ -299,6 +376,298 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
 
   applyFilter(filterValue: string) {
     this.dataSource.filter = filterValue.trim().toLowerCase();
+  }
+
+  openModal(auditoria) {
+    this.reset();
+    const defectos$ = this._defectoTerminadoService.listDefectos();
+    const operaciones$ = this._operacionTerminadoService.listOperaciones();
+    const posiciones$ = this._posicionTerminadoService.listPosiciones();
+    const origenes$ = this._origenTerminadoService.listOrigenes();
+    this._auditoriaCalidadService.getAuditoriaDetail(auditoria.IdAuditoria)
+      .subscribe((res: any) => {
+        this.otDetalle = res.RES;
+        setTimeout(() => M.updateTextFields(), 100);
+        if (this.otDetalle.FechaRegistroFin !== null) {
+          this.form.disable();
+        } else {
+          this.form.enable();
+        }
+        console.log(res);
+        this.items = res.RES_DET;
+        this.items.forEach(x => {
+          x.Imagen = x.Aud_Imagen;
+          this.Det.push(x);
+        });
+        this.dataSourceEdit = new MatTableDataSource(this.items);
+        // this.dtElem.dtInstance.then((dtInstance: DataTables.Api) => {
+        //   dtInstance.destroy();
+        //   this.items = res.RES_DET;
+        //   this.items.forEach(x => {
+        //     x.Imagen = x.Aud_Imagen;
+        //     this.Det.push(x);
+        //   });
+        //   console.log('DETALLE DESPUES DE CARGAR MODAL: ', this.Det);
+        //   this.dtTrigger.next();
+        // });
+      });
+
+
+    forkJoin(defectos$, operaciones$, posiciones$, origenes$)
+      .subscribe(
+        (res: Array<any>) => {
+          console.log(res);
+          this.defectos = res[0].Vst_Terminado;
+          this.operaciones = res[1].COperacionTerminados;
+          this.posiciones = res[2].c_posicion_t;
+          this.origenes = res[3].c_origen_t;
+        },
+        error => console.log(error),
+        () => {
+          console.log('TERMINE FORKJOIN');
+        }
+      );
+  }
+
+  eliminarAuditoria(id) {
+    console.log(id);
+    swal({
+      text: '¿Estas seguro de eliminar esta auditoria?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._auditoriaCalidadService.deleteAuditoria(id)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Response.StatusCode !== 409) {
+                  this._toast.success('Auditoria eliminada con exito', '');
+                  this.cargarAuditorias();
+                } else {
+                  this._toast.warning('Ups! Algo no salio bien', '');
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
+  }
+
+  cerrarAuditoria() {
+    swal({
+      text: '¿Estas seguro de cerrar esta auditoria?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._auditoriaCalidadService.cierreAuditoria(this.otDetalle.IdAuditoria)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res === null) {
+                  this._toast.success('Auditoria cerrada con exito', '');
+                  this.closeModal();
+                  this.cargarAuditorias();
+                } else {
+                  this._toast.warning('Ups! Algo no salio bien', '');
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
+  }
+
+  validaAgregaAuditoriaEdit() {
+    console.log(this.form.value);
+    console.log(this.ordenTrabajo);
+    if (!this.form.invalid) {
+      const detalle = this.form.value;
+      const detalleItem = {
+        'IdDefecto': detalle.Defecto.ID,
+        'IdOrigen': detalle.Origen.ID,
+        'IdPosicion': detalle.Posicion.ID,
+        'IdOperacion': detalle.Defecto.ID,
+        'Revisado': false,
+        'Compostura': !!detalle.Compostura,
+        // 'cantidad': detalle.Cantidad,
+        'Imagen': detalle.Imagen,
+        'Nota': detalle.Nota,
+        'Recup': +detalle.Recup,
+        'Criterio': +detalle.Criterio,
+        'Fin': +detalle.Fin,
+        'Archivo': detalle.Archivo
+      };
+      this.Det.push(detalleItem);
+      console.log(this.Det);
+      // this.dtElem.dtInstance.then((dtInstance: DataTables.Api) => {
+        // Destroy the table first
+        const defecto = this.form.controls['Defecto'].value;
+        const operacion = this.form.controls['Operacion'].value;
+        const posicion = this.form.controls['Posicion'].value;
+        const origen = this.form.controls['Origen'].value;
+        const recup = this.form.controls['Recup'].value;
+        const criterio = this.form.controls['Criterio'].value;
+        const fin = this.form.controls['Fin'].value;
+        const imagen = this.form.controls['Imagen'].value;
+        // dtInstance.destroy();
+        const itemTable = {
+          Defecto: defecto.Nombre,
+          Operacion: operacion.Nombre,
+          Posicion: posicion.Nombre,
+          Origen: origen.Nombre,
+          Recup: recup,
+          Criterio: criterio,
+          Fin: fin,
+          Aud_Imagen: imagen,
+          Nota: this.form.controls['Nota'].value
+        };
+        this.items.push(itemTable);
+        this.dataSourceEdit = new MatTableDataSource(this.items);
+        this.form.reset();
+        this.selectedFile = null;
+        const elems = document.querySelectorAll('select');
+        setTimeout(() => M.FormSelect.init(elems, {}), 500);
+        // Call the dtTrigger to rerender again
+        // this.dtTrigger.next();
+      // });
+    } else {
+      this._toast.warning('Error en formulario', '');
+    }
+  }
+
+  closeModal() {
+    const elem = document.querySelector('#modalEditAuditoria');
+    const instance = M.Modal.getInstance(elem);
+    this.Det = [];
+    instance.close();
+  }
+
+  openModalDetalle(auditoria) {
+    const modalDetalle = document.querySelector('#modal-detalle');
+    M.Modal.init(modalDetalle);
+    const modalInstance = M.Modal.getInstance(modalDetalle);
+    modalInstance.open();
+    this.totalDetall = auditoria.total;
+
+    this._auditoriaCalidadService.getAuditoriaDetail(auditoria.IdAuditoria)
+      .subscribe((res: any) => {
+        this.dataSourceDetalle = new MatTableDataSource(res.RES_DET);
+        this.otDetalle = res.RES;
+        console.log(res);
+      });
+  }
+
+  closeModalDetalle() {
+    const modalDetalle = document.querySelector('#modal-detalle');
+    const modalInstance = M.Modal.getInstance(modalDetalle);
+    modalInstance.close();
+  }
+
+  openImage(imagen) {
+    const base64ImageData = imagen;
+    let extension = this.base64MimeType(imagen);
+    console.log(extension);
+    const contentType = `image/${extension}`;
+
+    const byteCharacters = atob(base64ImageData.substr(`data:${contentType};base64,`.length));
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+      const slice = byteCharacters.slice(offset, offset + 1024);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+    const blob = new Blob(byteArrays, {type: contentType});
+    const blobUrl = URL.createObjectURL(blob);
+
+    window.open(blobUrl, '_blank');
+  }
+
+  base64MimeType(encoded) {
+    let result = null;
+
+    if (typeof encoded !== 'string') {
+      return result;
+    }
+
+    let mime = encoded.match(/data:image+\/([a-zA-Z0-9-.+]+).*,.*/);
+
+    if (mime && mime.length) {
+      result = mime[1];
+    }
+
+    return result;
+  }
+
+  openPDF(data, tipo?) {
+    const linkSource = data;
+    let fileName = '';
+    const downloadLink = document.createElement('a');
+    if (tipo === 'pdf') {
+      fileName = 'archivo.pdf';
+    } else {
+      let extension = this.base64MimeType(data);
+      console.log('EXTENSION: ', extension);
+      fileName = `imagen.${extension}`;
+      console.log(fileName);
+    }
+
+    downloadLink.href = linkSource;
+    downloadLink.download = fileName;
+    console.log(downloadLink.download);
+    downloadLink.click();
+  }
+
+  imprimirDetalle(auditoria) {
+    console.log(auditoria);
+    this._reporteService.getReporte(auditoria.IdAuditoria, 'Calidad')
+      .subscribe(
+        imprimirResp => {
+          console.log('RESULTADO IMPRIMIR RECIB0: ', imprimirResp);
+          const pdfResult: any = this.domSanitizer.bypassSecurityTrustResourceUrl(
+            URL.createObjectURL(imprimirResp)
+          );
+          // printJS(pdfResult.changingThisBreaksApplicationSecurity);
+          window.open(pdfResult.changingThisBreaksApplicationSecurity);
+          console.log(pdfResult);
+        });
   }
 
 }

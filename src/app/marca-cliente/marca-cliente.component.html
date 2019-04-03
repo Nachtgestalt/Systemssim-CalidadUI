@@ -13,12 +13,12 @@
         </thead>
         <tbody>
         <tr *ngFor="let cliente of clientes; let i = index;"
-            (dblclick)="obtenerMarcas(modalMarcas, cliente, 'nuevo')">
+            (dblclick)="obtenerMarcas(modalMarcas, cliente)">
           <td>{{i + 1}}</td>
           <td>{{cliente.Descripcion}}</td>
           <td>
             <button class="waves-effect waves-light btn tooltipped modal-trigger"
-                    matTooltip="Ver relacion" (click)="obtenerMarcas(modalMarcas, cliente, 'editar')">
+                    matTooltip="Ver relacion" (click)="obtenerMarcas(modalMarcas, cliente)">
             <i class="material-icons center">edit</i></button>
           </td>
         </tr>
