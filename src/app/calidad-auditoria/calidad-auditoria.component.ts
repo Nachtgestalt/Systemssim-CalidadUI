@@ -249,15 +249,18 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
   }
 
   eliminar(index) {
+    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.destroy();
+      this.Det.splice(index, 1);
+      this.items.splice(index, 1);
+      this.dtTrigger.next();
+    });
+  }
+
+  eliminarEdit(index) {
     this.Det.splice(index, 1);
     this.items.splice(index, 1);
     this.dataSourceEdit = new MatTableDataSource(this.items);
-    // this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-    //   dtInstance.destroy();
-    //   this.Det.splice(index, 1);
-    //   this.items.splice(index, 1);
-    //   this.dtTrigger.next();
-    // });
   }
 
   guardarAuditoriaEdit() {
@@ -530,35 +533,35 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
       this.Det.push(detalleItem);
       console.log(this.Det);
       // this.dtElem.dtInstance.then((dtInstance: DataTables.Api) => {
-        // Destroy the table first
-        const defecto = this.form.controls['Defecto'].value;
-        const operacion = this.form.controls['Operacion'].value;
-        const posicion = this.form.controls['Posicion'].value;
-        const origen = this.form.controls['Origen'].value;
-        const recup = this.form.controls['Recup'].value;
-        const criterio = this.form.controls['Criterio'].value;
-        const fin = this.form.controls['Fin'].value;
-        const imagen = this.form.controls['Imagen'].value;
-        // dtInstance.destroy();
-        const itemTable = {
-          Defecto: defecto.Nombre,
-          Operacion: operacion.Nombre,
-          Posicion: posicion.Nombre,
-          Origen: origen.Nombre,
-          Recup: recup,
-          Criterio: criterio,
-          Fin: fin,
-          Aud_Imagen: imagen,
-          Nota: this.form.controls['Nota'].value
-        };
-        this.items.push(itemTable);
-        this.dataSourceEdit = new MatTableDataSource(this.items);
-        this.form.reset();
-        this.selectedFile = null;
-        const elems = document.querySelectorAll('select');
-        setTimeout(() => M.FormSelect.init(elems, {}), 500);
-        // Call the dtTrigger to rerender again
-        // this.dtTrigger.next();
+      // Destroy the table first
+      const defecto = this.form.controls['Defecto'].value;
+      const operacion = this.form.controls['Operacion'].value;
+      const posicion = this.form.controls['Posicion'].value;
+      const origen = this.form.controls['Origen'].value;
+      const recup = this.form.controls['Recup'].value;
+      const criterio = this.form.controls['Criterio'].value;
+      const fin = this.form.controls['Fin'].value;
+      const imagen = this.form.controls['Imagen'].value;
+      // dtInstance.destroy();
+      const itemTable = {
+        Defecto: defecto.Nombre,
+        Operacion: operacion.Nombre,
+        Posicion: posicion.Nombre,
+        Origen: origen.Nombre,
+        Recup: recup,
+        Criterio: criterio,
+        Fin: fin,
+        Aud_Imagen: imagen,
+        Nota: this.form.controls['Nota'].value
+      };
+      this.items.push(itemTable);
+      this.dataSourceEdit = new MatTableDataSource(this.items);
+      this.form.reset();
+      this.selectedFile = null;
+      const elems = document.querySelectorAll('select');
+      setTimeout(() => M.FormSelect.init(elems, {}), 500);
+      // Call the dtTrigger to rerender again
+      // this.dtTrigger.next();
       // });
     } else {
       this._toast.warning('Error en formulario', '');

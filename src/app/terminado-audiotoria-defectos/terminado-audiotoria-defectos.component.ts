@@ -174,13 +174,6 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
         this.dataSource = new MatTableDataSource(res.Auditoria);
       }
     );
-
-    // this._terminadoAuditoriaService.listAuditorias().subscribe(
-    //   (res: any) => {
-    //     this.dataSource = new MatTableDataSource(res.RES);
-    //     console.log(res);
-    //   }
-    // );
   }
 
   cargarOT() {
@@ -301,15 +294,18 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
   }
 
   eliminar(index) {
+    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+      dtInstance.destroy();
+      this.Det.splice(index, 1);
+      this.items.splice(index, 1);
+      this.dtTrigger.next();
+    });
+  }
+
+  eliminarEditar(index) {
     this.Det.splice(index, 1);
     this.items.splice(index, 1);
     this.dataSourceEdit = new MatTableDataSource(this.items);
-    // this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-    //   dtInstance.destroy();
-    //   this.Det.splice(index, 1);
-    //   this.items.splice(index, 1);
-    //   this.dtTrigger.next();
-    // });
   }
 
   cerrarAuditoria() {
@@ -533,6 +529,7 @@ export class TerminadoAudiotoriaDefectosComponent implements OnInit, AfterViewCh
     this._terminadoAuditoriaService.getAuditoriaDetail(auditoria.IdAuditoria, tipo)
       .subscribe((res: any) => {
         this.dataSourceDetalle = new MatTableDataSource(res.RES_DET);
+        console.log('DATASOURCE DETALLE: ', this.dataSourceDetalle.data);
         this.otDetalle = res.RES;
         console.log(res);
       });

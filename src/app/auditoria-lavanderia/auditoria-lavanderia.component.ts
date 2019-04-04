@@ -1,24 +1,24 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Globals} from '../Globals';
-declare var M: any;
-declare var $: any;
-declare var jQuery: any;
-import 'jquery';
-import {ToastrService} from '../../../node_modules/ngx-toastr';
-import {MatTableDataSource} from '@angular/material';
-import {TerminadoService} from '../services/terminado/terminado.service';
-import {AuditoriaTerminadoService} from '../services/terminado/auditoria-terminado.service';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {DataTableDirective} from 'angular-datatables';
 import {forkJoin, Subject} from 'rxjs';
+import {MatTableDataSource} from '@angular/material';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ProcesosEspecialesService} from '../services/procesos-especiales/procesos-especiales.service';
+import {AuditoriaTerminadoService} from '../services/terminado/auditoria-terminado.service';
+import {ToastrService} from 'ngx-toastr';
+import {Globals} from '../Globals';
+import {LavanderiaService} from '../services/lavanderia/lavanderia.service';
+
+declare var M: any;
+declare var $: any;
 
 @Component({
-  selector: 'app-auditoriaprocesosespeciales',
-  templateUrl: './auditoriaprocesosespeciales.component.html',
-  styleUrls: ['./auditoriaprocesosespeciales.component.css']
+  selector: 'app-auditoria-lavanderia',
+  templateUrl: './auditoria-lavanderia.component.html',
+  styleUrls: ['./auditoria-lavanderia.component.css']
 })
-export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, AfterViewInit {
+export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterViewInit {
+
   dtOptions = {
     language: {
       processing: 'Procesando...',
@@ -67,7 +67,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
 
   form: FormGroup;
   constructor(
-    private _procesosService: ProcesosEspecialesService,
+    private _lavanderiaService: LavanderiaService,
     private _terminadoAuditoriaService: AuditoriaTerminadoService,
     private _toast: ToastrService
   ) {
@@ -83,11 +83,11 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
     this.GetOperaciones();
     this.GetPosicion();
     this.GetAuditoriaProcEsp();
-    $('#lblModulo').text('Procesos Especiales - Auditoría');
+    $('#lblModulo').text('Lavandería - Auditoría');
 
-    const defectos$ = this._procesosService.listDefectos('', '', 'True');
-    const operaciones$ = this._procesosService.listOperaciones('', '', 'True');
-    const posiciones$ = this._procesosService.listPosiciones('', '', 'True');
+    const defectos$ = this._lavanderiaService.listDefectos('', '', 'True');
+    const operaciones$ = this._lavanderiaService.listOperaciones('', '', 'True');
+    const posiciones$ = this._lavanderiaService.listPosiciones('', '', 'True');
 
     forkJoin(defectos$, operaciones$, posiciones$)
       .subscribe(
@@ -564,19 +564,19 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
         'IdUsuario': this.Json_Usuario.ID,
         'Det': this.Det
       };
-      this._procesosService.createAuditoria(data)
-        .subscribe(
-          res => {
-            this._toast.success('Se agrego correctamente auditoria terminado', '');
-            console.log(res);
-            const elem = document.querySelector('#modalNewAuditoria');
-            const instance = M.Modal.getInstance(elem);
-            instance.close();
-            this.cargarAuditorias();
-            this.reset();
-          },
-          error => this._toast.error('Error al conectar a la base de datos', '')
-        );
+      // this._lavanderiaService.createAuditoria(data)
+      //   .subscribe(
+      //     res => {
+      //       this._toast.success('Se agrego correctamente auditoria terminado', '');
+      //       console.log(res);
+      //       const elem = document.querySelector('#modalNewAuditoria');
+      //       const instance = M.Modal.getInstance(elem);
+      //       instance.close();
+      //       this.cargarAuditorias();
+      //       this.reset();
+      //     },
+      //     error => this._toast.error('Error al conectar a la base de datos', '')
+      //   );
     } else {
       this._toast.warning('La auditoría debe contener al menos un detalle', '');
     }
@@ -619,5 +619,4 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
 
     reader.readAsDataURL(file);
   }
-
 }

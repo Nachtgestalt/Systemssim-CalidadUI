@@ -215,6 +215,7 @@
       <ng-container matColumnDef="Composturas">
         <th mat-header-cell *matHeaderCellDef> Composturas</th>
         <td mat-cell *matCellDef="let element"
+            matTooltip="Doble click para ver detalle"
             (dblclick)="openModalDetalle(element, 'Compostura')"> {{element.pzas_c | numberFormat}} </td>
       </ng-container>
 
@@ -222,6 +223,7 @@
       <ng-container matColumnDef="2das">
         <th mat-header-cell *matHeaderCellDef> Sgdas. Term.</th>
         <td mat-cell *matCellDef="let element"
+            matTooltip="Doble click para ver detalle"
             (dblclick)="openModalDetalle(element, 'Segundas')"> {{element.pzas_2 | numberFormat}} </td>
       </ng-container>
 
@@ -558,7 +560,13 @@
     </div>
     <hr class="border">
     <div class="row mt-3">
-      <table mat-table [dataSource]="dataSourceDetalle" class="mat-elevation-z8">
+      <div class="center-align f-w-bold mt-3"
+           style="font-size: 2rem"
+           *ngIf="dataSourceDetalle?.data.length === 0">
+        Esta auditoría no contiene {{tituloModalDetalle}}
+      </div>
+      <table mat-table [dataSource]="dataSourceDetalle" class="mat-elevation-z8"
+             *ngIf="dataSourceDetalle?.data.length > 0">
         <!-- Defecto Column -->
         <ng-container matColumnDef="Defecto">
           <th mat-header-cell *matHeaderCellDef>DEFECTO</th>

@@ -161,4 +161,8 @@ export class LavanderiaService {
     return this._http.put(url, body, {headers});
   }
 
+  // ================ Auditoria ===================
+  createAuditoria(data) {
+
+  }
 }

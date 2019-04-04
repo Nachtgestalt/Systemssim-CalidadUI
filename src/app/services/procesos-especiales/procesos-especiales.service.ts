@@ -160,4 +160,16 @@ export class ProcesosEspecialesService {
     const body = JSON.stringify(payload);
     return this._http.put(url, body, {headers});
   }
+
+  // ================ AUDITORIA ===================
+  createAuditoria(auditoria) {
+    const url = `${this.URL_PROCESOS}/NuevaAuditoriaTerminado`;
+    const body = JSON.stringify(auditoria);
+    // const formData: FormData = Utility.convertModelToFormData(auditoria);
+    // formData.forEach( x => {
+    //   console.log(x);
+    // });
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.post(url, body, {headers});
+  }
 }
