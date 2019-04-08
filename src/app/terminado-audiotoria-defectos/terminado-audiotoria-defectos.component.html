@@ -335,7 +335,9 @@
             <td style="text-align: right">{{item.Cantidad | numberFormat}}</td>
             <td>
               <img [src]="item.Imagen" alt="imagen" style="width:40px;height:40px;"
-                   *ngIf="item.Imagen !== null">
+                   class="cursor"
+                   matTooltip="Ver imagen"
+                   *ngIf="item.Imagen !== null" (click)="openImage(item.Imagen)">
             </td>
             <td>{{item.Nota}}</td>
             <td class="center-align">

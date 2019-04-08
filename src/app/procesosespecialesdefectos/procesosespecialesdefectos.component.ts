@@ -191,7 +191,7 @@ export class ProcesosespecialesdefectosComponent implements OnInit, OnDestroy, A
         let Mensaje = '';
         const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
         $.ajax({
-          url: Globals.UriRioSulApi + 'ProcesosEspeciales/NuevoDefectoProceso',
+          url: Globals.UriRioSulApi + 'ProcesosEspeciales/Defecto',
           type: 'POST',
           contentType: 'application/json; charset=utf-8',
           async: false,

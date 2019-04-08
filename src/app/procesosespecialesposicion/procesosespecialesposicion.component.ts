@@ -192,7 +192,7 @@ export class ProcesosespecialesposicionComponent implements OnInit, OnDestroy, A
 
   GetEnabledPosicionProcesosEspeciales(id) {
     const options = {
-      text: '¿Estas seguro de modificar esta operación?',
+      text: '¿Estas seguro de modificar esta posición?',
       buttons: {
         cancel: {
           text: 'Cancelar',
@@ -265,7 +265,7 @@ export class ProcesosespecialesposicionComponent implements OnInit, OnDestroy, A
             console.log(res);
             if (res.Message.IsSuccessStatusCode) {
               this._toast.success('Posición guardada con exito', '');
-              $('#modalNewPosicionLavanderia').modal('close');
+              $('#modalNewPosicionProcesosEspeciales').modal('close');
               this.GetPosicionProcesosEspeciales();
             } else {
               this._toast.warning('Algo no ha salido bien', '');
@@ -340,17 +340,17 @@ export class ProcesosespecialesposicionComponent implements OnInit, OnDestroy, A
     this.idPosicion = id;
     this._procesosService.listOperaciones('', '', 'True')
       .subscribe(
-        (res: any) => {
-          console.log(res);
-          this.dataSourceEdit = new MatTableDataSource(res.Vst_ProcesosEspeciales);
+        (result: any) => {
+          console.log(result);
+          this.dataSourceEdit = new MatTableDataSource(result.Vst_ProcesosEspeciales);
           this.selection = new SelectionModel(true, []);
           this._procesosService.getPosicion(id)
             .subscribe(
               (res: any) => {
                 console.log(res);
-                this.form.patchValue(res.Vst_ProcesosEspeciales);
+                this.form.patchValue(res.Vst_ProcesosEsp);
                 setTimeout(() => M.updateTextFields(), 100);
-                const defectos = res.Operacion;
+                const defectos = res.Operaciones;
                 const copyDataSourceEdit = [];
                 this.dataSourceEdit.data.forEach((x, i) => {
                   defectos.forEach(y => {
@@ -462,13 +462,13 @@ export class ProcesosespecialesposicionComponent implements OnInit, OnDestroy, A
   editPosicion() {
     const payload = this.form.value;
     payload.Operacion = this.selection.selected;
-    this._procesosService.updatePosicion(payload)
+    this._procesosService.updatePosicion(payload, this.idPosicion)
       .subscribe(
         (res: any) => {
           console.log(res);
           if (res.Message.IsSuccessStatusCode) {
             this._toast.success('Posición actualizada con exito', '');
-            $('#modalEditPosicionLavanderia').modal('close');
+            $('#modalEditPosicionProcesos').modal('close');
             this.GetPosicionProcesosEspeciales();
           } else {
             this._toast.warning('Algo no ha salido bien', '');

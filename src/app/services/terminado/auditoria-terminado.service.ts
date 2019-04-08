@@ -14,10 +14,6 @@ export class AuditoriaTerminadoService {
   createAuditoria(auditoria) {
     const url = `${this.URL_TERMINADO}/NuevaAuditoriaTerminado`;
     const body = JSON.stringify(auditoria);
-    // const formData: FormData = Utility.convertModelToFormData(auditoria);
-    // formData.forEach( x => {
-    //   console.log(x);
-    // });
     const headers = new HttpHeaders().append('content-type', 'application/json');
     return this._http.post(url, body, {headers});
   }

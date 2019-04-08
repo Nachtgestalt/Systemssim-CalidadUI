@@ -75,14 +75,14 @@ export class ProcesosespecialesoperacionesComponent implements OnInit, OnDestroy
 
   initFormGroup() {
     this.form = new FormGroup({
-      'IdSubModulo': new FormControl(19),
+      'IdSubModulo': new FormControl(13),
       'IdUsuario': new FormControl(this.json_Usuario.ID),
       'Clave': new FormControl(),
       'Nombre': new FormControl(),
       'Descripcion': new FormControl(''),
       'Observaciones': new FormControl(''),
       'Imagen': new FormControl(),
-      'Defecto': new FormControl()
+      'Defectos': new FormControl()
     });
   }
 
@@ -133,7 +133,25 @@ export class ProcesosespecialesoperacionesComponent implements OnInit, OnDestroy
   }
 
   EditOperacionProcesosEspeciales() {
-    console.log('modulo');
+    const payload = this.form.value;
+    payload.Defectos = this.selection.selected;
+    this._procesosService.updateOperación(payload, this.idOperacion)
+      .subscribe(
+        (res: any) => {
+          console.log(res);
+          if (res.Message.IsSuccessStatusCode) {
+            this._toast.success('Operación actualizada con exito', '');
+            $('#modalEditOperacionProcesosEspeciales').modal('close');
+            this.GetOperacionProcesosEspeciales();
+          } else {
+            this._toast.warning('Algo no ha salido bien', '');
+          }
+        },
+        error => {
+          console.log(error);
+          this._toast.error('Error al conectar a la base de datos', '');
+        }
+      );
   }
 
   NewOperacionProcesosEspeciales() {
@@ -146,7 +164,7 @@ export class ProcesosespecialesoperacionesComponent implements OnInit, OnDestroy
         .pipe(
           switchMap((res: any) => {
             if (res.Message.IsSuccessStatusCode) {
-              this.form.controls['Defecto'].patchValue(this.selection.selected);
+              this.form.controls['Defectos'].patchValue(this.selection.selected);
               return this._procesosService.createOperacion(this.form.value);
             } else {
               return EMPTY;
@@ -227,7 +245,7 @@ export class ProcesosespecialesoperacionesComponent implements OnInit, OnDestroy
     this._procesosService.listDefectos('', '', 'True')
       .pipe(
         map((res: any) => {
-            res.Vst_Lavanderia.forEach(x => {
+            res.Vst_ProcesosEspeciales.forEach(x => {
               delete x.Imagen;
             });
             return res;
@@ -236,16 +254,16 @@ export class ProcesosespecialesoperacionesComponent implements OnInit, OnDestroy
         tap(res => console.log('Despues de eliminar imagen: ', res))
       )
       .subscribe(
-        (res: any) => {
-          console.log(res);
-          this.dataSourceEdit = new MatTableDataSource(res.Vst_Lavanderia);
+        (result: any) => {
+          console.log(result);
+          this.dataSourceEdit = new MatTableDataSource(result.Vst_ProcesosEspeciales);
           this.selection = new SelectionModel(true, []);
           this._procesosService.getOperacion(id)
             .subscribe(
               (res: any) => {
                 console.log(res);
-                this.form.patchValue(res.Vst_Lavanderia);
-                const defectos = res.Defecto;
+                this.form.patchValue(res.Vst_ProcesosEsp);
+                const defectos = res.Defectos;
                 const copyDataSourceEdit = [];
                 this.dataSourceEdit.data.forEach((x, i) => {
                   defectos.forEach(y => {

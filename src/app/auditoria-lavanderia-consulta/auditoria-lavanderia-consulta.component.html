@@ -1,0 +1,365 @@
+<div class="card-panel">
+  <div class="row" style="text-align: right">
+    <div class="col s12">
+      <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+        <i class="material-icons left">arrow_back</i>
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col s4 center-align">
+      <span>Periodo</span>
+    </div>
+    <div class="col s2 center-align">
+      <span>Cliente</span>
+    </div>
+    <div class="col s2 center-align">
+      <span>Marca</span>
+    </div>
+    <div class="col s2 center-align">
+      <span># PO</span>
+    </div>
+    <div class="col s2 center-align">
+      <span># Corte</span>
+    </div>
+  </div>
+  <form [formGroup]="formFilter">
+    <div class="row">
+      <div class="col s2">
+        <div class="input-field">
+          <i class="material-icons prefix">date_range</i>
+          <input id="inicio" type="date" class="validate"
+                 formControlName="Fecha_i">
+          <label for="inicio">Inicio</label>
+        </div>
+      </div>
+
+      <div class="col s2">
+        <div class="input-field">
+          <i class="material-icons prefix">date_range</i>
+          <input id="fin" type="date" class="validate"
+                 formControlName="Fecha_f">
+          <label for="fin">Fin</label>
+        </div>
+      </div>
+
+      <div class="col s2">
+        <div class="input-field">
+          <input id="cliente" type="text" class="validate" [matAutocomplete]="cliente"
+                 formControlName="IdCliente"
+                 (focus)="obtenerMarcas(true)"
+                 (blur)="obtenerMarcas(true)">
+          <mat-autocomplete #cliente="matAutocomplete" [displayWith]="displayFn">
+            <mat-option *ngFor="let cliente of filteredOptions | async" [value]="cliente">
+              {{cliente.Descripcion}}
+            </mat-option>
+          </mat-autocomplete>
+          <label for="cliente">Buscar cliente</label>
+        </div>
+      </div>
+
+      <div class="col s2">
+        <div class="input-field">
+          <input id="marca" type="text" class="validate" [matAutocomplete]="marca"
+                 formControlName="Marca"
+                 (focus)="obtenerMarcas()"
+                 (blur)="obtenerPO()">
+          <mat-autocomplete #marca="matAutocomplete">
+            <mat-option *ngFor="let marca of filteredOptionsMarca | async" [value]="marca">
+              {{marca}}
+            </mat-option>
+          </mat-autocomplete>
+          <label for="marca">Buscar marca</label>
+        </div>
+      </div>
+
+      <div class="col s2">
+        <div class="input-field">
+          <input id="po" type="text" class="validate" [matAutocomplete]="po"
+                 formControlName="PO"
+                 (focus)="obtenerPO()"
+                 (blur)="obtenerCorte()">
+          <mat-autocomplete #po="matAutocomplete">
+            <mat-option *ngFor="let po of pos" [value]="po">
+              {{po}}
+            </mat-option>
+          </mat-autocomplete>
+          <label for="po">Buscar PO</label>
+        </div>
+      </div>
+
+      <div class="col s2">
+        <div class="input-field">
+          <input id="corte" type="text" class="validate" [matAutocomplete]="corte"
+                 formControlName="Corte"
+                 (focus)="obtenerCorte()">
+          <mat-autocomplete #corte="matAutocomplete">
+            <mat-option *ngFor="let corte of cortes" [value]="corte">
+              {{corte}}
+            </mat-option>
+          </mat-autocomplete>
+          <label for="corte">Buscar Corte</label>
+        </div>
+      </div>
+    </div>
+    <div class="row right-align">
+      <div class="col s12">
+        <button type="button" name="btnAddCortador"
+                style="margin-right: 1rem;"
+                class="btn light-blue darken-4 waves-effect waves-light"
+                (click)="reset()">Reiniciar
+          <!--<i class="material-icons right">search</i>-->
+        </button>
+        <button type="button" name="btnAddCortador"
+                class="btn light-blue darken-4 waves-effect waves-light"
+                (click)="buscar()">Buscar
+          <i class="material-icons right">search</i>
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!--TABLA DE RESULTADOS-->
+  <div class="row">
+    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      <!-- Cliente Column -->
+      <ng-container matColumnDef="Cliente">
+        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+        <td mat-cell *matCellDef="let element; let i = index">
+          {{element.Cliente}}
+          <!--<a class=" btn  modal-trigger" data-target="modalEditDefectoTerminado"-->
+          <!--matTooltip="Edita el defecto  seleccionado">-->
+          <!--&lt;!&ndash;(click)="getInfoDefectoTerminado(defecto.ID)">&ndash;&gt;-->
+          <!--<i class="material-icons right">edit</i>-->
+          <!--</a>-->
+        </td>
+      </ng-container>
+
+      <!-- Marca Column -->
+      <ng-container matColumnDef="Marca">
+        <th mat-header-cell *matHeaderCellDef>Marca</th>
+        <td mat-cell *matCellDef="let element; let i = index"> {{element.Marca}} </td>
+      </ng-container>
+
+      <!-- PO Column -->
+      <ng-container matColumnDef="PO">
+        <th mat-header-cell *matHeaderCellDef> PO</th>
+        <td mat-cell *matCellDef="let element"> {{element.PO}} </td>
+      </ng-container>
+
+      <!-- Corte Column -->
+      <ng-container matColumnDef="Corte">
+        <th mat-header-cell *matHeaderCellDef> Corte</th>
+        <td mat-cell *matCellDef="let element"> {{element.Corte}} </td>
+      </ng-container>
+
+      <!-- Fecha Inicio Column -->
+      <ng-container matColumnDef="Fecha Inicio">
+        <th mat-header-cell *matHeaderCellDef> Fecha Inicio</th>
+        <td mat-cell *matCellDef="let element"> {{element.Fecha_i | date: 'dd/MM/yyyy'}} </td>
+      </ng-container>
+
+      <!-- Fecha fin de trabajo Column -->
+      <ng-container matColumnDef="Fecha fin">
+        <th mat-header-cell *matHeaderCellDef> Fecha fin</th>
+        <td mat-cell *matCellDef="let element">
+          {{element.Fecha_f === '0001-01-01T00:00:00' ? '' : element.Fecha_f | date: 'dd/MM/yyyy'}}
+        </td>
+      </ng-container>
+
+      <!-- Composturas-->
+      <ng-container matColumnDef="Defectos">
+        <th mat-header-cell *matHeaderCellDef> Defectos</th>
+        <td mat-cell *matCellDef="let element"
+            matTooltip="Doble click para ver detalle"
+            (dblclick)="openModalDetalle(element)"> {{element.pzas_r | numberFormat}} </td>
+      </ng-container>
+
+      <!-- 2das terminado Column-->
+      <ng-container matColumnDef="2das">
+        <th mat-header-cell *matHeaderCellDef> Sgdas. Term.</th>
+        <td mat-cell *matCellDef="let element"> {{element.pzas_2 | numberFormat}} </td>
+      </ng-container>
+
+      <!-- Status Finales Column -->
+      <ng-container matColumnDef="Status">
+        <th mat-header-cell *matHeaderCellDef> Status</th>
+        <td mat-cell *matCellDef="let element"> {{element.status}} </td>
+      </ng-container>
+
+      <!-- Status Finales Column -->
+      <ng-container matColumnDef="Opciones">
+        <th mat-header-cell *matHeaderCellDef class="alinear-der"></th>
+        <td mat-cell *matCellDef="let element" class="alinear-der">
+<!--          <button type="button" name="btnAddCortador"-->
+<!--                  class="btn light-blue darken-4 modal-trigger mr-3"-->
+<!--                  data-target="modalEditAuditoria"-->
+<!--                  matTooltip="Editar"-->
+<!--                  (click)="openModal(element)">-->
+<!--            <i class="material-icons center">edit</i>-->
+<!--          </button>-->
+<!--          <button type="button" name="btnAddCortador"-->
+<!--                  class="btn red darken-4 "-->
+<!--                  matTooltip="Eliminar"-->
+<!--                  (click)="eliminarAuditoria(element.IdAuditoria)">-->
+<!--            <i class="material-icons center">delete_forever</i>-->
+<!--          </button>-->
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+</div>
+
+<div id="modal-detalle" class="modal modal-fixed-footer modal-lg">
+  <div class="modal-content">
+    <div class="row">
+      <span class="close" (click)="closeModalDetalle()">&times;</span>
+      <h4 class="center-align">DEFECTOS LAVANDERÍA</h4>
+    </div>
+    <div class="row">
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">OT: </label>
+        <label class="encabezado-detalle">{{otDetalle?.OrdenTrabajo}}</label>
+      </div>
+    </div>
+    <hr class="border">
+    <div class="row">
+      <div class="row">
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">CLIENTE: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Descripcion}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">PO: </label>
+          <label class="encabezado-detalle">{{otDetalle?.PO}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">TELA: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Tela}}</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">MARCA: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Marca}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">#CORTADA: </label>
+          <label class="encabezado-detalle">{{otDetalle?.NumCortada}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">LAVADO: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Lavado}}</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">ESTILO: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Estilo}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">PLANTA: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Planta}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">RUTA: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Ruta}}</label>
+        </div>
+      </div>
+    </div>
+    <hr class="border">
+    <div class="row mt-3">
+      <div class="center-align f-w-bold mt-3"
+           style="font-size: 2rem"
+           *ngIf="dataSourceDetalle?.data.length === 0">
+        Esta auditoría no contiene defectos
+      </div>
+      <table mat-table [dataSource]="dataSourceDetalle" class="mat-elevation-z8"
+             *ngIf="dataSourceDetalle?.data.length > 0">
+        <!-- Posicion Column -->
+        <ng-container matColumnDef="Posicion">
+          <th mat-header-cell *matHeaderCellDef> POSICION</th>
+          <td mat-cell *matCellDef="let element"> {{element.DescripcionPosicion}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+
+        <!-- Operación Column -->
+        <ng-container matColumnDef="Operacion">
+          <th mat-header-cell *matHeaderCellDef>OPERACIÓN</th>
+          <td mat-cell *matCellDef="let element; let i = index"> {{element.DescripcionOperacion}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Defecto Column -->
+        <ng-container matColumnDef="Defecto">
+          <th mat-header-cell *matHeaderCellDef>DEFECTO</th>
+          <td mat-cell *matCellDef="let element; let i = index">
+            {{element.DescripcionDefecto}}
+          </td>
+          <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold">TOTAL:</td>
+        </ng-container>
+
+        <!-- PZAS.RECUP Column -->
+        <ng-container matColumnDef="Cantidad">
+          <th mat-header-cell *matHeaderCellDef> CANTIDAD</th>
+          <td mat-cell *matCellDef="let element"> {{element.Cantidad | numberFormat}} </td>
+          <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold">{{getTotalDetalle()}}</td>
+        </ng-container>
+
+        <!-- Imagen Column -->
+        <ng-container matColumnDef="Imagen">
+          <th mat-header-cell *matHeaderCellDef> IMAGEN</th>
+          <td mat-cell *matCellDef="let element">
+            <img [src]="element.Aud_Imagen" alt="imagen" style="width:40px;height:40px;"
+                 class="cursor"
+                 matTooltip="Ver imagen"
+                 *ngIf="element.Aud_Imagen !== null && element.Aud_Imagen !== ''"
+                 (click)="openImage(element.Aud_Imagen)">
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Nota column-->
+        <ng-container matColumnDef="Nota">
+          <th mat-header-cell *matHeaderCellDef> NOTA</th>
+          <td mat-cell *matCellDef="let element"> {{element.Nota}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Archivo Column -->
+        <ng-container matColumnDef="Archivo">
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> ARCHIVO</th>
+          <td mat-cell *matCellDef="let element" class="alinear-der">
+            <i class="material-icons prefix cursor" *ngIf="element.Archivo"
+               (click)="openPdfInTab(element.Archivo)"
+               matTooltip="Ver archivo">
+              attach_file
+            </i>
+            <p *ngIf="!element.Archivo">No hay archivo</p>
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsDetalle"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsDetalle;"></tr>
+        <tr mat-footer-row *matFooterRowDef="displayedColumnsDetalle"></tr>
+      </table>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6"></div>
+      <div class="col s6" style="text-align: right">
+        <button type="button" class="btn-flat mr-3" (click)="imprimirDetalle(otDetalle)">
+          <i class="material-icons left">print</i>
+          IMPRIMIR
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

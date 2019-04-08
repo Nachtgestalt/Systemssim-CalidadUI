@@ -70,6 +70,7 @@ import localeMx from '@angular/common/locales/es-MX';
 import { NumberFormatPipe } from './pipes/number-format.pipe';
 import { MarcaClienteComponent } from './marca-cliente/marca-cliente.component';
 import { AuditoriaLavanderiaComponent } from './auditoria-lavanderia/auditoria-lavanderia.component';
+import { AuditoriaLavanderiaConsultaComponent } from './auditoria-lavanderia-consulta/auditoria-lavanderia-consulta.component';
 
 // the second parameter 'fr' is optional
 registerLocaleData(localeMx);
@@ -131,6 +132,7 @@ registerLocaleData(localeMx);
     NumberFormatPipe,
     MarcaClienteComponent,
     AuditoriaLavanderiaComponent,
+    AuditoriaLavanderiaConsultaComponent,
   ],
   entryComponents: [
     AddEditOperacionTerminadoComponent
@@ -207,6 +209,7 @@ registerLocaleData(localeMx);
           {path: 'procesosespecialesposicion', component: ProcesosespecialesposicionComponent},
           {path: 'auditoriaprocesosespeciales', component: AuditoriaprocesosespecialesComponent},
           {path: 'auditorialavanderia', component: AuditoriaLavanderiaComponent},
+          {path: 'auditorialavanderiaconsulta', component: AuditoriaLavanderiaConsultaComponent},
         ]
       },
       {

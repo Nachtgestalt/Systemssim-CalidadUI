@@ -8,6 +8,10 @@ import {AuditoriaTerminadoService} from '../services/terminado/auditoria-termina
 import {ToastrService} from 'ngx-toastr';
 import {Globals} from '../Globals';
 import {LavanderiaService} from '../services/lavanderia/lavanderia.service';
+import {ClientesService} from '../services/clientes/clientes.service';
+import swal from 'sweetalert';
+import {ReportesService} from '../services/reportes/reportes.service';
+import {DomSanitizer} from '@angular/platform-browser';
 
 declare var M: any;
 declare var $: any;
@@ -46,8 +50,15 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
     'Cliente', 'Marca', 'PO', 'Corte', 'Fecha Inicio',
     'Fecha fin', 'Defectos', '2das', 'Status', 'Opciones'
   ];
+  displayedColumnsEdit: string[] = [
+    'Posicion', 'Operacion', 'Defecto', 'Cantidad', 'Imagen', 'Nota', 'Archivo', 'Opciones'
+  ];
+  displayedColumnsDetalle: string[] = [
+    'Posicion', 'Operacion', 'Defecto', 'Cantidad', 'Imagen', 'Nota', 'Archivo'];
 
   dataSource: MatTableDataSource<any>;
+  dataSourceEdit: MatTableDataSource<any>;
+  dataSourceDetalle: MatTableDataSource<any>;
 
   totalDetalle = 0;
 
@@ -65,24 +76,26 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
 
   selectedFile;
 
+  modalAgregar = false;
+
   form: FormGroup;
   constructor(
+    private domSanitizer: DomSanitizer,
+    private _clientesService: ClientesService,
     private _lavanderiaService: LavanderiaService,
     private _terminadoAuditoriaService: AuditoriaTerminadoService,
+    private _reporteService: ReportesService,
     private _toast: ToastrService
   ) {
   }
 
   ngOnInit() {
     this.initFormGroup();
+    this.cargarAuditorias();
     $('.tooltipped').tooltip();
     $('select').formSelect();
     $('#modalNewAuditoria').modal();
-    this.GetClients();
-    this.GetDefectos();
-    this.GetOperaciones();
-    this.GetPosicion();
-    this.GetAuditoriaProcEsp();
+    $('#modalEditAuditoria').modal();
     $('#lblModulo').text('Lavandería - Auditoría');
 
     const defectos$ = this._lavanderiaService.listDefectos('', '', 'True');
@@ -93,9 +106,9 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
       .subscribe(
         (res: Array<any>) => {
           console.log(res);
-          this.defectos = res[0].Vst_ProcesosEspeciales;
-          this.operaciones = res[1].Vst_ProcesosEspeciales;
-          this.posiciones = res[2].Vst_ProcesosEspeciales;
+          this.defectos = res[0].Vst_Lavanderia;
+          this.operaciones = res[1].Vst_Lavanderia;
+          this.posiciones = res[2].Vst_Lavanderia;
           const elems = document.querySelectorAll('select');
           setTimeout(() => M.FormSelect.init(elems, {}), 500);
         }
@@ -135,46 +148,16 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
       Corte: null,
       Planta: null,
       Estilo: null,
-      Auditoria: 'Terminado'
+      Auditoria: 'Lavanderia'
     };
     console.log('FILTRO', filtro);
-    // this._clientesService.busqueda(filtro).subscribe(
-    //   (res: any) => {
-    //     console.log(res);
-    //     this.dataSource = new MatTableDataSource(res.Auditoria);
-    //   }
-    // );
-  }
-
-  GetClients() {
-    const ddl = $('#ddlCliente');
-    $.ajax({
-      url: Globals.UriRioSulApi + 'Cliente/ObtieneClientes',
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        $('#ddlCliente').empty();
-        if (json.length > 0) {
-          for (let index = 0; index < json.length; index++) {
-            if (index === 0) {
-              $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              $(ddl).append($('<option></option>').attr('value', json[index].IdClienteRef).text(json[index].Descripcion));
-            } else {
-              // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json[index].IdClienteRef).text(json[index].Descripcion));
-            }
-          }
-          $(ddl).formSelect();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
+    this._clientesService.busqueda(filtro).subscribe(
+      (res: any) => {
+        console.log(res);
+        this.dataSource = new MatTableDataSource(res.Auditoria);
       }
-    });
+    );
   }
-
   ValidateAddProcEspAuditoria() {
     if ($('#ddlCliente')[0].value === '0') {
       this._toast.warning('Se debe seleccionar un cliente valido', '');
@@ -244,94 +227,6 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
     }
   }
 
-  GetDefectos() {
-    const ddl = $('#ddlDefectos');
-    $.ajax({
-      url: Globals.UriRioSulApi + 'ProcesosEspeciales/ObtieneDefectoProseso',
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          $('#ddlDefectos').empty();
-          for (let i = 0; i < json.Vst_ProcesosEspeciales.length; i++) {
-            if (i === 0) {
-              $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[i].ID).text(json.Vst_ProcesosEspeciales[i].Nombre));
-            } else {
-              // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[i].ID).text(json.Vst_ProcesosEspeciales[i].Nombre));
-            }
-          }
-          $(ddl).formSelect();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
-    });
-  }
-
-  GetOperaciones() {
-    const ddl = $('#ddlOperaion');
-    $.ajax({
-      url: Globals.UriRioSulApi + 'ProcesosEspeciales/ObtieneOperacionProcesosEspeciales',
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          $('#ddlOperaion').empty();
-          for (let index = 0; index < json.Vst_ProcesosEspeciales.length; index++) {
-            if (index === 0) {
-              $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[index].ID).text(json.Vst_ProcesosEspeciales[index].Nombre));
-            } else {
-              // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[index].ID).text(json.Vst_ProcesosEspeciales[index].Nombre));
-            }
-          }
-          $(ddl).formSelect();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
-    });
-  }
-
-  GetPosicion() {
-    const ddl = $('#ddlPosicion');
-    $.ajax({
-      url: Globals.UriRioSulApi + 'ProcesosEspeciales/ObtienePosicion',
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          $('#ddlPosicion').empty();
-          for (let index = 0; index < json.Vst_ProcesosEspeciales.length; index++) {
-            if (index === 0) {
-              $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[index].ID).text(json.Vst_Confeccion[index].Nombre));
-            } else {
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[index].ID).text(json.Vst_Confeccion[index].Nombre));
-            }
-          }
-          $(ddl).formSelect();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
-    });
-  }
-
   DisposeNewProcesosEspeciales() {
     $('#ddlDefecto').val(0);
     $('#ddlDefecto').formSelect();
@@ -388,63 +283,6 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
     }
   }
 
-  GetAuditoriaProcEsp() {
-    let sOptions = '';
-    let _index_ = 1;
-    $.ajax({
-      url: Globals.UriRioSulApi + 'AuditoriaProcesosEspeciales/ObtieneAuditoriaProcEsp',
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          for (let i = 0; i < json.RES.length; i++) {
-            sOptions += '<tr>';
-            sOptions += '<td></td>';
-            sOptions += '<td>' + _index_ + '</td>';
-            sOptions += '<td>' + json.RES[i].Descripcion + '</td>';
-            sOptions += '<td>' + json.RES[i].OrdenTrabajo + '</td>';
-            sOptions += '<td>' + json.RES[i].PO + '</td>';
-            sOptions += '<td>' + json.RES[i].Tela + '</td>';
-            sOptions += '<td>' + json.RES[i].Marca + '</td>';
-            sOptions += '<td>' + json.RES[i].NumCortada + '</td>';
-            sOptions += '<td>' + json.RES[i].Lavado + '</td>';
-            sOptions += '<td>' + json.RES[i].Estilo + '</td>';
-            sOptions += '<td>' + json.RES[i].Planta + '</td>';
-            sOptions += '</tr>';
-
-            _index_++;
-          }
-          $('#tlbAuditoriaProcEsp').html('');
-          $('#tlbAuditoriaProcEsp').html('<tbody>' + sOptions + '</tbody>');
-          // tslint:disable-next-line:max-line-length
-          $('#tlbAuditoriaProcEsp').append('<thead><th></th><th>No.</th><th>Cliente</th><th>Orden Trabajo</th><th>PO</th><th>Tela</th><th>Marca</th><th>NumCortada</th><th>Lavado</th><th>Estilo</th><th>Planta</th></thead>');
-          $('#tlbAuditoriaProcEsp').DataTable({
-            sorting: true,
-            bDestroy: true,
-            ordering: true,
-            bPaginate: true,
-            pageLength: 6,
-            bInfo: true,
-            dom: 'Bfrtip',
-            processing: true,
-            buttons: [
-              'copyHtml5',
-              'excelHtml5',
-              'csvHtml5',
-              'pdfHtml5'
-            ]
-          });
-          $('.tooltipped').tooltip();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
-    });
-  }
-
   GetOrdenTrabajo(): boolean {
     let Result = false;
     $.ajax({
@@ -469,11 +307,13 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
   }
 
   reset() {
+    this.modalAgregar = false;
     this.Det = [];
     this.otDetalle = null;
     this.bloquearOT = false;
     this.ordenTrabajo = '';
     this.initFormGroup();
+    this.selectedFile = null;
     setTimeout(() => this.form.enable(), 100);
     this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.destroy();
@@ -511,10 +351,8 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
         'IdDefecto': detalle.Defecto.ID,
         'IdPosicion': detalle.Posicion.ID,
         'IdOperacion': detalle.Defecto.ID,
-        'Revisado': false,
-        'Compostura': detalle.Compostura,
-        'cantidad': +detalle.Cantidad,
-        'Imagen': detalle.Imagen,
+        'Cantidad': +detalle.Cantidad,
+        'Aud_Imagen': detalle.Imagen,
         'Nota': detalle.Nota,
         'Archivo': detalle.Archivo
       };
@@ -534,6 +372,48 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
       });
     } else {
       this._toast.warning('Se debe seleccionar una orden de trabajo valida', '');
+    }
+  }
+  validaAgregaAuditoriaEdit() {
+    console.log(this.form.value);
+    console.log(this.ordenTrabajo);
+    if (!this.form.invalid) {
+      const detalle = this.form.value;
+      const detalleItem = {
+        'IdDefecto': detalle.Defecto.ID,
+        'IdPosicion': detalle.Posicion.ID,
+        'IdOperacion': detalle.Defecto.ID,
+        'Cantidad': detalle.Cantidad,
+        'Aud_Imagen': detalle.Imagen,
+        'Nota': detalle.Nota,
+        'Archivo': detalle.Archivo
+      };
+      this.Det.push(detalleItem);
+      console.log(this.Det);
+      const defecto = this.form.controls['Defecto'].value;
+      const operacion = this.form.controls['Operacion'].value;
+      const posicion = this.form.controls['Posicion'].value;
+      const cantidad = this.form.controls['Cantidad'].value;
+      const imagen = this.form.controls['Imagen'].value;
+      const archivo = this.form.controls['Archivo'].value;
+      console.log(this.form.value);
+      const itemTable = {
+        DescripcionDefecto: defecto.Nombre,
+        DescripcionOperacion: operacion.Nombre,
+        DescripcionPosicion: posicion.Nombre,
+        Cantidad: cantidad,
+        Aud_Imagen: imagen,
+        Archivo: archivo,
+        Nota: this.form.controls['Nota'].value
+      };
+      this.items.push(itemTable);
+      this.dataSourceEdit = new MatTableDataSource(this.items);
+      this.form.reset();
+      this.selectedFile = null;
+      const elems = document.querySelectorAll('select');
+      setTimeout(() => M.FormSelect.init(elems, {}), 500);
+    } else {
+      this._toast.warning('Error en formulario', '');
     }
   }
 
@@ -564,21 +444,125 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
         'IdUsuario': this.Json_Usuario.ID,
         'Det': this.Det
       };
-      // this._lavanderiaService.createAuditoria(data)
-      //   .subscribe(
-      //     res => {
-      //       this._toast.success('Se agrego correctamente auditoria terminado', '');
-      //       console.log(res);
-      //       const elem = document.querySelector('#modalNewAuditoria');
-      //       const instance = M.Modal.getInstance(elem);
-      //       instance.close();
-      //       this.cargarAuditorias();
-      //       this.reset();
-      //     },
-      //     error => this._toast.error('Error al conectar a la base de datos', '')
-      //   );
+      this._lavanderiaService.createAuditoria(data)
+        .subscribe(
+          res => {
+            this._toast.success('Se agrego correctamente auditoria lavandería', '');
+            console.log(res);
+            const elem = document.querySelector('#modalNewAuditoria');
+            const instance = M.Modal.getInstance(elem);
+            instance.close();
+            this.cargarAuditorias();
+            this.reset();
+          },
+          error => this._toast.error('Error al conectar a la base de datos', '')
+        );
     } else {
       this._toast.warning('La auditoría debe contener al menos un detalle', '');
+    }
+  }
+
+  eliminarAuditoria(id) {
+    console.log(id);
+    swal({
+      text: '¿Estas seguro de eliminar esta auditoria?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._lavanderiaService.deleteAuditoria(id)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Response.IsSuccessStatusCode) {
+                  this._toast.success('Auditoria eliminada con exito', '');
+                  this.cargarAuditorias();
+                } else {
+                  this._toast.warning('Ups! Algo no salio bien', '');
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
+  }
+
+  openModal(auditoria) {
+    this._lavanderiaService.getAuditoriaDetail(auditoria.IdAuditoria)
+      .subscribe((res: any) => {
+        this.otDetalle = res.RES;
+        setTimeout(() => M.updateTextFields(), 100);
+        if (this.otDetalle.FechaRegistroFin !== null) {
+          this.form.disable();
+        } else {
+          this.form.enable();
+        }
+        console.log(res);
+        this.items = res.RES_DET;
+        this.dataSourceEdit = new MatTableDataSource(this.items);
+        this.items.forEach(x => {
+          x.Imagen = x.Aud_Imagen;
+          this.Det.push(x);
+        });
+      });
+  }
+
+  eliminarEditar(index) {
+    this.Det.splice(index, 1);
+    this.items.splice(index, 1);
+    this.dataSourceEdit = new MatTableDataSource(this.items);
+  }
+
+  guardarAuditoriaEdit() {
+    if (this.otDetalle.FechaRegistroFin !== null) {
+      const elem = document.querySelector('#modalNewAuditoria');
+      const instance = M.Modal.getInstance(elem);
+      instance.close();
+      this.cargarAuditorias();
+      this.reset();
+    } else {
+      if (this.Det.length > 0) {
+        const data = {
+          IdAuditoria: this.otDetalle.IdAuditoria,
+          Det: this.Det
+        };
+        this._lavanderiaService.updateAuditoria(data)
+          .subscribe(
+            (res: any) => {
+              if (res.Response.StatusCode === 200) {
+                this._toast.success('Se actualizo correctamente auditoria calidad', '');
+                console.log(res);
+                const elem = document.querySelector('#modalEditAuditoria');
+                const instance = M.Modal.getInstance(elem);
+                instance.close();
+                this.cargarAuditorias();
+                this.reset();
+              } else {
+                this._toast.warning('Ups! Algo no salio bien', '');
+              }
+            },
+            error => {
+              console.log(error);
+              this._toast.error('Error al conectar a la base de datos', '');
+            }
+          );
+      } else {
+        this._toast.warning('La auditoría debe contener al menos un detalle', '');
+      }
     }
   }
 
@@ -590,12 +574,64 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
     modalInstance.open();
     this.totalDetalle = auditoria.total;
 
-    // this._terminadoAuditoriaService.getAuditoriaDetail(auditoria.IdAuditoria, tipo)
-    //   .subscribe((res: any) => {
-    //     this.dataSourceDetalle = new MatTableDataSource(res.RES_DET);
-    //     this.otDetalle = res.RES;
-    //     console.log(res);
-    //   });
+    this._lavanderiaService.getAuditoriaDetail(auditoria.IdAuditoria)
+      .subscribe((res: any) => {
+        this.dataSourceDetalle = new MatTableDataSource(res.RES_DET);
+        this.otDetalle = res.RES;
+        console.log(res);
+      });
+  }
+
+  closeModalDetalle() {
+    const modalDetalle = document.querySelector('#modal-detalle');
+    const modalInstance = M.Modal.getInstance(modalDetalle);
+    modalInstance.close();
+  }
+
+  cerrarAuditoria() {
+    swal({
+      text: '¿Estas seguro de cerrar esta auditoria?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._lavanderiaService.cierreAuditoria(this.otDetalle.IdAuditoria)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res === null) {
+                  this._toast.success('Auditoria cerrada con exito', '');
+                  this.closeModal();
+                  this.cargarAuditorias();
+                } else {
+                  this._toast.warning('Ups! Algo no salio bien', '');
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
+  }
+
+  closeModal() {
+    const elem = document.querySelector('#modalEditAuditoria');
+    const instance = M.Modal.getInstance(elem);
+    this.Det = [];
+    instance.close();
   }
 
   applyFilter(filterValue: string) {
@@ -616,7 +652,96 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
       }
       // nuevo ? this.form.get('Imagen').patchValue(event.target.result) : this.formEdit.get('Imagen').patchValue(event.target.result);
     });
-
     reader.readAsDataURL(file);
+  }
+
+  openPdfInTab(archivo) {
+    const base64ImageData = archivo;
+    // let extension = this.base64MimeType(archivo);
+    // console.log(extension);
+    // data:application/pdf
+    const contentType = `application/pdf`;
+
+    const byteCharacters = atob(base64ImageData.substr(`data:${contentType};base64,`.length));
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+      const slice = byteCharacters.slice(offset, offset + 1024);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+    const blob = new Blob(byteArrays, {type: contentType});
+    const blobUrl = URL.createObjectURL(blob);
+
+    window.open(blobUrl, '_blank');
+  }
+
+  openImage(imagen) {
+    const base64ImageData = imagen;
+    const extension = this.base64MimeType(imagen);
+    console.log(extension);
+    const contentType = `image/${extension}`;
+
+    const byteCharacters = atob(base64ImageData.substr(`data:${contentType};base64,`.length));
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+      const slice = byteCharacters.slice(offset, offset + 1024);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+    const blob = new Blob(byteArrays, {type: contentType});
+    const blobUrl = URL.createObjectURL(blob);
+
+    window.open(blobUrl, '_blank');
+  }
+
+  base64MimeType(encoded) {
+    let result = null;
+
+    if (typeof encoded !== 'string') {
+      return result;
+    }
+
+    let mime = encoded.match(/data:image+\/([a-zA-Z0-9-.+]+).*,.*/);
+
+    if (mime && mime.length) {
+      result = mime[1];
+    }
+
+    return result;
+  }
+
+  imprimirDetalle(auditoria) {
+    console.log(auditoria);
+    this._reporteService.getReporte(auditoria.IdAuditoria, 'Lavanderia')
+      .subscribe(
+        imprimirResp => {
+          console.log('RESULTADO IMPRIMIR RECIB0: ', imprimirResp);
+          const pdfResult: any = this.domSanitizer.bypassSecurityTrustResourceUrl(
+            URL.createObjectURL(imprimirResp)
+          );
+          // printJS(pdfResult.changingThisBreaksApplicationSecurity);
+          window.open(pdfResult.changingThisBreaksApplicationSecurity);
+          console.log(pdfResult);
+        });
+  }
+
+  getTotalDetalle() {
+    return this.dataSourceDetalle.data.map(t => t.Cantidad).reduce((acc, value) => acc + value, 0);
   }
 }

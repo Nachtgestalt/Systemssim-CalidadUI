@@ -69,7 +69,7 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
     $('#modalNewPosicionLavanderia').modal();
     $('#modalEditPosicionLavanderia').modal();
     $('#modalEnablePosicionProcesosEspeciales').modal();
-    $('#lblModulo').text('Procesos Especiales - Posición');
+    $('#lblModulo').text('Lavandería - Posición');
     this.initFormGroupFilter();
     this.initFormGroup();
     this.GetPosicionLavanderia();

@@ -8,6 +8,7 @@ import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 export class LavanderiaService {
 
   private URL_LAVANDERA = `${Globals.UriRioSulApi}Lavanderia`;
+  private URL_AUDITORIA = `${Globals.UriRioSulApi}AuditoriaLavanderia`;
 
   constructor(private _http: HttpClient) {}
 
@@ -163,6 +164,40 @@ export class LavanderiaService {
 
   // ================ Auditoria ===================
   createAuditoria(data) {
+    const url = `${this.URL_AUDITORIA}/AuditoriaLavanderia`;
+    const body = JSON.stringify(data);
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.post(url, body, {headers});
+  }
 
+  updateAuditoria(auditoria) {
+    const url = `${this.URL_AUDITORIA}/ActualizaAuditoriaDet`;
+    const body = JSON.stringify(auditoria);
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.put(url, body, {headers});
+  }
+
+  cierreAuditoria(id) {
+    const url = `${this.URL_AUDITORIA}/CierreAuditoria`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('IdAuditoria', id);
+    return this._http.put(url, null, {headers, params});
+  }
+
+  deleteAuditoria(id) {
+    const url = `${this.URL_AUDITORIA}/EliminaAuditoria`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('IdAuditoria', id);
+    return this._http.delete(url, {headers, params});
+  }
+
+  getAuditoriaDetail(id, tipo?) {
+    const url = `${this.URL_AUDITORIA}/AuditoriaLavanderia`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams().append('ID', id);
+    if (tipo) {
+      params = params.append('tipo', tipo);
+    }
+    return this._http.get(url, {headers, params});
   }
 }

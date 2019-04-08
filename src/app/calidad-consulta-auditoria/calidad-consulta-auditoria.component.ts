@@ -121,7 +121,6 @@ export class CalidadConsultaAuditoriaComponent implements OnInit, OnDestroy, Aft
         console.log(res);
         this.clientes = res;
       });
-    // this.cargarAuditorias();
   }
 
   ngAfterViewInit(): void {

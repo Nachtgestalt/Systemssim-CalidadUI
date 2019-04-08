@@ -12,6 +12,7 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {DataTableDirective} from 'angular-datatables';
 import {forkJoin, Subject} from 'rxjs';
 import {ProcesosEspecialesService} from '../services/procesos-especiales/procesos-especiales.service';
+import {ClientesService} from '../services/clientes/clientes.service';
 
 @Component({
   selector: 'app-auditoriaprocesosespeciales',
@@ -47,7 +48,12 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
     'Fecha fin', 'Defectos', '2das', 'Status', 'Opciones'
   ];
 
+  displayedColumnsEdit: string[] = [
+    'Posicion', 'Operacion', 'Defecto', 'Cantidad', 'Imagen', 'Nota', 'Archivo', 'Opciones'
+  ];
+
   dataSource: MatTableDataSource<any>;
+  dataSourceEdit: MatTableDataSource<any>;
 
   totalDetalle = 0;
 
@@ -67,6 +73,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
 
   form: FormGroup;
   constructor(
+    private _clientesService: ClientesService,
     private _procesosService: ProcesosEspecialesService,
     private _terminadoAuditoriaService: AuditoriaTerminadoService,
     private _toast: ToastrService
@@ -78,11 +85,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
     $('.tooltipped').tooltip();
     $('select').formSelect();
     $('#modalNewAuditoria').modal();
-    this.GetClients();
-    this.GetDefectos();
-    this.GetOperaciones();
-    this.GetPosicion();
-    this.GetAuditoriaProcEsp();
+    this.cargarAuditorias();
     $('#lblModulo').text('Procesos Especiales - Auditoría');
 
     const defectos$ = this._procesosService.listDefectos('', '', 'True');
@@ -122,56 +125,6 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
       'Nota': new FormControl(),
       'Archivo': new FormControl(),
       'NombreArchivo': new FormControl(),
-    });
-  }
-
-  cargarAuditorias() {
-    const filtro = {
-      Fecha_i: null,
-      Fecha_f: null,
-      IdCliente: null,
-      Marca: null,
-      PO: null,
-      Corte: null,
-      Planta: null,
-      Estilo: null,
-      Auditoria: 'Terminado'
-    };
-    console.log('FILTRO', filtro);
-    // this._clientesService.busqueda(filtro).subscribe(
-    //   (res: any) => {
-    //     console.log(res);
-    //     this.dataSource = new MatTableDataSource(res.Auditoria);
-    //   }
-    // );
-  }
-
-  GetClients() {
-    const ddl = $('#ddlCliente');
-    $.ajax({
-      url: Globals.UriRioSulApi + 'Cliente/ObtieneClientes',
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        $('#ddlCliente').empty();
-        if (json.length > 0) {
-          for (let index = 0; index < json.length; index++) {
-            if (index === 0) {
-              $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              $(ddl).append($('<option></option>').attr('value', json[index].IdClienteRef).text(json[index].Descripcion));
-            } else {
-              // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json[index].IdClienteRef).text(json[index].Descripcion));
-            }
-          }
-          $(ddl).formSelect();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
     });
   }
 
@@ -244,94 +197,6 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
     }
   }
 
-  GetDefectos() {
-    const ddl = $('#ddlDefectos');
-    $.ajax({
-      url: Globals.UriRioSulApi + 'ProcesosEspeciales/ObtieneDefectoProseso',
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          $('#ddlDefectos').empty();
-          for (let i = 0; i < json.Vst_ProcesosEspeciales.length; i++) {
-            if (i === 0) {
-              $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[i].ID).text(json.Vst_ProcesosEspeciales[i].Nombre));
-            } else {
-              // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[i].ID).text(json.Vst_ProcesosEspeciales[i].Nombre));
-            }
-          }
-          $(ddl).formSelect();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
-    });
-  }
-
-  GetOperaciones() {
-    const ddl = $('#ddlOperaion');
-    $.ajax({
-      url: Globals.UriRioSulApi + 'ProcesosEspeciales/ObtieneOperacionProcesosEspeciales',
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          $('#ddlOperaion').empty();
-          for (let index = 0; index < json.Vst_ProcesosEspeciales.length; index++) {
-            if (index === 0) {
-              $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[index].ID).text(json.Vst_ProcesosEspeciales[index].Nombre));
-            } else {
-              // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[index].ID).text(json.Vst_ProcesosEspeciales[index].Nombre));
-            }
-          }
-          $(ddl).formSelect();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
-    });
-  }
-
-  GetPosicion() {
-    const ddl = $('#ddlPosicion');
-    $.ajax({
-      url: Globals.UriRioSulApi + 'ProcesosEspeciales/ObtienePosicion',
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          $('#ddlPosicion').empty();
-          for (let index = 0; index < json.Vst_ProcesosEspeciales.length; index++) {
-            if (index === 0) {
-              $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[index].ID).text(json.Vst_Confeccion[index].Nombre));
-            } else {
-              $(ddl).append($('<option></option>').attr('value', json.Vst_ProcesosEspeciales[index].ID).text(json.Vst_Confeccion[index].Nombre));
-            }
-          }
-          $(ddl).formSelect();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
-    });
-  }
-
   DisposeNewProcesosEspeciales() {
     $('#ddlDefecto').val(0);
     $('#ddlDefecto').formSelect();
@@ -388,61 +253,25 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
     }
   }
 
-  GetAuditoriaProcEsp() {
-    let sOptions = '';
-    let _index_ = 1;
-    $.ajax({
-      url: Globals.UriRioSulApi + 'AuditoriaProcesosEspeciales/ObtieneAuditoriaProcEsp',
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          for (let i = 0; i < json.RES.length; i++) {
-            sOptions += '<tr>';
-            sOptions += '<td></td>';
-            sOptions += '<td>' + _index_ + '</td>';
-            sOptions += '<td>' + json.RES[i].Descripcion + '</td>';
-            sOptions += '<td>' + json.RES[i].OrdenTrabajo + '</td>';
-            sOptions += '<td>' + json.RES[i].PO + '</td>';
-            sOptions += '<td>' + json.RES[i].Tela + '</td>';
-            sOptions += '<td>' + json.RES[i].Marca + '</td>';
-            sOptions += '<td>' + json.RES[i].NumCortada + '</td>';
-            sOptions += '<td>' + json.RES[i].Lavado + '</td>';
-            sOptions += '<td>' + json.RES[i].Estilo + '</td>';
-            sOptions += '<td>' + json.RES[i].Planta + '</td>';
-            sOptions += '</tr>';
-
-            _index_++;
-          }
-          $('#tlbAuditoriaProcEsp').html('');
-          $('#tlbAuditoriaProcEsp').html('<tbody>' + sOptions + '</tbody>');
-          // tslint:disable-next-line:max-line-length
-          $('#tlbAuditoriaProcEsp').append('<thead><th></th><th>No.</th><th>Cliente</th><th>Orden Trabajo</th><th>PO</th><th>Tela</th><th>Marca</th><th>NumCortada</th><th>Lavado</th><th>Estilo</th><th>Planta</th></thead>');
-          $('#tlbAuditoriaProcEsp').DataTable({
-            sorting: true,
-            bDestroy: true,
-            ordering: true,
-            bPaginate: true,
-            pageLength: 6,
-            bInfo: true,
-            dom: 'Bfrtip',
-            processing: true,
-            buttons: [
-              'copyHtml5',
-              'excelHtml5',
-              'csvHtml5',
-              'pdfHtml5'
-            ]
-          });
-          $('.tooltipped').tooltip();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
+  cargarAuditorias() {
+    const filtro = {
+      Fecha_i: null,
+      Fecha_f: null,
+      IdCliente: null,
+      Marca: null,
+      PO: null,
+      Corte: null,
+      Planta: null,
+      Estilo: null,
+      Auditoria: 'Lavanderia'
+    };
+    console.log('FILTRO', filtro);
+    this._clientesService.busqueda(filtro).subscribe(
+      (res: any) => {
+        console.log(res);
+        this.dataSource = new MatTableDataSource(res.Auditoria);
       }
-    });
+    );
   }
 
   GetOrdenTrabajo(): boolean {
@@ -582,6 +411,25 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
     }
   }
 
+  openModal(auditoria) {
+    this._procesosService.getAuditoriaDetail(auditoria.IdAuditoria)
+      .subscribe((res: any) => {
+        this.otDetalle = res.RES;
+        setTimeout(() => M.updateTextFields(), 100);
+        if (this.otDetalle.FechaRegistroFin !== null) {
+          this.form.disable();
+        } else {
+          this.form.enable();
+        }
+        console.log(res);
+        this.items = res.RES_DET;
+        this.dataSourceEdit = new MatTableDataSource(this.items);
+        this.items.forEach(x => {
+          x.Imagen = x.Aud_Imagen;
+          this.Det.push(x);
+        });
+      });
+  }
 
   openModalDetalle(auditoria) {
     const modalDetalle = document.querySelector('#modal-detalle');
