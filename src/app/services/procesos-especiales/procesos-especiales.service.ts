@@ -173,7 +173,7 @@ export class ProcesosEspecialesService {
   }
 
   updateAuditoria(auditoria) {
-    const url = `${this.URL_AUDITORIA}/ActualizaAuditoriaDet`;
+    const url = `${this.URL_AUDITORIA}/AuditoriaProcEsp`;
     const body = JSON.stringify(auditoria);
     const headers = new HttpHeaders().append('content-type', 'application/json');
     return this._http.put(url, body, {headers});
@@ -182,19 +182,19 @@ export class ProcesosEspecialesService {
   cierreAuditoria(id) {
     const url = `${this.URL_AUDITORIA}/CierreAuditoria`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
-    const params = new HttpParams().append('IdAuditoria', id);
+    const params = new HttpParams().append('ID', id);
     return this._http.put(url, null, {headers, params});
   }
 
   deleteAuditoria(id) {
     const url = `${this.URL_AUDITORIA}/EliminaAuditoria`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
-    const params = new HttpParams().append('IdAuditoria', id);
+    const params = new HttpParams().append('ID', id);
     return this._http.delete(url, {headers, params});
   }
 
   getAuditoriaDetail(id, tipo?) {
-    const url = `${this.URL_AUDITORIA}/AuditoriaLavanderia`;
+    const url = `${this.URL_AUDITORIA}/AuditoriaProcEsp`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     let params = new HttpParams().append('ID', id);
     if (tipo) {

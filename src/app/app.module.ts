@@ -71,6 +71,7 @@ import { NumberFormatPipe } from './pipes/number-format.pipe';
 import { MarcaClienteComponent } from './marca-cliente/marca-cliente.component';
 import { AuditoriaLavanderiaComponent } from './auditoria-lavanderia/auditoria-lavanderia.component';
 import { AuditoriaLavanderiaConsultaComponent } from './auditoria-lavanderia-consulta/auditoria-lavanderia-consulta.component';
+import { AuditoriaProcesosConsultaComponent } from './auditoria-procesos-consulta/auditoria-procesos-consulta.component';
 
 // the second parameter 'fr' is optional
 registerLocaleData(localeMx);
@@ -133,6 +134,7 @@ registerLocaleData(localeMx);
     MarcaClienteComponent,
     AuditoriaLavanderiaComponent,
     AuditoriaLavanderiaConsultaComponent,
+    AuditoriaProcesosConsultaComponent,
   ],
   entryComponents: [
     AddEditOperacionTerminadoComponent
@@ -210,6 +212,7 @@ registerLocaleData(localeMx);
           {path: 'auditoriaprocesosespeciales', component: AuditoriaprocesosespecialesComponent},
           {path: 'auditorialavanderia', component: AuditoriaLavanderiaComponent},
           {path: 'auditorialavanderiaconsulta', component: AuditoriaLavanderiaConsultaComponent},
+          {path: 'auditoriaprocesosespecialesconsulta', component: AuditoriaProcesosConsultaComponent},
         ]
       },
       {

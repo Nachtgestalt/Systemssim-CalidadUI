@@ -75,10 +75,11 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
   items = [];
 
   selectedFile;
-
+  loading = false;
   modalAgregar = false;
 
   form: FormGroup;
+
   constructor(
     private domSanitizer: DomSanitizer,
     private _clientesService: ClientesService,
@@ -158,6 +159,7 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
       }
     );
   }
+
   ValidateAddProcEspAuditoria() {
     if ($('#ddlCliente')[0].value === '0') {
       this._toast.warning('Se debe seleccionar un cliente valido', '');
@@ -326,6 +328,7 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
 
   detalleOT(ot) {
     console.log(ot);
+    this.loading = true;
     this._terminadoAuditoriaService.getDetailOT(ot)
       .subscribe(
         (res: any) => {
@@ -337,6 +340,11 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
           } else {
             this.otDetalle = res.OT;
           }
+        }, error1 => {
+          console.log(error1);
+        },
+        () => {
+          this.loading = false;
         }
       );
   }
@@ -374,6 +382,7 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
       this._toast.warning('Se debe seleccionar una orden de trabajo valida', '');
     }
   }
+
   validaAgregaAuditoriaEdit() {
     console.log(this.form.value);
     console.log(this.ordenTrabajo);
@@ -544,7 +553,7 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
           .subscribe(
             (res: any) => {
               if (res.Response.StatusCode === 200) {
-                this._toast.success('Se actualizo correctamente auditoria calidad', '');
+                this._toast.success('Se actualizo correctamente auditoria', '');
                 console.log(res);
                 const elem = document.querySelector('#modalEditAuditoria');
                 const instance = M.Modal.getInstance(elem);

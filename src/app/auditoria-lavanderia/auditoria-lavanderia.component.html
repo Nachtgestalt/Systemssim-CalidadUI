@@ -5,7 +5,7 @@
         <i class="material-icons left">arrow_back</i>
       </button>
       &nbsp;&nbsp;
-      <button class="btn tooltipped  modal-trigger"
+      <button class="btn modal-trigger"
               data-target="modalNewAuditoria" type="button"
               name="btnAddAuditoria" (click)="reset()">
         Agregar
@@ -138,10 +138,23 @@
         <div class="col s12" style="text-align: right">
           <button (click)="detalleOT(ordenTrabajo)" class="btn  " type="button"
                   name="btnSearchCortadores" data-position="bottom"
-                  data-tooltip="Busca si existe la orden de trabajo">
+                  data-tooltip="Busca si existe la orden de trabajo"
+                  [disabled]="loading">
             BUSCAR
             <i class="material-icons right">search</i>
           </button>
+        </div>
+      </div>
+      <div class="col s1" *ngIf="loading">
+        <div class="lds-roller">
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
+          <div></div>
         </div>
       </div>
       <div class="col s2" style="text-align:right">

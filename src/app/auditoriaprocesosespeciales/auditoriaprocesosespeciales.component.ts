@@ -13,6 +13,9 @@ import {DataTableDirective} from 'angular-datatables';
 import {forkJoin, Subject} from 'rxjs';
 import {ProcesosEspecialesService} from '../services/procesos-especiales/procesos-especiales.service';
 import {ClientesService} from '../services/clientes/clientes.service';
+import {ReportesService} from '../services/reportes/reportes.service';
+import {DomSanitizer} from '@angular/platform-browser';
+import swal from 'sweetalert';
 
 @Component({
   selector: 'app-auditoriaprocesosespeciales',
@@ -51,9 +54,12 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
   displayedColumnsEdit: string[] = [
     'Posicion', 'Operacion', 'Defecto', 'Cantidad', 'Imagen', 'Nota', 'Archivo', 'Opciones'
   ];
+  displayedColumnsDetalle: string[] = [
+    'Posicion', 'Operacion', 'Defecto', 'Cantidad', 'Imagen', 'Nota', 'Archivo'];
 
   dataSource: MatTableDataSource<any>;
   dataSourceEdit: MatTableDataSource<any>;
+  dataSourceDetalle: MatTableDataSource<any>;
 
   totalDetalle = 0;
 
@@ -70,12 +76,15 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
   items = [];
 
   selectedFile;
+  loading = false;
 
   form: FormGroup;
   constructor(
+    private domSanitizer: DomSanitizer,
     private _clientesService: ClientesService,
     private _procesosService: ProcesosEspecialesService,
     private _terminadoAuditoriaService: AuditoriaTerminadoService,
+    private _reporteService: ReportesService,
     private _toast: ToastrService
   ) {
   }
@@ -85,6 +94,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
     $('.tooltipped').tooltip();
     $('select').formSelect();
     $('#modalNewAuditoria').modal();
+    $('#modalEditAuditoria').modal();
     this.cargarAuditorias();
     $('#lblModulo').text('Procesos Especiales - Auditoría');
 
@@ -263,7 +273,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
       Corte: null,
       Planta: null,
       Estilo: null,
-      Auditoria: 'Lavanderia'
+      Auditoria: 'ProcesosEspeciales'
     };
     console.log('FILTRO', filtro);
     this._clientesService.busqueda(filtro).subscribe(
@@ -303,6 +313,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
     this.bloquearOT = false;
     this.ordenTrabajo = '';
     this.initFormGroup();
+    this.selectedFile = '';
     setTimeout(() => this.form.enable(), 100);
     this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
       dtInstance.destroy();
@@ -315,6 +326,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
 
   detalleOT(ot) {
     console.log(ot);
+    this.loading = true;
     this._terminadoAuditoriaService.getDetailOT(ot)
       .subscribe(
         (res: any) => {
@@ -326,6 +338,11 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
           } else {
             this.otDetalle = res.OT;
           }
+        }, error1 => {
+          console.log(error1);
+        },
+        () => {
+          this.loading = false;
         }
       );
   }
@@ -425,9 +442,48 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
         this.items = res.RES_DET;
         this.dataSourceEdit = new MatTableDataSource(this.items);
         this.items.forEach(x => {
-          x.Imagen = x.Aud_Imagen;
+          // x.Imagen = x.Aud_Imagen;
           this.Det.push(x);
         });
+      });
+  }
+
+  eliminarAuditoria(id) {
+    console.log(id);
+    swal({
+      text: '¿Estas seguro de eliminar esta auditoria?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._procesosService.deleteAuditoria(id)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Response.IsSuccessStatusCode) {
+                  this._toast.success('Auditoria eliminada con exito', '');
+                  this.cargarAuditorias();
+                } else {
+                  this._toast.warning('Ups! Algo no salio bien', '');
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
       });
   }
 
@@ -438,12 +494,147 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
     modalInstance.open();
     this.totalDetalle = auditoria.total;
 
-    // this._terminadoAuditoriaService.getAuditoriaDetail(auditoria.IdAuditoria, tipo)
-    //   .subscribe((res: any) => {
-    //     this.dataSourceDetalle = new MatTableDataSource(res.RES_DET);
-    //     this.otDetalle = res.RES;
-    //     console.log(res);
-    //   });
+    this._procesosService.getAuditoriaDetail(auditoria.IdAuditoria)
+      .subscribe((res: any) => {
+        this.dataSourceDetalle = new MatTableDataSource(res.RES_DET);
+        this.otDetalle = res.RES;
+        console.log(res);
+      });
+  }
+
+  closeModal() {
+    const elem = document.querySelector('#modalEditAuditoria');
+    const instance = M.Modal.getInstance(elem);
+    this.Det = [];
+    this.reset();
+    instance.close();
+  }
+
+  validaAgregaAuditoriaEdit() {
+    console.log(this.form.value);
+    console.log(this.ordenTrabajo);
+    if (!this.form.invalid) {
+      const detalle = this.form.value;
+      const detalleItem = {
+        'IdDefecto': detalle.Defecto.ID,
+        'IdPosicion': detalle.Posicion.ID,
+        'IdOperacion': detalle.Defecto.ID,
+        'Cantidad': detalle.Cantidad,
+        'Aud_Imagen': detalle.Imagen,
+        'Nota': detalle.Nota,
+        'Archivo': detalle.Archivo
+      };
+      this.Det.push(detalleItem);
+      console.log(this.Det);
+      const defecto = this.form.controls['Defecto'].value;
+      const operacion = this.form.controls['Operacion'].value;
+      const posicion = this.form.controls['Posicion'].value;
+      const cantidad = this.form.controls['Cantidad'].value;
+      const imagen = this.form.controls['Imagen'].value;
+      const archivo = this.form.controls['Archivo'].value;
+      console.log(this.form.value);
+      const itemTable = {
+        DescripcionDefecto: defecto.Nombre,
+        DescripcionOperacion: operacion.Nombre,
+        DescripcionPosicion: posicion.Nombre,
+        Cantidad: cantidad,
+        Aud_Imagen: imagen,
+        Archivo: archivo,
+        Nota: this.form.controls['Nota'].value
+      };
+      this.items.push(itemTable);
+      this.dataSourceEdit = new MatTableDataSource(this.items);
+      this.form.reset();
+      this.selectedFile = null;
+      const elems = document.querySelectorAll('select');
+      setTimeout(() => M.FormSelect.init(elems, {}), 500);
+    } else {
+      this._toast.warning('Error en formulario', '');
+    }
+  }
+
+  eliminarEditar(index) {
+    this.Det.splice(index, 1);
+    this.items.splice(index, 1);
+    this.dataSourceEdit = new MatTableDataSource(this.items);
+  }
+
+  guardarAuditoriaEdit() {
+    if (this.otDetalle.FechaRegistroFin !== null) {
+      const elem = document.querySelector('#modalNewAuditoria');
+      const instance = M.Modal.getInstance(elem);
+      instance.close();
+      this.cargarAuditorias();
+      this.reset();
+    } else {
+      if (this.Det.length > 0) {
+        const data = {
+          IdAuditoria: this.otDetalle.IdAuditoria,
+          Det: this.Det
+        };
+        this._procesosService.updateAuditoria(data)
+          .subscribe(
+            (res: any) => {
+              if (res.Response.StatusCode === 200) {
+                this._toast.success('Se actualizo correctamente auditoria', '');
+                console.log(res);
+                const elem = document.querySelector('#modalEditAuditoria');
+                const instance = M.Modal.getInstance(elem);
+                instance.close();
+                this.cargarAuditorias();
+                this.reset();
+              } else {
+                this._toast.warning('Ups! Algo no salio bien', '');
+              }
+            },
+            error => {
+              console.log(error);
+              this._toast.error('Error al conectar a la base de datos', '');
+            }
+          );
+      } else {
+        this._toast.warning('La auditoría debe contener al menos un detalle', '');
+      }
+    }
+  }
+
+  cerrarAuditoria() {
+    swal({
+      text: '¿Estas seguro de cerrar esta auditoria?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._procesosService.cierreAuditoria(this.otDetalle.IdAuditoria)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res === null) {
+                  this._toast.success('Auditoria cerrada con exito', '');
+                  this.closeModal();
+                  this.cargarAuditorias();
+                } else {
+                  this._toast.warning('Ups! Algo no salio bien', '');
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
   }
 
   applyFilter(filterValue: string) {
@@ -451,6 +642,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
   }
 
   processFile(imageInput: any, nuevo: boolean, tipo) {
+    console.log('IMAGE INPUT', imageInput);
     const file: File = imageInput.files[0];
     const reader = new FileReader();
     console.log(file);
@@ -468,4 +660,99 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
     reader.readAsDataURL(file);
   }
 
+  openPdfInTab(archivo) {
+    const base64ImageData = archivo;
+    // let extension = this.base64MimeType(archivo);
+    // console.log(extension);
+    // data:application/pdf
+    const contentType = `application/pdf`;
+
+    const byteCharacters = atob(base64ImageData.substr(`data:${contentType};base64,`.length));
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+      const slice = byteCharacters.slice(offset, offset + 1024);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+    const blob = new Blob(byteArrays, {type: contentType});
+    const blobUrl = URL.createObjectURL(blob);
+
+    window.open(blobUrl, '_blank');
+  }
+
+  openImage(imagen) {
+    const base64ImageData = imagen;
+    const extension = this.base64MimeType(imagen);
+    console.log(extension);
+    const contentType = `image/${extension}`;
+
+    const byteCharacters = atob(base64ImageData.substr(`data:${contentType};base64,`.length));
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+      const slice = byteCharacters.slice(offset, offset + 1024);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+    const blob = new Blob(byteArrays, {type: contentType});
+    const blobUrl = URL.createObjectURL(blob);
+
+    window.open(blobUrl, '_blank');
+  }
+
+  base64MimeType(encoded) {
+    let result = null;
+
+    if (typeof encoded !== 'string') {
+      return result;
+    }
+
+    let mime = encoded.match(/data:image+\/([a-zA-Z0-9-.+]+).*,.*/);
+
+    if (mime && mime.length) {
+      result = mime[1];
+    }
+
+    return result;
+  }
+
+  imprimirDetalle(auditoria) {
+    console.log(auditoria);
+    this._reporteService.getReporte(auditoria.IdAuditoria, 'ProcesosEspeciales')
+      .subscribe(
+        imprimirResp => {
+          console.log('RESULTADO IMPRIMIR RECIB0: ', imprimirResp);
+          const pdfResult: any = this.domSanitizer.bypassSecurityTrustResourceUrl(
+            URL.createObjectURL(imprimirResp)
+          );
+          // printJS(pdfResult.changingThisBreaksApplicationSecurity);
+          window.open(pdfResult.changingThisBreaksApplicationSecurity);
+          console.log(pdfResult);
+        });
+  }
+
+  closeModalDetalle() {
+    const modalDetalle = document.querySelector('#modal-detalle');
+    const modalInstance = M.Modal.getInstance(modalDetalle);
+    modalInstance.close();
+  }
+
+  getTotalDetalle() {
+    return this.dataSourceDetalle.data.map(t => t.Cantidad).reduce((acc, value) => acc + value, 0);
+  }
 }
