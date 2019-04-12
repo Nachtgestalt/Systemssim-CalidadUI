@@ -358,7 +358,7 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
       const detalleItem = {
         'IdDefecto': detalle.Defecto.ID,
         'IdPosicion': detalle.Posicion.ID,
-        'IdOperacion': detalle.Defecto.ID,
+        'IdOperacion': detalle.Operacion.ID,
         'Cantidad': +detalle.Cantidad,
         'Aud_Imagen': detalle.Imagen,
         'Nota': detalle.Nota,
@@ -391,7 +391,7 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
       const detalleItem = {
         'IdDefecto': detalle.Defecto.ID,
         'IdPosicion': detalle.Posicion.ID,
-        'IdOperacion': detalle.Defecto.ID,
+        'IdOperacion': detalle.Operacion.ID,
         'Cantidad': detalle.Cantidad,
         'Aud_Imagen': detalle.Imagen,
         'Nota': detalle.Nota,
@@ -407,9 +407,9 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
       const archivo = this.form.controls['Archivo'].value;
       console.log(this.form.value);
       const itemTable = {
-        DescripcionDefecto: defecto.Nombre,
-        DescripcionOperacion: operacion.Nombre,
-        DescripcionPosicion: posicion.Nombre,
+        NombreDefecto: defecto.Nombre,
+        NombreOperacion: operacion.Nombre,
+        NombrePosicion: posicion.Nombre,
         Cantidad: cantidad,
         Aud_Imagen: imagen,
         Archivo: archivo,
@@ -640,6 +640,8 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
     const elem = document.querySelector('#modalEditAuditoria');
     const instance = M.Modal.getInstance(elem);
     this.Det = [];
+    this.items = [];
+    this.initFormGroup();
     instance.close();
   }
 

@@ -52,9 +52,12 @@ export class AuditoriaCalidadService {
     return this._http.get(url, {headers, params});
   }
 
-  getDetailOT(ot) {
+  getDetailOT(ot, tipo?) {
     const url = `${Globals.UriRioSulApi}AuditoriaTerminado/ObtenemosOT_D`;
-    const params = new HttpParams().append('OT', ot);
+    let params = new HttpParams().append('OT', ot);
+    if (tipo) {
+      params = params.append('Tipo', tipo);
+    }
     const headers = new HttpHeaders().append('content-type', 'application/json');
     return this._http.get(url, {headers, params});
   }

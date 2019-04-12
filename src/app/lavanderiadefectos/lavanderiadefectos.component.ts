@@ -82,8 +82,8 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
       'IdUsuario': new FormControl(),
       'Clave': new FormControl(),
       'Nombre': new FormControl(),
-      'Descripcion': new FormControl(),
-      'Observaciones': new FormControl(),
+      'Descripcion': new FormControl(''),
+      'Observaciones': new FormControl(''),
       'Imagen': new FormControl(),
     });
   }
@@ -159,8 +159,8 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
       this._toast.warning('Se debe ingresar una clave de defecto cortador', '');
     } else if ($('#NOMBRE_NEW_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de defecto cortador', '');
-    } else if ($('#OBSERVACIONES_NEW_CORTADOR').val() === '') {
-      this._toast.warning('Se debe ingresar las observaciones del defecto cortador', '');
+    // } else if ($('#OBSERVACIONES_NEW_CORTADOR').val() === '') {
+    //   this._toast.warning('Se debe ingresar las observaciones del defecto cortador', '');
     } else {
       let Result = false;
       $.ajax({
@@ -192,8 +192,8 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
             IdUsuario: Json_Usuario.ID,
             Clave: $('#CVE_NEW_CORTADOR').val(),
             Nombre: $('#NOMBRE_NEW_CORTADOR').val(),
-            Descripcion: $('#DESCRIPCION_NEW_CORTADOR').val(),
-            Observaciones: $('#OBSERVACIONES_NEW_CORTADOR').val(),
+            Descripcion: '',
+            Observaciones: '',
             Imagen: ($('#blah')[0].src === 'http://placehold.it/180' ? '' : $('#blah')[0].src)
           }),
           success: function (json) {

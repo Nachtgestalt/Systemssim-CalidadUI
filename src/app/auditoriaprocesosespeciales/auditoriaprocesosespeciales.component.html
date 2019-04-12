@@ -236,7 +236,7 @@
           <mat-label>DEFECTO</mat-label>
           <mat-select formControlName="Defecto">
             <mat-option *ngFor="let defecto of defectos" [value]="defecto">
-              {{defecto.Descripcion}}
+              {{defecto.Nombre}}
             </mat-option>
           </mat-select>
         </mat-form-field>
@@ -320,7 +320,7 @@
         <tbody>
         <tr *ngFor="let item of items; let i = index">
           <td>{{i + 1}}</td>
-          <td>{{item.Defecto?.Descripcion}}</td>
+          <td>{{item.Defecto?.Nombre}}</td>
           <td>{{item.Operacion?.Nombre}}</td>
           <td>{{item.Posicion?.Nombre}}</td>
           <td style="text-align: right">{{item.Cantidad | numberFormat}}</td>
@@ -442,7 +442,7 @@
           <mat-label>DEFECTO</mat-label>
           <mat-select formControlName="Defecto">
             <mat-option *ngFor="let defecto of defectos" [value]="defecto">
-              {{defecto.Descripcion}}
+              {{defecto.Nombre}}
             </mat-option>
           </mat-select>
         </mat-form-field>
@@ -537,14 +537,14 @@
           <!-- Posicion Column -->
           <ng-container matColumnDef="Posicion">
             <th mat-header-cell *matHeaderCellDef> POSICION</th>
-            <td mat-cell *matCellDef="let element"> {{element.DescripcionPosicion}} </td>
+            <td mat-cell *matCellDef="let element"> {{element.NombrePosicion}} </td>
             <td mat-footer-cell *matFooterCellDef></td>
           </ng-container>
 
           <!-- Operación Column -->
           <ng-container matColumnDef="Operacion">
             <th mat-header-cell *matHeaderCellDef>OPERACIÓN</th>
-            <td mat-cell *matCellDef="let element; let i = index"> {{element.DescripcionOperacion}} </td>
+            <td mat-cell *matCellDef="let element; let i = index"> {{element.NombreOperacion}} </td>
             <td mat-footer-cell *matFooterCellDef></td>
           </ng-container>
 
@@ -552,7 +552,7 @@
           <ng-container matColumnDef="Defecto">
             <th mat-header-cell *matHeaderCellDef>DEFECTO</th>
             <td mat-cell *matCellDef="let element; let i = index">
-              {{element.DescripcionDefecto}}
+              {{element.NombreDefecto}}
             </td>
             <td mat-footer-cell *matFooterCellDef></td>
           </ng-container>
@@ -703,7 +703,7 @@
         <!-- Posicion Column -->
         <ng-container matColumnDef="Posicion">
           <th mat-header-cell *matHeaderCellDef> POSICION</th>
-          <td mat-cell *matCellDef="let element"> {{element.DescripcionPosicion}} </td>
+          <td mat-cell *matCellDef="let element"> {{element.NombrePosicion}} </td>
           <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
@@ -711,7 +711,7 @@
         <!-- Operación Column -->
         <ng-container matColumnDef="Operacion">
           <th mat-header-cell *matHeaderCellDef>OPERACIÓN</th>
-          <td mat-cell *matCellDef="let element; let i = index"> {{element.DescripcionOperacion}} </td>
+          <td mat-cell *matCellDef="let element; let i = index"> {{element.NombreOperacion}} </td>
           <td mat-footer-cell *matFooterCellDef></td>
         </ng-container>
 
@@ -719,7 +719,7 @@
         <ng-container matColumnDef="Defecto">
           <th mat-header-cell *matHeaderCellDef>DEFECTO</th>
           <td mat-cell *matCellDef="let element; let i = index">
-            {{element.DescripcionDefecto}}
+            {{element.NombreDefecto}}
           </td>
           <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold">TOTAL:</td>
         </ng-container>

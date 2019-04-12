@@ -356,7 +356,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
       const detalleItem = {
         'IdDefecto': detalle.Defecto.ID,
         'IdPosicion': detalle.Posicion.ID,
-        'IdOperacion': detalle.Defecto.ID,
+        'IdOperacion': detalle.Operacion.ID,
         'Revisado': false,
         'Compostura': detalle.Compostura,
         'cantidad': +detalle.Cantidad,
@@ -518,9 +518,9 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
       const detalleItem = {
         'IdDefecto': detalle.Defecto.ID,
         'IdPosicion': detalle.Posicion.ID,
-        'IdOperacion': detalle.Defecto.ID,
+        'IdOperacion': detalle.Operacion.ID,
         'Cantidad': detalle.Cantidad,
-        'Aud_Imagen': detalle.Imagen,
+        'Imagen': detalle.Imagen,
         'Nota': detalle.Nota,
         'Archivo': detalle.Archivo
       };
@@ -534,11 +534,11 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
       const archivo = this.form.controls['Archivo'].value;
       console.log(this.form.value);
       const itemTable = {
-        DescripcionDefecto: defecto.Nombre,
-        DescripcionOperacion: operacion.Nombre,
-        DescripcionPosicion: posicion.Nombre,
+        NombreDefecto: defecto.Nombre,
+        NombreOperacion: operacion.Nombre,
+        NombrePosicion: posicion.Nombre,
         Cantidad: cantidad,
-        Aud_Imagen: imagen,
+        Imagen: imagen,
         Archivo: archivo,
         Nota: this.form.controls['Nota'].value
       };

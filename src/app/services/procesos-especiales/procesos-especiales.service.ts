@@ -175,6 +175,7 @@ export class ProcesosEspecialesService {
   updateAuditoria(auditoria) {
     const url = `${this.URL_AUDITORIA}/AuditoriaProcEsp`;
     const body = JSON.stringify(auditoria);
+    // const params = new HttpParams().append('ID', auditoria.IdAuditoria);
     const headers = new HttpHeaders().append('content-type', 'application/json');
     return this._http.put(url, body, {headers});
   }

@@ -94,8 +94,8 @@ export class ProcesosespecialesposicionComponent implements OnInit, OnDestroy, A
       'IdUsuario': new FormControl(),
       'Clave': new FormControl(),
       'Nombre': new FormControl(),
-      'Descripcion': new FormControl(),
-      'Observaciones': new FormControl(),
+      'Descripcion': new FormControl(''),
+      'Observaciones': new FormControl(''),
       'Imagen': new FormControl(''),
       'Operacion': new FormControl()
     });
@@ -252,8 +252,8 @@ export class ProcesosespecialesposicionComponent implements OnInit, OnDestroy, A
       this._toast.warning('Se debe ingresar una clave de posición de procesos especiales', '');
     } else if ($('#NOMBRE_NEW_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de posición de procesos especiales', '');
-    } else if ($('#OBSERVACIONES_NEW_CORTADOR').val() === '') {
-      this._toast.warning('Se debe ingresar las observaciones de posición de procesos especiales', '');
+    // } else if ($('#OBSERVACIONES_NEW_CORTADOR').val() === '') {
+    //   this._toast.warning('Se debe ingresar las observaciones de posición de procesos especiales', '');
     } else {
       const json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
       this.form.controls['IdUsuario'].patchValue(json_Usuario.ID);

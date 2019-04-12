@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
-import {debounceTime, distinctUntilChanged, map, startWith, switchMap} from 'rxjs/operators';
+import {map, startWith} from 'rxjs/operators';
 import {Observable} from 'rxjs';
 import {ClientesService} from '../services/clientes/clientes.service';
 import {MatTableDataSource} from '@angular/material';

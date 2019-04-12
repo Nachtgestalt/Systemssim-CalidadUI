@@ -194,7 +194,7 @@ export class CalidadAuditoriaComponent implements OnInit, AfterViewChecked, Afte
 
   detalleOT(ot) {
     console.log(ot);
-    this._auditoriaCalidadService.getDetailOT(ot)
+    this._auditoriaCalidadService.getDetailOT(ot, 'Calidad')
       .subscribe(
         (res: any) => {
           console.log(res);

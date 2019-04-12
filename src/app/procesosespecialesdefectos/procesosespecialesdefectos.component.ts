@@ -99,8 +99,8 @@ export class ProcesosespecialesdefectosComponent implements OnInit, OnDestroy, A
       'IdUsuario': new FormControl(),
       'Clave': new FormControl(),
       'Nombre': new FormControl(),
-      'Descripcion': new FormControl(),
-      'Observaciones': new FormControl(),
+      'Descripcion': new FormControl(''),
+      'Observaciones': new FormControl(''),
       'Imagen': new FormControl(),
     });
   }
@@ -167,8 +167,8 @@ export class ProcesosespecialesdefectosComponent implements OnInit, OnDestroy, A
       this._toast.warning('Se debe ingresar una clave de defecto cortador', '');
     } else if ($('#NOMBRE_NEW_PROCEOS_ESPECIALES').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de defecto cortador', '');
-    } else if ($('#OBSERVACIONES_NEW_PROCESOS_ESPECIALES').val() === '') {
-      this._toast.warning('Se debe ingresar las observaciones del defecto procesos especiales', '');
+    // } else if ($('#OBSERVACIONES_NEW_PROCESOS_ESPECIALES').val() === '') {
+    //   this._toast.warning('Se debe ingresar las observaciones del defecto procesos especiales', '');
     } else {
       let Result = false;
       $.ajax({
@@ -200,8 +200,8 @@ export class ProcesosespecialesdefectosComponent implements OnInit, OnDestroy, A
             IdUsuario: Json_Usuario.ID,
             Clave: $('#CVE_NEW_PROCESOS_ESPECIALES').val(),
             Nombre: $('#NOMBRE_NEW_PROCESOS_ESPECIALES').val(),
-            Descripcion: $('#DESCRIPCION_NEW_PROCESOS_ESPECIALES').val(),
-            Observaciones: $('#OBSERVACIONES_NEW_PROCESOS_ESPECIALES').val(),
+            Descripcion: '',
+            Observaciones: '',
             Imagen: ($('#blah')[0].src === 'http://placehold.it/180' ? '' : $('#blah')[0].src)
           }),
           success: function (json) {
