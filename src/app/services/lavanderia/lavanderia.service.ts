@@ -12,6 +12,12 @@ export class LavanderiaService {
 
   constructor(private _http: HttpClient) {}
 
+  createDefecto(payload) {
+    const url = `${this.URL_LAVANDERA}/NuevoDefectoLavanderia`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.post(url, payload, {headers});
+  }
+
   listDefectos(clave = '', nombre = '', activo?) {
     const url = `${this.URL_LAVANDERA}/ObtieneDefectoLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');

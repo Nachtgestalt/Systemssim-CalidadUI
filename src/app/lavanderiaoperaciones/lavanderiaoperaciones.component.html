@@ -1,6 +1,20 @@
 <div class="card-panel">
   <div class="row">
     <form class="col s12">
+      <div class="row" style="text-align: right">
+        <div class="col s12">
+          <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+            <i class="material-icons left">arrow_back</i>
+          </button>
+          &nbsp;&nbsp;
+          <button (click)="getDefectosActivos()"
+                  class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom"
+                  data-tooltip="Agrega una nueva operación" data-target="modalNewOperacionProcesosEspeciales"
+                  type="button" name="btnAddOperacionProcesosEspeciales">Agregar
+            <i class="material-icons right">send</i>
+          </button>
+        </div>
+      </div>
       <div class="row">
         <div class="input-field col s3">
           <i class="material-icons prefix">font_download</i>
@@ -59,20 +73,6 @@
         </table>
       </div>
       <br/>
-      <div class="row" style="text-align: right">
-        <div class="col s12">
-          <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
-            <i class="material-icons left">arrow_back</i>
-          </button>
-          &nbsp;&nbsp;
-          <button (click)="getDefectosActivos()"
-                  class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom"
-                  data-tooltip="Agrega una nueva operación" data-target="modalNewOperacionProcesosEspeciales"
-                  type="button" name="btnAddOperacionProcesosEspeciales">Agregar
-            <i class="material-icons right">send</i>
-          </button>
-        </div>
-      </div>
     </form>
   </div>
 </div>

@@ -31,17 +31,23 @@
     <!--TABLA DE RESULTADOS-->
     <div class="row">
       <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+        <!-- Corte Column -->
+        <ng-container matColumnDef="Corte">
+          <th mat-header-cell *matHeaderCellDef> Corte</th>
+          <td mat-cell *matCellDef="let element"> {{element.OT}} </td>
+        </ng-container>
+
         <!-- Cliente Column -->
         <ng-container matColumnDef="Cliente">
           <th mat-header-cell *matHeaderCellDef>Cliente</th>
           <td mat-cell *matCellDef="let element; let i = index">
-            {{element.Cliente}}
-            <!--<a class=" btn  modal-trigger" data-target="modalEditDefectoTerminado"-->
-            <!--matTooltip="Edita el defecto  seleccionado">-->
-            <!--&lt;!&ndash;(click)="getInfoDefectoTerminado(defecto.ID)">&ndash;&gt;-->
-            <!--<i class="material-icons right">edit</i>-->
-            <!--</a>-->
-          </td>
+        {{element.Cliente}}
+        <!--<a class=" btn  modal-trigger" data-target="modalEditDefectoTerminado"-->
+        <!--matTooltip="Edita el defecto  seleccionado">-->
+        <!--&lt;!&ndash;(click)="getInfoDefectoTerminado(defecto.ID)">&ndash;&gt;-->
+        <!--<i class="material-icons right">edit</i>-->
+        <!--</a>-->
+        </td>
         </ng-container>
 
         <!-- Marca Column -->
@@ -56,9 +62,10 @@
           <td mat-cell *matCellDef="let element"> {{element.PO}} </td>
         </ng-container>
 
-        <!-- Corte Column -->
-        <ng-container matColumnDef="Corte">
-          <th mat-header-cell *matHeaderCellDef> Corte</th>
+
+        <!-- Cortadasa Column -->
+        <ng-container matColumnDef="Cortadas">
+          <th mat-header-cell *matHeaderCellDef> Cant. Cortada</th>
           <td mat-cell *matCellDef="let element"> {{element.Corte}} </td>
         </ng-container>
 
@@ -396,7 +403,7 @@
     <div class="row">
       <div class="col s4">
         <label class="encabezado-detalle f-w-bold">CLIENTE: </label>
-        <label id="lblCliente" class="encabezado-detalle">{{otDetalle?.Cliente}}</label>
+        <label id="lblCliente" class="encabezado-detalle">{{otDetalle?.Descripcion}}</label>
       </div>
       <div class="col s4">
         <label class="encabezado-detalle f-w-bold">PO: </label>
@@ -414,7 +421,7 @@
       </div>
       <div class="col s4">
         <label class="encabezado-detalle f-w-bold">#CORTADA: </label>
-        <label class="encabezado-detalle" id="lblNoCortada">{{otDetalle?.No_Cortada}}</label>
+        <label class="encabezado-detalle" id="lblNoCortada">{{otDetalle?.NumCortada}}</label>
       </div>
       <div class="col s4">
         <label class="encabezado-detalle f-w-bold">LAVADO: </label>

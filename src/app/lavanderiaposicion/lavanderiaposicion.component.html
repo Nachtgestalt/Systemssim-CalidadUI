@@ -1,6 +1,20 @@
 <div class="card-panel">
   <div class="row">
     <form class="col s12" [formGroup]="formFilter">
+      <div class="row" style="text-align: right">
+        <div class="col s12">
+          <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+            <i class="material-icons left">arrow_back</i>
+          </button>
+          &nbsp;&nbsp;
+          <button class="btn modal-trigger"
+                  data-target="modalNewPosicionLavanderia"
+                  type="button" name="btnAddPosicionCortador"
+                  (click)="getOperacionesActivasLavanderia()">Agregar
+            <i class="material-icons right">send</i>
+          </button>
+        </div>
+      </div>
       <div class="row">
         <div class="input-field col s3">
           <i class="material-icons prefix">font_download</i>
@@ -42,7 +56,7 @@
               <button
                 class="btn modal-trigger" data-target="modalEditPosicionLavanderia"
                 matTooltip="Edita la posición seleccionada"
-                (click)="getDetalle(posicion.ID)"
+                (click)="getDetalle(posicion)"
                 [disabled]="posicion.Activo === false">
                 <i class="material-icons center">edit</i>
               </button>
@@ -63,42 +77,9 @@
         </table>
       </div>
       <br/>
-      <div class="row" style="text-align: right">
-        <div class="col s12">
-          <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
-            <i class="material-icons left">arrow_back</i>
-          </button>
-          &nbsp;&nbsp;
-          <button class="btn modal-trigger"
-                  data-target="modalNewPosicionLavanderia"
-                  type="button" name="btnAddPosicionCortador"
-                  (click)="getOperacionesActivas()">Agregar
-            <i class="material-icons right">send</i>
-          </button>
-        </div>
-      </div>
     </form>
   </div>
 </div>
-
-<!-- Update Enabled Cortador -->
-<!--<div id="modalEnablePosicionProcesosEspeciales" class="modal">-->
-<!--  <div class="modal-content">-->
-<!--    <div style="text-align: center">-->
-<!--      <p>¿Realmente deseas activar o desactivar la posición del proceso especial-?</p>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--  <div class="modal-footer">-->
-<!--    <div class="row">-->
-<!--      <div class="col s6" style="text-align: left">-->
-<!--        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>-->
-<!--      </div>-->
-<!--      <div class="col s6" style="text-align: right">-->
-<!--        <a (click)="GetEnabledPosicionLavanderia();" class="waves-effect waves-green btn-flat">Aceptar</a>-->
-<!--      </div>-->
-<!--    </div>-->
-<!--  </div>-->
-<!--</div>-->
 
 <!-- Nueva Posición -->
 <div id="modalNewPosicionLavanderia" class="modal modal-fixed-footer">
@@ -109,30 +90,26 @@
         <div class="input-field col s4">
           <i class="material-icons prefix">account_box</i>
           <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate"
-          formControlName="Clave">
+                 formControlName="Clave">
           <label for="CVE_NEW_CORTADOR">Clave</label>
         </div>
         <div class="input-field col s4">
           <i class="material-icons prefix">account_circle</i>
           <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate"
-          formControlName="Nombre">
+                 formControlName="Nombre">
           <label for="NOMBRE_NEW_CORTADOR">Nombre:</label>
         </div>
       </div>
-<!--      <div class="row">-->
-<!--        <div class="input-field col s6">-->
-<!--          <i class="material-icons prefix">font_download</i>-->
-<!--          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate"-->
-<!--          formControlName="Observaciones">-->
-<!--          <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>-->
-<!--        </div>-->
-<!--        <div class="input-field col s6">-->
-<!--          <i class="material-icons prefix">font_download</i>-->
-<!--          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate"-->
-<!--          formControlName="Descripcion">-->
-<!--          <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>-->
-<!--        </div>-->
-<!--      </div>-->
+      <div class="row">
+        <mat-radio-group
+          aria-labelledby="example-radio-group-label"
+          class="example-radio-group"
+          formControlName="Tipo">
+          <mat-radio-button class="example-radio-button" *ngFor="let option of optionModule" [value]="option.value">
+            {{option.viewValue}}
+          </mat-radio-button>
+        </mat-radio-group>
+      </div>
       <div class="row">
         <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
 
@@ -183,7 +160,7 @@
   <div class="modal-footer">
     <div class="row">
       <div class="col s6" style="text-align: left">
-        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
+        <a class="modal-close waves-effect waves-green btn-flat" (click)="reset()">Cancelar</a>
       </div>
       <div class="col s6" style="text-align: right">
         <a (click)="NewPosicionLavanderia()"
@@ -211,20 +188,20 @@
           <label for="NOMBRE_NEW_CORTADOR">Nombre:</label>
         </div>
       </div>
-<!--      <div class="row">-->
-<!--        <div class="input-field col s6">-->
-<!--          <i class="material-icons prefix">font_download</i>-->
-<!--          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate"-->
-<!--                 formControlName="Observaciones">-->
-<!--          <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>-->
-<!--        </div>-->
-<!--        <div class="input-field col s6">-->
-<!--          <i class="material-icons prefix">font_download</i>-->
-<!--          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate"-->
-<!--                 formControlName="Descripcion">-->
-<!--          <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>-->
-<!--        </div>-->
-<!--      </div>-->
+      <!--      <div class="row">-->
+      <!--        <div class="input-field col s6">-->
+      <!--          <i class="material-icons prefix">font_download</i>-->
+      <!--          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate"-->
+      <!--                 formControlName="Observaciones">-->
+      <!--          <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>-->
+      <!--        </div>-->
+      <!--        <div class="input-field col s6">-->
+      <!--          <i class="material-icons prefix">font_download</i>-->
+      <!--          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate"-->
+      <!--                 formControlName="Descripcion">-->
+      <!--          <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>-->
+      <!--        </div>-->
+      <!--      </div>-->
       <div class="row">
         <table mat-table [dataSource]="dataSourceEdit" class="mat-elevation-z8">
 

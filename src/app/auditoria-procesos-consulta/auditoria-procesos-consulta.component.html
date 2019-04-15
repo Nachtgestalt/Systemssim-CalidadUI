@@ -122,6 +122,12 @@
   <!--TABLA DE RESULTADOS-->
   <div class="row">
     <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+      <!-- Corte Column -->
+      <ng-container matColumnDef="Corte">
+        <th mat-header-cell *matHeaderCellDef> Corte</th>
+        <td mat-cell *matCellDef="let element"> {{element.OT}} </td>
+      </ng-container>
+
       <!-- Cliente Column -->
       <ng-container matColumnDef="Cliente">
         <th mat-header-cell *matHeaderCellDef>Cliente</th>
@@ -148,8 +154,8 @@
       </ng-container>
 
       <!-- Corte Column -->
-      <ng-container matColumnDef="Corte">
-        <th mat-header-cell *matHeaderCellDef> Corte</th>
+      <ng-container matColumnDef="Cortadas">
+        <th mat-header-cell *matHeaderCellDef> Cant. Cortada</th>
         <td mat-cell *matCellDef="let element"> {{element.Corte}} </td>
       </ng-container>
 

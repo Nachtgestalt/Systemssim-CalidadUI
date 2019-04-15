@@ -30,6 +30,12 @@ export class ProcesosEspecialesService {
     return this._http.get(url, {headers, params});
   }
 
+  createDefecto(payload) {
+    const url = `${this.URL_PROCESOS}/Defecto`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.post(url, payload, {headers});
+  }
+
   updateDefecto(defecto) {
     const url = `${this.URL_PROCESOS}/Defecto`;
     const headers = new HttpHeaders().append('content-type', 'application/json');

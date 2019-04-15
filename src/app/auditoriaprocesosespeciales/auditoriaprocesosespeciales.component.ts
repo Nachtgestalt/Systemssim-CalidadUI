@@ -2,7 +2,6 @@ import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/c
 import {Globals} from '../Globals';
 declare var M: any;
 declare var $: any;
-declare var jQuery: any;
 import 'jquery';
 import {ToastrService} from '../../../node_modules/ngx-toastr';
 import {MatTableDataSource} from '@angular/material';
@@ -47,7 +46,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
   @ViewChild(DataTableDirective) dtElement: DataTableDirective;
   dtTrigger: Subject<any> = new Subject();
   displayedColumns: string[] = [
-    'Cliente', 'Marca', 'PO', 'Corte', 'Fecha Inicio',
+    'Corte', 'Cliente', 'Marca', 'PO', 'Cortadas', 'Fecha Inicio',
     'Fecha fin', 'Defectos', '2das', 'Status', 'Opciones'
   ];
 
@@ -722,7 +721,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
       return result;
     }
 
-    let mime = encoded.match(/data:image+\/([a-zA-Z0-9-.+]+).*,.*/);
+    const mime = encoded.match(/data:image+\/([a-zA-Z0-9-.+]+).*,.*/);
 
     if (mime && mime.length) {
       result = mime[1];

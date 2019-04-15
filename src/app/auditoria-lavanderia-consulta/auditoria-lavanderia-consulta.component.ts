@@ -19,7 +19,7 @@ declare var M: any;
 export class AuditoriaLavanderiaConsultaComponent implements OnInit {
 
   displayedColumns: string[] = [
-    'Cliente', 'Marca', 'PO', 'Corte', 'Fecha Inicio',
+    'Corte', 'Cliente', 'Marca', 'PO', 'Cortadas', 'Fecha Inicio',
     'Fecha fin', 'Defectos', '2das', 'Status', 'Opciones'
   ];
 
@@ -279,7 +279,7 @@ export class AuditoriaLavanderiaConsultaComponent implements OnInit {
       return result;
     }
 
-    let mime = encoded.match(/data:image+\/([a-zA-Z0-9-.+]+).*,.*/);
+    const mime = encoded.match(/data:image+\/([a-zA-Z0-9-.+]+).*,.*/);
 
     if (mime && mime.length) {
       result = mime[1];

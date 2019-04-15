@@ -1,16 +1,15 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Globals} from '../Globals';
 
 declare var $: any;
-declare var jQuery: any;
 declare var M: any;
 import 'jquery';
-import {ToastrService} from '../../../node_modules/ngx-toastr';
+import {ToastrService} from 'ngx-toastr';
 import {LavanderiaService} from '../services/lavanderia/lavanderia.service';
 import {DataTableDirective} from 'angular-datatables';
 import {Subject} from 'rxjs';
 import {FormControl, FormGroup} from '@angular/forms';
 import swal from 'sweetalert';
+import {ProcesosEspecialesService} from '../services/procesos-especiales/procesos-especiales.service';
 
 @Component({
   selector: 'app-lavanderiadefectos',
@@ -18,6 +17,8 @@ import swal from 'sweetalert';
   styleUrls: ['./lavanderiadefectos.component.css']
 })
 export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterViewInit {
+  private json_usuario = JSON.parse(sessionStorage.getItem('currentUser'));
+
   @ViewChild(DataTableDirective) dtElement: DataTableDirective;
   dtOptions = {};
   dtTrigger: Subject<any> = new Subject();
@@ -27,11 +28,16 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
   selectedFileEdit;
   noMostrar = true;
 
-  form: FormGroup;
   formEdit: FormGroup;
+
+  optionModule = [
+    {value: true, viewValue: 'LAVANDERIA'},
+    {value: false, viewValue: 'PROCESOS ESPECIALES'}
+  ];
 
   constructor(
     private _toast: ToastrService,
+    private _procesosService: ProcesosEspecialesService,
     private _lavanderiaService: LavanderiaService
   ) {
   }
@@ -64,7 +70,7 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
     $('#modalEnableDefectoLavanderia').modal();
     $('#lblModulo').text('Lavandería - Defectos');
     this.initFormGroupEdit();
-    this.GetDefectosLavanderia();
+    this.obtenerDefectos();
   }
 
   ngAfterViewInit(): void {
@@ -85,10 +91,11 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
       'Descripcion': new FormControl(''),
       'Observaciones': new FormControl(''),
       'Imagen': new FormControl(),
+      'Tipo': new FormControl(true)
     });
   }
 
-  GetDefectosLavanderia() {
+  obtenerDefectos() {
     let _request = '';
     if ($('#CLAVE_CORTADOR').val() !== '' && $('#NOMBRE_CORTADOR').val() === '') {
       _request += '?Clave=' + $('#CLAVE_CORTADOR').val();
@@ -106,7 +113,7 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
             this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
               // Destroy the table first
               dtInstance.destroy();
-              this.defectos = res.Vst_Lavanderia;
+              this.defectos = res.Vst_Lavanderia.concat(res.Vst_ProcesosEspeciales);
               // Call the dtTrigger to rerender again
               this.dtTrigger.next();
             });
@@ -119,8 +126,8 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
       );
   }
 
-  GetEnabledDefectoLavanderia(id) {
-    let options = {
+  GetEnabledDefectoLavanderia(defecto) {
+    const options = {
       text: '¿Estas seguro de modificar este defecto?',
       buttons: {
         cancel: {
@@ -138,18 +145,33 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
     swal(options)
       .then((willDelete) => {
         if (willDelete) {
-          this._lavanderiaService.inactivaActivaDefecto(id)
-            .subscribe(
-              res => {
-                console.log(res);
-                this._toast.success('Defecto actualizado con exito', '');
-                this.GetDefectosLavanderia();
-              },
-              error => {
-                console.log(error);
-                this._toast.error('No se pudo establecer conexión a la base de datos', '');
-              }
-            );
+          if (defecto.IdSubModulo === 17) {
+            this._lavanderiaService.inactivaActivaDefecto(defecto.ID)
+              .subscribe(
+                res => {
+                  console.log(res);
+                  this._toast.success('Defecto actualizado con exito', '');
+                  this.obtenerDefectos();
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                }
+              );
+          } else if (defecto.IdSubModulo === 27) {
+            this._procesosService.inactivaActivaDefecto(defecto.ID)
+              .subscribe(
+                res => {
+                  console.log(res);
+                  this._toast.success('Defecto actualizado con exito', '');
+                  this.obtenerDefectos();
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                }
+              );
+          }
         }
       });
   }
@@ -159,59 +181,55 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
       this._toast.warning('Se debe ingresar una clave de defecto cortador', '');
     } else if ($('#NOMBRE_NEW_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de defecto cortador', '');
-    // } else if ($('#OBSERVACIONES_NEW_CORTADOR').val() === '') {
-    //   this._toast.warning('Se debe ingresar las observaciones del defecto cortador', '');
     } else {
-      let Result = false;
-      $.ajax({
-        // tslint:disable-next-line:max-line-length
-        url: Globals.UriRioSulApi + 'Lavanderia/ValidaLavanderiaSubModulo?SubModulo=17&Clave=' + $('#CVE_NEW_CORTADOR').val() + '&Nombre=' + $('#NOMBRE_NEW_CORTADOR').val(),
-        dataType: 'json',
-        contents: 'application/json; charset=utf-8',
-        method: 'get',
-        async: false,
-        success: function (json) {
-          if (json.Message.IsSuccessStatusCode) {
-            Result = json.Hecho;
-          }
-        },
-        error: function () {
-          console.log('No se pudo establecer conexión a la base de datos');
-        }
-      });
-      if (Result) {
-        let Mensaje = '';
-        const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
-        $.ajax({
-          url: Globals.UriRioSulApi + 'Lavanderia/NuevoDefectoLavanderia',
-          type: 'POST',
-          contentType: 'application/json; charset=utf-8',
-          async: false,
-          data: JSON.stringify({
-            IdSubModulo: 1,
-            IdUsuario: Json_Usuario.ID,
-            Clave: $('#CVE_NEW_CORTADOR').val(),
-            Nombre: $('#NOMBRE_NEW_CORTADOR').val(),
-            Descripcion: '',
-            Observaciones: '',
-            Imagen: ($('#blah')[0].src === 'http://placehold.it/180' ? '' : $('#blah')[0].src)
-          }),
-          success: function (json) {
-            if (json.Message.IsSuccessStatusCode) {
-              Mensaje = 'Se agrego correctamente el defecto';
+      const body = {
+        IdSubModulo: 17,
+        IdUsuario: this.json_usuario.ID,
+        Clave: this.formEdit.controls['Clave'].value,
+        Nombre: this.formEdit.controls['Nombre'].value,
+        Descripcion: '',
+        Observaciones: '',
+        Imagen: this.formEdit.controls['Imagen'].value
+      };
+      if (this.formEdit.controls['Tipo'].value) {
+        body.IdSubModulo = 17;
+        this._lavanderiaService.createDefecto(body).subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Se agrego correctamente el defecto', '');
+              $('#modalNewDefectoLavanderia').modal('close');
+              this.resetModalEdit();
+              this.obtenerDefectos();
+            } else {
+              this._toast.warning('Algo salio mal', '');
             }
           },
-          error: function () {
-            console.log('No se pudo establecer conexión a la base de datos');
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           }
-        });
-        if (Mensaje !== '') {
-          this.GetDefectosLavanderia();
-          this._toast.success(Mensaje, '');
-          $('#modalNewDefectoLavanderia').modal('close');
-        }
+        );
       } else {
-        this._toast.warning('La clave de defecto cortador ya se encuentra registrada en el sistema', '');
+        console.log('Aun no disponible');
+        body.IdSubModulo = 27;
+        this._procesosService.createDefecto(body).subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Se agrego correctamente el defecto', '');
+              $('#modalNewDefectoLavanderia').modal('close');
+              this.resetModalEdit();
+              this.obtenerDefectos();
+            } else {
+              this._toast.warning('Algo salio mal', '');
+            }
+          },
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
+          }
+        );
       }
     }
   }
@@ -223,7 +241,7 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
         res => {
           console.log(res);
           this._toast.success('Defecto actualizado con exito', '');
-          this.GetDefectosLavanderia();
+          this.obtenerDefectos();
           this.resetModalEdit();
           $('#modalEditDefectoLavanderia').modal('close');
         },
@@ -262,23 +280,43 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
     };
     swal(options).then((willDelete) => {
       if (willDelete) {
-        this._lavanderiaService.deleteDefecto(defecto.ID, 'Defecto')
-          .subscribe(
-            (res: any) => {
-              console.log(res);
-              if (res.Message.IsSuccessStatusCode) {
-                this._toast.success('Defecto eliminado con exito', '');
-                this.GetDefectosLavanderia();
-              } else {
-                const mensaje = res.Hecho.split(',');
-                this._toast.warning(mensaje[0], mensaje[2]);
+        if (defecto.IdSubModulo === 17) {
+          this._lavanderiaService.deleteDefecto(defecto.ID, 'Defecto')
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Defecto eliminado con exito', '');
+                  this.obtenerDefectos();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
               }
-            },
-            error => {
-              console.log(error);
-              this._toast.error('Error al conectar a la base de datos', '');
-            }
-          );
+            );
+        } else if (defecto.IdSubModulo === 27) {
+          this._procesosService.deleteDefecto(defecto.ID, 'Defecto')
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Defecto eliminado con exito', '');
+                  this.obtenerDefectos();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
       }
     });
   }
@@ -307,20 +345,10 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
 
       this.selectedFile = event.target.result;
       // this.selectedFile.pending = true;
-      nuevo ? this.form.get('Imagen').patchValue(event.target.result) : this.formEdit.get('Imagen').patchValue(event.target.result);
+      nuevo ? this.formEdit.get('Imagen').patchValue(event.target.result) : this.formEdit.get('Imagen').patchValue(event.target.result);
       this.noMostrar = false;
     });
 
     reader.readAsDataURL(file);
   }
-
 }
-
-class ImageSnippet {
-  pending: boolean = false;
-  status: string = 'init';
-
-  constructor(public src: string, public file: File) {
-  }
-}
-

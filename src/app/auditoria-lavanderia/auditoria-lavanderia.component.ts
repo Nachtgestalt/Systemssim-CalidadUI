@@ -47,7 +47,7 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
   @ViewChild(DataTableDirective) dtElement: DataTableDirective;
   dtTrigger: Subject<any> = new Subject();
   displayedColumns: string[] = [
-    'Cliente', 'Marca', 'PO', 'Corte', 'Fecha Inicio',
+    'Corte', 'Cliente', 'Marca', 'PO', 'Cortadas', 'Fecha Inicio',
     'Fecha fin', 'Defectos', '2das', 'Status', 'Opciones'
   ];
   displayedColumnsEdit: string[] = [
@@ -728,7 +728,7 @@ export class AuditoriaLavanderiaComponent implements OnInit, OnDestroy, AfterVie
       return result;
     }
 
-    let mime = encoded.match(/data:image+\/([a-zA-Z0-9-.+]+).*,.*/);
+    const mime = encoded.match(/data:image+\/([a-zA-Z0-9-.+]+).*,.*/);
 
     if (mime && mime.length) {
       result = mime[1];
