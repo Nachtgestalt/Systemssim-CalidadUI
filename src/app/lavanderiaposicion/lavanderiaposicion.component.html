@@ -29,14 +29,14 @@
           <label for="NOMBRE_CORTADOR">Nombre</label>
         </div>
         <div class="col s6" style="text-align: right">
-          <button (click)="GetPosicionLavanderia()" class="btn tooltipped waves-effect waves-light"
+          <button (click)="obtenerPosiciones()" class="btn tooltipped waves-effect waves-light"
                   data-position="bottom"
                   data-tooltip="Consultar las posiciones po posición del cortador, filtro seleccionado" type="button"
                   name="btnSearchPosicionCortador">Buscar
             <i class="material-icons right">search</i>
           </button>
         </div>
-      </div>
+      </div>l
       <div class="row">
         <table id="tlbPosicionProcesosEspeciales" class="row-border hover"
                datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
@@ -46,6 +46,7 @@
             <th>No.</th>
             <th>Clave Defecto</th>
             <th>Nombre Defecto</th>
+            <th>Área</th>
             <th>Estatus</th>
             <th></th>
           </tr>
@@ -61,14 +62,15 @@
                 <i class="material-icons center">edit</i>
               </button>
             </td>
-            <td>{{i}}</td>
+            <td>{{i + 1}}</td>
             <td>{{posicion.Clave}}</td>
             <td>{{posicion.Nombre}}</td>
+            <td>{{posicion.IdSubModulo === 20 ? 'LAVANDERÍA' : 'PROCESOS ESPECIALES'}}</td>
             <td>{{posicion.Activo ? 'SI' : 'No'}}</td>
             <td>
               <a class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableDefectoCortador"
                  data-tooltiped="Activa / Inactiva el cortador seleccionado"
-                 (click)="GetEnabledPosicionLavanderia(posicion.ID)">
+                 (click)="GetEnabledPosicionLavanderia(posicion)">
                 <strong><u>{{posicion.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u></strong>
               </a>
             </td>

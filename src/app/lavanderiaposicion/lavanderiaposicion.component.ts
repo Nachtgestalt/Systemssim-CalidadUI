@@ -77,7 +77,7 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
     $('#lblModulo').text('Lavandería - Posición');
     this.initFormGroupFilter();
     this.initFormGroup();
-    this.GetPosicionLavanderia();
+    this.obtenerPosiciones();
   }
 
   ngAfterViewInit(): void {
@@ -115,7 +115,7 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
     );
   }
 
-  GetPosicionLavanderia() {
+  obtenerPosiciones() {
     this._lavanderiaService.listPosiciones(this.formFilter.controls['Clave'].value, this.formFilter.controls['Nombre'].value)
       .subscribe(
         (res: any) => {
@@ -124,7 +124,7 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
             this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
               // Destroy the table first
               dtInstance.destroy();
-              this.posiciones = res.Vst_Lavanderia;
+              this.posiciones = res.Vst_Lavanderia.concat(res.Vst_ProcesosEspeciales);
               // Call the dtTrigger to rerender again
               this.dtTrigger.next();
             });
@@ -137,7 +137,7 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
       );
   }
 
-  GetEnabledPosicionLavanderia(id) {
+  GetEnabledPosicionLavanderia(posicion) {
     const options = {
       text: '¿Estas seguro de modificar esta operación?',
       buttons: {
@@ -156,18 +156,33 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
     swal(options)
       .then((willDelete) => {
         if (willDelete) {
-          this._lavanderiaService.inactivaActivaPosicion(id)
-            .subscribe(
-              res => {
-                console.log(res);
-                this._toast.success('Operación actualizada con exito', '');
-                this.GetPosicionLavanderia();
-              },
-              error => {
-                console.log(error);
-                this._toast.error('No se pudo establecer conexión a la base de datos', '');
-              }
-            );
+          if (posicion.IdSubModulo === 20) {
+            this._lavanderiaService.inactivaActivaPosicion(posicion.ID)
+              .subscribe(
+                res => {
+                  console.log(res);
+                  this._toast.success('Posición actualizada con exito', '');
+                  this.obtenerPosiciones();
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                }
+              );
+          } else if (posicion.IdSubModulo === 14) {
+            this._procesosService.inactivaActivaPosicion(posicion.ID)
+              .subscribe(
+                res => {
+                  console.log(res);
+                  this._toast.success('Posición actualizada con exito', '');
+                  this.obtenerPosiciones();
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                }
+              );
+          }
         }
       });
 
@@ -183,7 +198,7 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
           if (res.Message.IsSuccessStatusCode) {
             this._toast.success('Posición actualizada con exito', '');
             $('#modalEditPosicionLavanderia').modal('close');
-            this.GetPosicionLavanderia();
+            this.obtenerPosiciones();
           } else {
             this._toast.warning('Algo no ha salido bien', '');
           }
@@ -213,23 +228,43 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
     };
     swal(options).then((willDelete) => {
       if (willDelete) {
-        this._lavanderiaService.deleteDefecto(posicion.ID, 'Posicion')
-          .subscribe(
-            (res: any) => {
-              console.log(res);
-              if (res.Message.IsSuccessStatusCode) {
-                this._toast.success('Posición eliminada con exito', '');
-                this.GetPosicionLavanderia();
-              } else {
-                const mensaje = res.Hecho.split(',');
-                this._toast.warning(mensaje[0], mensaje[2]);
+        if (posicion.IdSubModulo === 20) {
+          this._lavanderiaService.deleteDefecto(posicion.ID, 'Posicion')
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Posición eliminada con exito', '');
+                  this.obtenerPosiciones();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
               }
-            },
-            error => {
-              console.log(error);
-              this._toast.error('Error al conectar a la base de datos', '');
-            }
-          );
+            );
+        } else if (posicion.IdSubModulo === 14) {
+          this._procesosService.deleteDefecto(posicion.ID, 'Posicion')
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Posición eliminada con exito', '');
+                  this.obtenerPosiciones();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
       }
     });
   }
@@ -254,7 +289,7 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
               if (res.Message.IsSuccessStatusCode) {
                 this._toast.success('Posición guardada con exito', '');
                 $('#modalNewPosicionLavanderia').modal('close');
-                this.GetPosicionLavanderia();
+                this.obtenerPosiciones();
                 this.initFormGroup();
               } else {
                 this._toast.warning('Algo no ha salido bien', '');
@@ -272,7 +307,7 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
               if (res.Message.IsSuccessStatusCode) {
                 this._toast.success('Posición guardada con exito', '');
                 $('#modalNewPosicionLavanderia').modal('close');
-                this.GetPosicionLavanderia();
+                this.obtenerPosiciones();
                 this.initFormGroup();
               } else {
                 this._toast.warning('Algo no ha salido bien', '');
@@ -284,13 +319,6 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
             });
       }
     }
-  }
-
-  DisposeNewPosicionProcesosEspeciales() {
-    $('#CLAVE_CORTADOR').val('');
-    $('#NOMBRE_CORTADOR').val('');
-    $('#DESCRIPCION_NEW_CORTADOR').val('');
-    $('#OBSERVACIONES_NEW_CORTADOR').val('');
   }
 
   getOperacionesActivasLavanderia() {
@@ -372,34 +400,34 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
       );
     } else {
       tipo = this._procesosService.listOperaciones('', '', 'True');
-        tipo.subscribe(
-          (result: any) => {
-            console.log(result);
-            this.dataSourceEdit = new MatTableDataSource(result.Vst_ProcesosEspeciales);
-            this.selection = new SelectionModel(true, []);
-            this._procesosService.getPosicion(posicion.ID)
-              .subscribe(
-                (res: any) => {
-                  console.log(res);
-                  this.form.patchValue(res.Vst_ProcesosEsp);
-                  setTimeout(() => M.updateTextFields(), 100);
-                  const defectos = res.Operaciones;
-                  const copyDataSourceEdit = [];
-                  this.dataSourceEdit.data.forEach((x) => {
-                    defectos.forEach(y => {
-                      console.log('Operaciones:', x);
-                      console.log('Y:', y);
-                      if (y.Clave === x.Clave) {
-                        copyDataSourceEdit.push(x);
-                      }
-                    });
+      tipo.subscribe(
+        (result: any) => {
+          console.log(result);
+          this.dataSourceEdit = new MatTableDataSource(result.Vst_ProcesosEspeciales);
+          this.selection = new SelectionModel(true, []);
+          this._procesosService.getPosicion(posicion.ID)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                this.form.patchValue(res.Vst_ProcesosEsp);
+                setTimeout(() => M.updateTextFields(), 100);
+                const defectos = res.Operaciones;
+                const copyDataSourceEdit = [];
+                this.dataSourceEdit.data.forEach((x) => {
+                  defectos.forEach(y => {
+                    console.log('Operaciones:', x);
+                    console.log('Y:', y);
+                    if (y.Clave === x.Clave) {
+                      copyDataSourceEdit.push(x);
+                    }
                   });
-                  console.log('Seleccion: ', copyDataSourceEdit);
-                  this.selection = new SelectionModel(true, copyDataSourceEdit);
-                }
-              );
-          }
-        );
+                });
+                console.log('Seleccion: ', copyDataSourceEdit);
+                this.selection = new SelectionModel(true, copyDataSourceEdit);
+              }
+            );
+        }
+      );
     }
 
   }
