@@ -1,83 +1,84 @@
 <div class="card-panel">
   <div class="row">
-    <form class="col s12">
-      <div class="row" style="text-align: right">
-        <div class="col s12">
-          <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
-            <i class="material-icons left">arrow_back</i>
-          </button>
-          &nbsp;&nbsp;
-          <button type="button" name="btnAddDefectoCortador"
-                  class="btn tooltipped waves-effect waves-light modal-trigger"
-                  data-position="bottom" data-tooltip="Agrega un nuevo defecto cortador"
-                  data-target="modalNewDefectoLavanderia"
-                  (click)="DisposeNewDefectoLavanderia()">Agregar
-            <i class="material-icons right">send</i>
-          </button>
-        </div>
+    <div class="row" style="text-align: right">
+      <div class="col s12">
+        <button class="btn red lighten-2" [routerLink]="['/home']">Regresar
+          <i class="material-icons left">arrow_back</i>
+        </button>
+        &nbsp;&nbsp;
+        <button type="button" name="btnAddDefectoCortador"
+                class="btn tooltipped waves-effect waves-light modal-trigger"
+                data-position="bottom" data-tooltip="Agrega un nuevo defecto cortador"
+                data-target="modalNewDefectoLavanderia"
+                (click)="DisposeNewDefectoLavanderia()">Agregar
+          <i class="material-icons right">send</i>
+        </button>
       </div>
+    </div>
+    <form class="col s12" #form="ngForm" (ngSubmit)="obtenerDefectos()">
       <div class="row">
         <div class="input-field col s3">
           <i class="material-icons prefix">font_download</i>
-          <input id="CLAVE_CORTADOR" type="text" class="validate">
+          <input id="CLAVE_CORTADOR" type="text" class="validate"
+                 [(ngModel)]="clave" name="clave">
           <label for="CLAVE_CORTADOR">Clave</label>
         </div>
         <div class="input-field col s3">
           <i class="material-icons prefix">account_box</i>
-          <input id="NOMBRE_CORTADOR" type="text" class="validate">
+          <input id="NOMBRE_CORTADOR" type="text" class="validate"
+                 [(ngModel)]="nombre" name="nombre">
           <label for="NOMBRE_CORTADOR">Nombre</label>
         </div>
         <div class="col s6" style="text-align: right">
-          <button (click)="obtenerDefectos()" class="btn tooltipped waves-effect waves-light"
-                  data-position="bottom" data-tooltip="Consultar los defectos por lavanderia por filtro seleccionado"
-                  type="button" name="btnSearchDefectoCortadores">Buscar
+          <button (click)="obtenerDefectos()" class="btn"
+                  type="submit" name="btnSearchDefectoCortadores">Buscar
             <i class="material-icons right">search</i>
           </button>
         </div>
       </div>
-      <div class="row">
-        <table id="tlbDefectoLavanderia" class="row-border hover"
-               datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
-          <thead>
-          <tr>
-            <th></th>
-            <th>No.</th>
-            <th>Clave Defecto</th>
-            <th>Nombre Defecto</th>
-            <th>Área</th>
-            <th>Estatus</th>
-            <th></th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr *ngFor="let defecto of defectos; let i = index" (dblclick)="eliminar(defecto)">
-            <td>
-              <button
-                class="btn modal-trigger" data-target="modalEditDefectoLavanderia"
-                matTooltip="Edita el defecto  seleccionado"
-                (click)="editDefecto(defecto)"
-                [disabled]="defecto.Activo === false">
-                <i class="material-icons center">edit</i>
-              </button>
-            </td>
-            <td>{{i + 1}}</td>
-            <td>{{defecto.Clave}}</td>
-            <td>{{defecto.Nombre}}</td>
-            <td>{{defecto.IdSubModulo === 17 ? 'LAVANDERÍA' : 'PROCESOS ESPECIALES'}}</td>
-            <td>{{defecto.Activo ? 'SI' : 'No'}}</td>
-            <td>
-              <a class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableDefectoCortador"
-                 data-tooltiped="Activa / Inactiva el cortador seleccionado"
-              (click)="GetEnabledDefectoLavanderia(defecto)">
-                <strong><u>{{defecto.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u></strong>
-              </a>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-      <br/>
     </form>
+    <div class="row">
+      <table id="tlbDefectoLavanderia" class="row-border hover"
+             datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
+        <thead>
+        <tr>
+          <th></th>
+          <th>No.</th>
+          <th>Clave Defecto</th>
+          <th>Nombre Defecto</th>
+          <th>Área</th>
+          <th>Estatus</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let defecto of defectos; let i = index" (dblclick)="eliminar(defecto)">
+          <td>
+            <button
+              class="btn modal-trigger" data-target="modalEditDefectoLavanderia"
+              matTooltip="Edita el defecto  seleccionado"
+              (click)="editDefecto(defecto)"
+              [disabled]="defecto.Activo === false">
+              <i class="material-icons center">edit</i>
+            </button>
+          </td>
+          <td>{{i + 1}}</td>
+          <td>{{defecto.Clave}}</td>
+          <td>{{defecto.Nombre}}</td>
+          <td>{{defecto.IdSubModulo === 17 ? 'LAVANDERÍA' : 'PROCESOS ESPECIALES'}}</td>
+          <td>{{defecto.Activo ? 'SI' : 'No'}}</td>
+          <td>
+            <a class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableDefectoCortador"
+               data-tooltiped="Activa / Inactiva el cortador seleccionado"
+               (click)="GetEnabledDefectoLavanderia(defecto)">
+              <strong><u>{{defecto.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u></strong>
+            </a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <br/>
   </div>
 </div>
 
@@ -89,13 +90,13 @@
         <div class="input-field col s4">
           <i class="material-icons prefix">account_box</i>
           <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate"
-          formControlName="Clave">
+                 formControlName="Clave">
           <label for="CVE_NEW_CORTADOR">Clave</label>
         </div>
         <div class="input-field col s4">
           <i class="material-icons prefix">account_circle</i>
           <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate"
-          formControlName="Nombre">
+                 formControlName="Nombre">
           <label for="NOMBRE_NEW_CORTADOR">Nombre:</label>
         </div>
       </div>
@@ -158,22 +159,22 @@
           <label class="active" for="NOMBRE_EDT_DEFECTO">Nombre:</label>
         </div>
       </div>
-<!--      <div class="row">-->
-<!--        <div class="input-field col s6">-->
-<!--          <i class="material-icons prefix">font_download</i>-->
-<!--          <input id="OBSERVACIONES_EDT_DEFECTO" name="OBSERVACIONES_EDT_DEFECTO" maxlength="10" type="text"-->
-<!--                 class="validate"-->
-<!--                 formControlName="Observaciones">-->
-<!--          <label class="active" for="OBSERVACIONES_EDT_DEFECTO">Obs.:</label>-->
-<!--        </div>-->
-<!--        <div class="input-field col s6">-->
-<!--          <i class="material-icons prefix">font_download</i>-->
-<!--          <input id="DESCRIPCION_EDT_DEFECTO" name="DESCRIPCION_EDT_DEFECTO" maxlength="250" type="text"-->
-<!--                 class="validate"-->
-<!--          formControlName="Descripcion">-->
-<!--          <label class="active" for="DESCRIPCION_EDT_DEFECTO">Descripcion:</label>-->
-<!--        </div>-->
-<!--      </div>-->
+      <!--      <div class="row">-->
+      <!--        <div class="input-field col s6">-->
+      <!--          <i class="material-icons prefix">font_download</i>-->
+      <!--          <input id="OBSERVACIONES_EDT_DEFECTO" name="OBSERVACIONES_EDT_DEFECTO" maxlength="10" type="text"-->
+      <!--                 class="validate"-->
+      <!--                 formControlName="Observaciones">-->
+      <!--          <label class="active" for="OBSERVACIONES_EDT_DEFECTO">Obs.:</label>-->
+      <!--        </div>-->
+      <!--        <div class="input-field col s6">-->
+      <!--          <i class="material-icons prefix">font_download</i>-->
+      <!--          <input id="DESCRIPCION_EDT_DEFECTO" name="DESCRIPCION_EDT_DEFECTO" maxlength="250" type="text"-->
+      <!--                 class="validate"-->
+      <!--          formControlName="Descripcion">-->
+      <!--          <label class="active" for="DESCRIPCION_EDT_DEFECTO">Descripcion:</label>-->
+      <!--        </div>-->
+      <!--      </div>-->
       <div class="row">
         <label>Imagen Defecto</label>
       </div>

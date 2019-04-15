@@ -1,10 +1,8 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Globals} from '../Globals';
 
 declare var $: any;
-declare var jQuery: any;
 import 'jquery';
-import {ToastrService} from '../../../node_modules/ngx-toastr';
+import {ToastrService} from 'ngx-toastr';
 import {DataTableDirective} from 'angular-datatables';
 import {EMPTY, Subject} from 'rxjs';
 import {FormControl, FormGroup} from '@angular/forms';
@@ -135,7 +133,7 @@ export class ProcesosespecialesoperacionesComponent implements OnInit, OnDestroy
   EditOperacionProcesosEspeciales() {
     const payload = this.form.value;
     payload.Defectos = this.selection.selected;
-    this._procesosService.updateOperación(payload, this.idOperacion)
+    this._procesosService.updateOperacion(payload, this.idOperacion)
       .subscribe(
         (res: any) => {
           console.log(res);
@@ -187,56 +185,6 @@ export class ProcesosespecialesoperacionesComponent implements OnInit, OnDestroy
             this._toast.error('No se pudo establecer conexión a la base de datos', '');
           }
         );
-      // let Result = false;
-      // $.ajax({
-      //   // tslint:disable-next-line:max-line-length
-      //   url: Globals.UriRioSulApi + 'ProcesosEspeciales/ValidaOperacionSubModuloProcesosEspeciales?SubModulo=13&Clave=' + $('#CLAVE_NEW_OPERACION').val() + '&Nombre=' + $('#DESCRIPCION_NEW_OPERACION').val(),
-      //   dataType: 'json',
-      //   contents: 'application/json; charset=utf-8',
-      //   method: 'get',
-      //   async: false,
-      //   success: function (json) {
-      //     if (json.Message.IsSuccessStatusCode) {
-      //       Result = json.Hecho;
-      //     }
-      //   },
-      //   error: function () {
-      //     console.log('No se pudo establecer conexión a la base de datos');
-      //   }
-      // });
-      // if (Result) {
-      //   let Mensaje = '';
-      //   const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
-      //   $.ajax({
-      //     url: Globals.UriRioSulApi + 'ProcesosEspeciales/NuevoOperacionProcesosEspeciales',
-      //     type: 'POST',
-      //     contentType: 'application/json; charset=utf-8',
-      //     async: false,
-      //     data: JSON.stringify({
-      //       IdSubModulo: 9,
-      //       IdUsuario: Json_Usuario.ID,
-      //       Clave: $('#CLAVE_NEW_OPERACION').val(),
-      //       Nombre: $('#DESCRIPCION_NEW_OPERACION').val(),
-      //       Descripcion: '',
-      //       Observaciones: '',
-      //       Imagen: $('#HDN_ARR').val()
-      //     }),
-      //     success: function (json) {
-      //       if (json.Message.IsSuccessStatusCode) {
-      //         Mensaje = 'Se agrego correctamente la operación de confección';
-      //       }
-      //     },
-      //     error: function () {
-      //       console.log('No se pudo establecer conexión a la base de datos');
-      //     }
-      //   });
-      //   if (Mensaje !== '') {
-      //     this._toast.success(Mensaje, '');
-      //     $('#modalNewOperacionProcesosEspeciales').modal('close');
-      //   }
-      // } else {
-      //   this._toast.warning('La clave de operación ya se encuentra registrada en el sistema', '');
-      // }
     }
   }
 
@@ -265,7 +213,7 @@ export class ProcesosespecialesoperacionesComponent implements OnInit, OnDestroy
                 this.form.patchValue(res.Vst_ProcesosEsp);
                 const defectos = res.Defectos;
                 const copyDataSourceEdit = [];
-                this.dataSourceEdit.data.forEach((x, i) => {
+                this.dataSourceEdit.data.forEach((x) => {
                   defectos.forEach(y => {
                     if (y.Clave === x.Clave) {
                       copyDataSourceEdit.push(x);

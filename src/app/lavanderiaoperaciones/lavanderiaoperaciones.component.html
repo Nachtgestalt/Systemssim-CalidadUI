@@ -7,7 +7,7 @@
             <i class="material-icons left">arrow_back</i>
           </button>
           &nbsp;&nbsp;
-          <button (click)="getDefectosActivos()"
+          <button (click)="getDefectosActivosLavanderia()"
                   class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom"
                   data-tooltip="Agrega una nueva operación" data-target="modalNewOperacionProcesosEspeciales"
                   type="button" name="btnAddOperacionProcesosEspeciales">Agregar
@@ -27,7 +27,7 @@
           <label for="DESCRIPCION_OPERACION">Nombre</label>
         </div>
         <div class="col s6" style="text-align: right">
-          <button (click)="GetOperacionLavanderia()" class="btn tooltipped waves-effect waves-light"
+          <button (click)="obtenerOperaciones()" class="btn tooltipped waves-effect waves-light"
                   data-position="bottom" data-tooltip="Consultar las operaciones de procesos especiales" type="button"
                   name="btnSearchOperacionConfeccion">Buscar
             <i class="material-icons right">search</i>
@@ -43,6 +43,7 @@
             <th>No.</th>
             <th>Clave Operación</th>
             <th>Nombre Operación</th>
+            <th>Área</th>
             <th>Estatus</th>
             <th></th>
           </tr>
@@ -53,18 +54,20 @@
               <button class="btn modal-trigger"
                       data-target="modalEditOperacionProcesosEspeciales"
                       matTooltip="Editar"
-                      (click)="getDetalle(operacion.ID)">
+                      [disabled]="operacion.Activo === false"
+                      (click)="getDetalle(operacion)">
                 <i class="material-icons center">edit</i>
               </button>
             </td>
             <td>{{i + 1}}</td>
             <td>{{operacion.Clave}}</td>
             <td>{{operacion.Nombre}}</td>
+            <td>{{operacion.IdSubModulo === 19 ? 'LAVANDERÍA' : 'PROCESOS ESPECIALES'}}</td>
             <td>{{operacion.Activo ? 'SI' : 'NO'}}</td>
             <td>
               <a class=" btn bold_sub"
                  matTooltip="Activa / Inactiva la operacion seleccionada"
-                 (click)="GetEnabledOperacionProcesosEspeciales(operacion.ID)">
+                 (click)="GetEnabledOperacionProcesosEspeciales(operacion)">
                 <u>{{operacion.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u>
               </a>
             </td>
@@ -94,6 +97,16 @@
                  formControlName="Nombre">
           <label for="DESCRIPCION_NEW_OPERACION">Nombre:</label>
         </div>
+      </div>
+      <div class="row">
+        <mat-radio-group
+          aria-labelledby="example-radio-group-label"
+          class="example-radio-group"
+          formControlName="Tipo">
+          <mat-radio-button class="example-radio-button" *ngFor="let option of optionModule" [value]="option.value">
+            {{option.viewValue}}
+          </mat-radio-button>
+        </mat-radio-group>
       </div>
       <div class="row">
         <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">

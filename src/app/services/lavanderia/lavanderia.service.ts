@@ -105,7 +105,7 @@ export class LavanderiaService {
     return this._http.put(url, null, {headers, params});
   }
 
-  updateOperación(payload, id) {
+  updateOperacion(payload, id) {
     const url = `${this.URL_LAVANDERA}/OperacionLavanderia`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);

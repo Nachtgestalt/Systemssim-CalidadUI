@@ -1,10 +1,8 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Globals} from '../Globals';
 
 declare var $: any;
-declare var jQuery: any;
 import 'jquery';
-import {ToastrService} from '../../../node_modules/ngx-toastr';
+import {ToastrService} from 'ngx-toastr';
 import {LavanderiaService} from '../services/lavanderia/lavanderia.service';
 import {EMPTY, Subject} from 'rxjs';
 import {DataTableDirective} from 'angular-datatables';
@@ -13,6 +11,7 @@ import {SelectionModel} from '@angular/cdk/collections';
 import {map, switchMap, tap} from 'rxjs/operators';
 import {FormControl, FormGroup} from '@angular/forms';
 import swal from 'sweetalert';
+import {ProcesosEspecialesService} from '../services/procesos-especiales/procesos-especiales.service';
 
 @Component({
   selector: 'app-lavanderiaoperaciones',
@@ -37,14 +36,16 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
 
   idOperacion;
 
-  // Formularios
-  claveGuardar;
-  nombreGuardar;
-
   form: FormGroup;
+
+  optionModule = [
+    {value: true, viewValue: 'LAVANDERIA'},
+    {value: false, viewValue: 'PROCESOS ESPECIALES'}
+  ];
 
   constructor(
     private _toast: ToastrService,
+    private _procesosService: ProcesosEspecialesService,
     private _lavanderiaService: LavanderiaService
   ) {
   }
@@ -75,7 +76,7 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
     $('#modalEnableOperacionProcesosEspeciales').modal();
     $('#modalNewOperacionProcesosEspeciales').modal();
     $('#modalEditOperacionProcesosEspeciales').modal();
-    this.GetOperacionLavanderia();
+    this.obtenerOperaciones();
     this.initFormGroup();
   }
 
@@ -90,15 +91,21 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
 
   initFormGroup() {
     this.form = new FormGroup({
-      'IdSubModulo': new FormControl(19),
+      'IdSubModulo': new FormControl(),
       'IdUsuario': new FormControl(this.json_Usuario.ID),
       'Clave': new FormControl(),
       'Nombre': new FormControl(),
       'Descripcion': new FormControl(''),
       'Observaciones': new FormControl(''),
       'Imagen': new FormControl(),
-      'Defecto': new FormControl()
+      'Defecto': new FormControl(),
+      'Defectos': new FormControl(),
+      'Tipo': new FormControl(true)
     });
+
+    this.form.controls['Tipo'].valueChanges.subscribe(
+      value => value ? this.getDefectosActivosLavanderia() : this.getDefectosActivosProcesos()
+    );
   }
 
   DisposeNewOperacionProcesosEspeciales() {
@@ -109,7 +116,7 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
     // this.GetPosicionDefectosActivos();
   }
 
-  GetOperacionLavanderia() {
+  obtenerOperaciones() {
     this._lavanderiaService.listOperaciones()
       .subscribe(
         (res: any) => {
@@ -117,7 +124,7 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
           this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
             // Destroy the table first
             dtInstance.destroy();
-            this.operaciones = res.Vst_Lavanderia;
+            this.operaciones = res.Vst_Lavanderia.concat(res.Vst_ProcesosEspeciales);
             this.dtTrigger.next();
             // Call the dtTrigger to rerender again
           });
@@ -125,8 +132,7 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
       );
   }
 
-  getDefectosActivos() {
-    this.initFormGroup();
+  getDefectosActivosLavanderia() {
     this.selection = new SelectionModel(true, []);
     this._lavanderiaService.listDefectos('', '', 'True')
       .pipe(
@@ -147,27 +153,70 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
       );
   }
 
-  EditOperacionProcesosEspeciales() {
-    console.log(this.selection.selected);
-    const payload = this.form.value;
-    payload.Defecto = this.selection.selected;
-    this._lavanderiaService.updateOperación(payload, this.idOperacion)
+  getDefectosActivosProcesos() {
+    this.selection = new SelectionModel(true, []);
+    this._procesosService.listDefectos('', '', 'True')
+      .pipe(
+        map((res: any) => {
+            res.Vst_ProcesosEspeciales.forEach(x => {
+              delete x.Imagen;
+            });
+            return res;
+          }
+        ),
+        tap(res => console.log('Despues de eliminar imagen: ', res))
+      )
       .subscribe(
         (res: any) => {
           console.log(res);
-          if (res.Message.IsSuccessStatusCode) {
-            this._toast.success('Operación actualizada con exito', '');
-            $('#modalEditOperacionProcesosEspeciales').modal('close');
-            this.GetOperacionLavanderia();
-          } else {
-            this._toast.warning('Algo no ha salido bien', '');
-          }
-        },
-        error => {
-          console.log(error);
-          this._toast.error('Error al conectar a la base de datos', '');
+          this.dataSource = new MatTableDataSource(res.Vst_ProcesosEspeciales);
         }
       );
+  }
+
+  EditOperacionProcesosEspeciales() {
+    console.log(this.selection.selected);
+    const payload = this.form.value;
+    if (this.form.controls['IdSubModulo'].value === 19) {
+      payload.Defecto = this.selection.selected;
+      this._lavanderiaService.updateOperacion(payload, this.idOperacion)
+        .subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Operación actualizada con exito', '');
+              $('#modalEditOperacionProcesosEspeciales').modal('close');
+              this.obtenerOperaciones();
+            } else {
+              this._toast.warning('Algo no ha salido bien', '');
+            }
+          },
+          error => {
+            console.log(error);
+            this._toast.error('Error al conectar a la base de datos', '');
+          }
+        );
+    } else if (this.form.controls['IdSubModulo'].value === 13) {
+      payload.Defectos = this.selection.selected;
+      this._procesosService.updateOperacion(payload, this.idOperacion)
+        .subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Operación actualizada con exito', '');
+              $('#modalEditOperacionProcesosEspeciales').modal('close');
+              this.obtenerOperaciones();
+            } else {
+              this._toast.warning('Algo no ha salido bien', '');
+            }
+          },
+          error => {
+            console.log(error);
+            this._toast.error('Error al conectar a la base de datos', '');
+          }
+        );
+    }
+
   }
 
   NewOperacionProcesosEspeciales() {
@@ -177,37 +226,72 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
     } else if ($('#DESCRIPCION_OPERACION').val()) {
       this._toast.warning('Se debe ingresar una descripción de la operación para procesos especailes', '');
     } else {
-      this._lavanderiaService.validaOperacionExiste(this.form.controls['Clave'].value, this.form.controls['Nombre'].value)
-        .pipe(
-          switchMap((res: any) => {
-            if (res.Message.IsSuccessStatusCode) {
-              this.form.controls['Defecto'].patchValue(this.selection.selected);
-              return this._lavanderiaService.createOperacion(this.form.value);
-            } else {
-              return EMPTY;
+      const json_usuario = JSON.parse(sessionStorage.getItem('currentUser'));
+      this.form.controls['IdUsuario'].patchValue(json_usuario.ID);
+      if (this.form.controls['Tipo'].value) {
+        this._lavanderiaService.validaOperacionExiste(this.form.controls['Clave'].value, this.form.controls['Nombre'].value)
+          .pipe(
+            switchMap((res: any) => {
+              if (res.Message.IsSuccessStatusCode) {
+                this.form.controls['Defecto'].patchValue(this.selection.selected);
+                this.form.controls['IdSubModulo'].patchValue(19);
+                return this._lavanderiaService.createOperacion(this.form.value);
+              } else {
+                return EMPTY;
+              }
+            })
+          )
+          .subscribe(
+            (res: any) => {
+              console.log(res);
+              if (res.Message.IsSuccessStatusCode) {
+                this._toast.success('Operación guardada con exito', '');
+                $('#modalNewOperacionProcesosEspeciales').modal('close');
+                this.initFormGroup();
+                this.obtenerOperaciones();
+              } else {
+                this._toast.warning('Algo no ha salido bien', '');
+              }
+            },
+            error => {
+              console.log(error);
+              this._toast.error('No se pudo establecer conexión a la base de datos', '');
             }
-          })
-        )
-        .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Operación guardada con exito', '');
-              $('#modalNewOperacionProcesosEspeciales').modal('close');
-              this.GetOperacionLavanderia();
-            } else {
-              this._toast.warning('Algo no ha salido bien', '');
+          );
+      } else {
+        this._procesosService.validaOperacionExiste(this.form.controls['Clave'].value, this.form.controls['Nombre'].value)
+          .pipe(
+            switchMap((res: any) => {
+              if (res.Message.IsSuccessStatusCode) {
+                this.form.controls['Defectos'].patchValue(this.selection.selected);
+                this.form.controls['IdSubModulo'].patchValue(13);
+                return this._procesosService.createOperacion(this.form.value);
+              } else {
+                return EMPTY;
+              }
+            })
+          )
+          .subscribe(
+            (res: any) => {
+              console.log(res);
+              if (res.Message.IsSuccessStatusCode) {
+                this._toast.success('Operación guardada con exito', '');
+                $('#modalNewOperacionProcesosEspeciales').modal('close');
+                this.obtenerOperaciones();
+              } else {
+                this._toast.warning('Algo no ha salido bien', '');
+              }
+            },
+            error => {
+              console.log(error);
+              this._toast.error('No se pudo establecer conexión a la base de datos', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
-          }
-        );
+          );
+      }
     }
   }
 
-  GetEnabledOperacionProcesosEspeciales(id) {
+  GetEnabledOperacionProcesosEspeciales(operacion) {
     const options = {
       text: '¿Estas seguro de modificar esta operación?',
       buttons: {
@@ -226,60 +310,117 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
     swal(options)
       .then((willDelete) => {
         if (willDelete) {
-          this._lavanderiaService.inactivaActivaOperacion(id)
-            .subscribe(
-              res => {
-                console.log(res);
-                this._toast.success('Operación actualizada con exito', '');
-                this.GetOperacionLavanderia();
-              },
-              error => {
-                console.log(error);
-                this._toast.error('No se pudo establecer conexión a la base de datos', '');
-              }
-            );
+          if (operacion.IdSubModulo === 19) {
+            this._lavanderiaService.inactivaActivaOperacion(operacion.ID)
+              .subscribe(
+                res => {
+                  console.log(res);
+                  this._toast.success('Operación actualizada con exito', '');
+                  this.obtenerOperaciones();
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                }
+              );
+          } else if (operacion.IdSubModulo === 13) {
+            this._procesosService.inactivaActivaOperacion(operacion.ID)
+              .subscribe(
+                res => {
+                  console.log(res);
+                  this._toast.success('Operación actualizada con exito', '');
+                  this.obtenerOperaciones();
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                }
+              );
+          }
+
         }
       });
   }
 
-  getDetalle(id) {
-    this.idOperacion = id;
-    this._lavanderiaService.listDefectos('', '', 'True')
-      .pipe(
-        map((res: any) => {
-            res.Vst_Lavanderia.forEach(x => {
-              delete x.Imagen;
-            });
-            return res;
-          }
-        ),
-        tap(res => console.log('Despues de eliminar imagen: ', res))
-      )
-      .subscribe(
-        (res: any) => {
-          console.log(res);
-          this.dataSourceEdit = new MatTableDataSource(res.Vst_Lavanderia);
-          this.selection = new SelectionModel(true, []);
-          this._lavanderiaService.getOperacion(id)
-            .subscribe(
-              (res: any) => {
-                console.log(res);
-                this.form.patchValue(res.Vst_Lavanderia);
-                const defectos = res.Defecto;
-                const copyDataSourceEdit = [];
-                this.dataSourceEdit.data.forEach((x, i) => {
-                  defectos.forEach(y => {
-                    if (y.Clave === x.Clave) {
-                      copyDataSourceEdit.push(x);
-                    }
+  getDetalle(operacion) {
+    this.idOperacion = operacion.ID;
+    if (operacion.IdSubModulo === 19) {
+      this._lavanderiaService.listDefectos('', '', 'True')
+        .pipe(
+          map((res: any) => {
+              res.Vst_Lavanderia.forEach(x => {
+                delete x.Imagen;
+              });
+              return res;
+            }
+          ),
+          tap(res => console.log('Despues de eliminar imagen: ', res))
+        )
+        .subscribe(
+          (result: any) => {
+            console.log(result);
+            this.dataSourceEdit = new MatTableDataSource(result.Vst_Lavanderia);
+            this.selection = new SelectionModel(true, []);
+            this._lavanderiaService.getOperacion(operacion.ID)
+              .subscribe(
+                (res: any) => {
+                  console.log(res);
+                  this.form.patchValue(res.Vst_Lavanderia);
+                  console.log('FORM: ', this.form.value);
+                  const defectos = res.Defecto;
+                  const copyDataSourceEdit = [];
+                  this.dataSourceEdit.data.forEach((x) => {
+                    defectos.forEach(y => {
+                      if (y.Clave === x.Clave) {
+                        copyDataSourceEdit.push(x);
+                      }
+                    });
                   });
-                });
-                console.log('Seleccion: ', copyDataSourceEdit);
-                this.selection = new SelectionModel(true, copyDataSourceEdit);
-              }
-            );
-        }
-      );
+                  console.log('Seleccion: ', copyDataSourceEdit);
+                  this.selection = new SelectionModel(true, copyDataSourceEdit);
+                }
+              );
+          }
+        );
+    } else {
+      this._procesosService.listDefectos('', '', 'True')
+        .pipe(
+          map((res: any) => {
+              res.Vst_ProcesosEspeciales.forEach(x => {
+                delete x.Imagen;
+              });
+              return res;
+            }
+          ),
+          tap(res => console.log('Despues de eliminar imagen: ', res))
+        )
+        .subscribe(
+          (result: any) => {
+            console.log(result);
+            this.dataSourceEdit = new MatTableDataSource(result.Vst_ProcesosEspeciales);
+            this.selection = new SelectionModel(true, []);
+            this._procesosService.getOperacion(operacion.ID)
+              .subscribe(
+                (res: any) => {
+                  console.log(res);
+                  this.form.patchValue(res.Vst_ProcesosEsp);
+                  const defectos = res.Defectos;
+                  const copyDataSourceEdit = [];
+                  this.dataSourceEdit.data.forEach((x) => {
+                    defectos.forEach(y => {
+                      if (y.Clave === x.Clave) {
+                        copyDataSourceEdit.push(x);
+                      }
+                    });
+                  });
+                  console.log('Seleccion: ', copyDataSourceEdit);
+                  this.selection = new SelectionModel(true, copyDataSourceEdit);
+                }
+              );
+          }
+        );
+    }
+
   }
 
   eliminar(operacion) {
@@ -300,23 +441,43 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
     };
     swal(options).then((willDelete) => {
       if (willDelete) {
-        this._lavanderiaService.deleteDefecto(operacion.ID, 'Operacion')
-          .subscribe(
-            (res: any) => {
-              console.log(res);
-              if (res.Message.IsSuccessStatusCode) {
-                this._toast.success('Operación eliminada con exito', '');
-                this.GetOperacionLavanderia();
-              } else {
-                const mensaje = res.Hecho.split(',');
-                this._toast.warning(mensaje[0], mensaje[2]);
+        if (operacion.IdSubModulo === 19) {
+          this._lavanderiaService.deleteDefecto(operacion.ID, 'Operacion')
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Operación eliminada con exito', '');
+                  this.obtenerOperaciones();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
               }
-            },
-            error => {
-              console.log(error);
-              this._toast.error('Error al conectar a la base de datos', '');
-            }
-          );
+            );
+        } else if (operacion.IdSubModulo === 13) {
+          this._procesosService.deleteDefecto(operacion.ID, 'Operacion')
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Operación eliminada con exito', '');
+                  this.obtenerOperaciones();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
       }
     });
   }

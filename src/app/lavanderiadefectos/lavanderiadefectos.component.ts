@@ -30,6 +30,9 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
 
   formEdit: FormGroup;
 
+  clave = '';
+  nombre = '';
+
   optionModule = [
     {value: true, viewValue: 'LAVANDERIA'},
     {value: false, viewValue: 'PROCESOS ESPECIALES'}
@@ -86,6 +89,7 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
     this.formEdit = new FormGroup({
       'ID': new FormControl(),
       'IdUsuario': new FormControl(),
+      'IdSubModulo': new FormControl(),
       'Clave': new FormControl(),
       'Nombre': new FormControl(),
       'Descripcion': new FormControl(''),
@@ -96,16 +100,8 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
   }
 
   obtenerDefectos() {
-    let _request = '';
-    if ($('#CLAVE_CORTADOR').val() !== '' && $('#NOMBRE_CORTADOR').val() === '') {
-      _request += '?Clave=' + $('#CLAVE_CORTADOR').val();
-    } else if ($('#NOMBRE_CORTADOR').val() !== '' && $('#CLAVE_CORTADOR').val() === '') {
-      _request += '?Nombre=' + $('#NOMBRE_CORTADOR').val();
-    } else {
-      _request += '?Nombre=' + $('#NOMBRE_CORTADOR').val() + '?Clave=' + $('#CLAVE_CORTADOR').val();
-    }
-    console.log(_request);
-    this._lavanderiaService.listDefectos()
+    console.log(this.clave, this.nombre);
+    this._lavanderiaService.listDefectos(this.clave, this.nombre)
       .subscribe(
         (res: any) => {
           if (res.Message.IsSuccessStatusCode) {
@@ -235,26 +231,43 @@ export class LavanderiadefectosComponent implements OnInit, OnDestroy, AfterView
   }
 
   EditDefectoLavanderia() {
-    console.log('EDITAR DEFECTO');
-    this._lavanderiaService.updateDefecto(this.formEdit.value)
-      .subscribe(
-        res => {
-          console.log(res);
-          this._toast.success('Defecto actualizado con exito', '');
-          this.obtenerDefectos();
-          this.resetModalEdit();
-          $('#modalEditDefectoLavanderia').modal('close');
-        },
-        error => {
-          console.log(error);
-          this._toast.error('No se pudo establecer conexión a la base de datos', '');
-        }
-      );
+    if (this.formEdit.controls['IdSubModulo'].value === 17) {
+      this._lavanderiaService.updateDefecto(this.formEdit.value)
+        .subscribe(
+          res => {
+            console.log(res);
+            this._toast.success('Defecto actualizado con exito', '');
+            this.obtenerDefectos();
+            this.resetModalEdit();
+            $('#modalEditDefectoLavanderia').modal('close');
+          },
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
+          }
+        );
+    } else if (this.formEdit.controls['IdSubModulo'].value === 27) {
+      this._procesosService.updateDefecto(this.formEdit.value)
+        .subscribe(
+          res => {
+            console.log(res);
+            this._toast.success('Defecto actualizado con exito', '');
+            this.obtenerDefectos();
+            this.resetModalEdit();
+            $('#modalEditDefectoLavanderia').modal('close');
+          },
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
+          }
+        );
+    }
   }
 
   editDefecto(defecto) {
     console.log(defecto);
     this.formEdit.patchValue(defecto);
+    console.log('VALOR DEL FORM: ', this.formEdit.value);
     this.selectedFileEdit = defecto.Imagen;
     if (this.selectedFileEdit) {
       this.noMostrar = true;

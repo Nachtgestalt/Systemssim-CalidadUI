@@ -107,7 +107,7 @@ export class ProcesosEspecialesService {
     return this._http.put(url, null, {headers, params});
   }
 
-  updateOperación(payload, id) {
+  updateOperacion(payload, id) {
     const url = `${this.URL_PROCESOS}/Operacion`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);
