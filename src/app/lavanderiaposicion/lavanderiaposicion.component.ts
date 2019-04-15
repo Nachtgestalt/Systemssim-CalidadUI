@@ -321,6 +321,11 @@ export class LavanderiaposicionComponent implements OnInit, OnDestroy, AfterView
     }
   }
 
+  openModalAgregar() {
+    this.initFormGroup();
+    this.getOperacionesActivasLavanderia();
+  }
+
   getOperacionesActivasLavanderia() {
     // this.initFormGroup();
     this.selection = new SelectionModel(true, []);

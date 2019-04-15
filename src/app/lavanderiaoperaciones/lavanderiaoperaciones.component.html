@@ -7,9 +7,9 @@
             <i class="material-icons left">arrow_back</i>
           </button>
           &nbsp;&nbsp;
-          <button (click)="getDefectosActivosLavanderia()"
-                  class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom"
-                  data-tooltip="Agrega una nueva operación" data-target="modalNewOperacionProcesosEspeciales"
+          <button (click)="openModalAgregar()"
+                  class="btn modal-trigger"
+                  data-target="modalNewOperacionProcesosEspeciales"
                   type="button" name="btnAddOperacionProcesosEspeciales">Agregar
             <i class="material-icons right">send</i>
           </button>
@@ -27,8 +27,8 @@
           <label for="DESCRIPCION_OPERACION">Nombre</label>
         </div>
         <div class="col s6" style="text-align: right">
-          <button (click)="obtenerOperaciones()" class="btn tooltipped waves-effect waves-light"
-                  data-position="bottom" data-tooltip="Consultar las operaciones de procesos especiales" type="button"
+          <button (click)="obtenerOperaciones()" class="btn"
+                  type="button"
                   name="btnSearchOperacionConfeccion">Buscar
             <i class="material-icons right">search</i>
           </button>
@@ -82,7 +82,7 @@
 
 <div id="modalNewOperacionProcesosEspeciales" class="modal modal-fixed-footer">
   <div class="modal-content">
-    <h4>Nueva Operación Lavandería</h4>
+    <h4>Nueva Operación</h4>
     <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s4">
@@ -170,7 +170,7 @@
 
 <div id="modalEditOperacionProcesosEspeciales" class="modal modal-fixed-footer">
   <div class="modal-content">
-    <h4>Edita la Operación de lavandería</h4>
+    <h4>Edita la Operación</h4>
     <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s4">

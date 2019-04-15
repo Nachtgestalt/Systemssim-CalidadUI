@@ -108,14 +108,6 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
     );
   }
 
-  DisposeNewOperacionProcesosEspeciales() {
-    $('#CLAVE_NEW_OPERACION').val('');
-    $('#DESCRIPCION_NEW_OPERACION').val('');
-    $('#modalNewOperacionConfeccion').val('');
-    $('#lblModulo').text('Procesos Especiales - Operaciones');
-    // this.GetPosicionDefectosActivos();
-  }
-
   obtenerOperaciones() {
     this._lavanderiaService.listOperaciones()
       .subscribe(
@@ -130,6 +122,11 @@ export class LavanderiaoperacionesComponent implements OnInit, OnDestroy, AfterV
           });
         }
       );
+  }
+
+  openModalAgregar() {
+    this.initFormGroup();
+    this.getDefectosActivosLavanderia();
   }
 
   getDefectosActivosLavanderia() {

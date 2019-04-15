@@ -3,14 +3,14 @@
     <form class="col s12" [formGroup]="formFilter">
       <div class="row" style="text-align: right">
         <div class="col s12">
-          <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+          <button class="btn red lighten-2" [routerLink]="['/home']">Regresar
             <i class="material-icons left">arrow_back</i>
           </button>
           &nbsp;&nbsp;
           <button class="btn modal-trigger"
                   data-target="modalNewPosicionLavanderia"
                   type="button" name="btnAddPosicionCortador"
-                  (click)="getOperacionesActivasLavanderia()">Agregar
+                  (click)="openModalAgregar()">Agregar
             <i class="material-icons right">send</i>
           </button>
         </div>
@@ -29,9 +29,8 @@
           <label for="NOMBRE_CORTADOR">Nombre</label>
         </div>
         <div class="col s6" style="text-align: right">
-          <button (click)="obtenerPosiciones()" class="btn tooltipped waves-effect waves-light"
-                  data-position="bottom"
-                  data-tooltip="Consultar las posiciones po posición del cortador, filtro seleccionado" type="button"
+          <button (click)="obtenerPosiciones()" class="btn"
+                  type="button"
                   name="btnSearchPosicionCortador">Buscar
             <i class="material-icons right">search</i>
           </button>
@@ -86,7 +85,7 @@
 <!-- Nueva Posición -->
 <div id="modalNewPosicionLavanderia" class="modal modal-fixed-footer">
   <div class="modal-content">
-    <h4>Nueva Posición Lavanderia</h4>
+    <h4>Nueva Posición</h4>
     <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s4">
@@ -174,7 +173,7 @@
 
 <div id="modalEditPosicionLavanderia" class="modal modal-fixed-footer">
   <div class="modal-content">
-    <h4>Edita Posición Lavanderia</h4>
+    <h4>Edita Posición</h4>
     <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s4">
