@@ -21,9 +21,9 @@
   <script>
     const Key = 'YWJjZGVmZ2hpamtsbW5vcHFycw==';
     // DESARROLLO
-    const UriRioSulApi = 'http://localhost:60958/api/';
+    // const UriRioSulApi = 'http://localhost:60958/api/';
     // PRODUCCION
-    // const UriRioSulApi = 'http://192.168.7.196:99/api/';
+    const UriRioSulApi = 'http://192.168.7.196:99/api/';
 
     function OnClickIdTable(Id){
       for(var i = 0; i < $("#tlbClientes tbody tr").length; i++){
@@ -203,10 +203,10 @@
             document.getElementById("lblCliente").innerText = json.HEAD_CLIENTE;
             for (let i = 0; i < json.Clientes.length; i++) {
               sOptions += '<tr>';
-              sOptions += '<td>' + _iindex + '</td>'
-              sOptions += '<td>' + json.Clientes[i].cve_cliente + '</td>'
-              sOptions += '<td>' + json.Clientes[i].nom_cliente + '</td>'
-              sOptions += '<td>' + json.Clientes[i].nom_corto + '</td>'
+              sOptions += '<td>' + _iindex + '</td>';
+              sOptions += '<td>' + json.Clientes[i].cve_cliente + '</td>';
+              sOptions += '<td>' + json.Clientes[i].nom_cliente + '</td>';
+              sOptions += '<td>' + json.Clientes[i].nom_corto + '</td>';
               sOptions += '</tr>';
 
               _iindex++;
@@ -789,13 +789,6 @@
       $('#NOMBRE_EDT_MESA').val('');
       $('#OBSERVACIONES_EDT_MESA').val('');
       $('#DESCRIPCION_EDT_MESA').val('');
-    }
-
-    function DisposeEditMesa() {
-      $('#CVE_EDT_POSICION').val('');
-      $('#NOMBRE_EDT_POSICION').val('');
-      $('#OBSERVACIONES_EDT_POSICION').val('');
-      $('#DESCRIPCION_EDT_POSICION').val('');
     }
 
     function DisposeEditDefectoCortador() {

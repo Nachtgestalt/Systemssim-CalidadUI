@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Globals } from '../Globals';
 declare var $: any;
-declare var jQuery: any;
 import 'jquery';
-import { ToastrService } from '../../../node_modules/ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-auditoriaconfeccion',

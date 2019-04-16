@@ -1,11 +1,10 @@
-import { async } from '@angular/core/testing';
-import { Globals } from './../Globals';
-import { Router, ActivatedRoute } from '@angular/router';
-import { Component, OnInit } from '@angular/core';
+import {Globals} from '../Globals';
+import {Router, ActivatedRoute} from '@angular/router';
+import {Component, OnInit} from '@angular/core';
+
 declare var $: any;
-declare var jQuery: any;
 import 'jquery';
-import { ToastrService } from 'ngx-toastr';
+import {ToastrService} from 'ngx-toastr';
 
 @Component({
   selector: 'app-usuarios',
@@ -16,9 +15,7 @@ export class UsuariosComponent implements OnInit {
 
   constructor(
     private _toast: ToastrService,
-    private _router: Router,
-    private _activatedRoute: ActivatedRoute
-    ) {}
+  ) {}
 
   ngOnInit() {
     $('.tooltipped').tooltip();
@@ -38,28 +35,29 @@ export class UsuariosComponent implements OnInit {
       Request += '&Usuario=' + $('#USU_BUSQUEDA_USERNAME').val();
     }
     Request += '&Email=' + $('#USU_BUSQUEDA_EMAIL').val();
-      if ($('#USU_BUSQUEDA_EMAIL').val() !== '') {
+    if ($('#USU_BUSQUEDA_EMAIL').val() !== '') {
     }
     $.ajax({
-      url : Globals.UriRioSulApi + 'Usuario/GetUsers?Key=' + atob(Globals.PasswordKey) + Request,
+      url: Globals.UriRioSulApi + 'Usuario/GetUsers?Key=' + atob(Globals.PasswordKey) + Request,
       dataType: 'json',
       contents: 'application/json; charset=utf-8',
       method: 'get',
       async: false,
       success: function (json) {
-        let sOptions = ''; let Index = 1;
+        let sOptions = '';
+        let Index = 1;
         let i: number;
         for (i = 0; i < json.Usuarios.length; i++) {
           sOptions += '<tr>';
           // tslint:disable-next-line:max-line-length
-          sOptions += '<td><a onclick="javascript: SetId(' + json.Usuarios[i].ID + ');GetPermits();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditUser" data-position="bottom" data-tooltip="Edita el usuario seleccionado"><i class="material-icons right">edit</i></a></td>';
+          sOptions += '<td><a onclick="SetId(' + json.Usuarios[i].ID + ');GetPermits();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditUser" data-position="bottom" data-tooltip="Edita el usuario seleccionado"><i class="material-icons right">edit</i></a></td>';
           sOptions += '<td>' + Index + '</td>';
           if (json.Usuarios[i].Activo === true) {
             // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(' + json.Usuarios[i].ID + ')" class="waves-effect waves-green btn-flat modal-trigger" data-target="modalEnableUser"><strong><u>Inactivar</u></strong></a></td>';
+            sOptions += '<td><a onclick="SetId(' + json.Usuarios[i].ID + ')" class="waves-effect waves-green btn-flat modal-trigger" data-target="modalEnableUser"><strong><u>Inactivar</u></strong></a></td>';
           } else {
             // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(' + json.Usuarios[i].ID + ')" class="waves-effect waves-green btn-flat modal-trigger" data-target="modalEnableUser"><strong><u>Activar</u></strong></a></td>';
+            sOptions += '<td><a onclick="SetId(' + json.Usuarios[i].ID + ')" class="waves-effect waves-green btn-flat modal-trigger" data-target="modalEnableUser"><strong><u>Activar</u></strong></a></td>';
           }
           sOptions += '<td>' + json.Usuarios[i].Nombre + '</td>';
           sOptions += '<td>' + json.Usuarios[i].Usuario + '</td>';
@@ -68,12 +66,12 @@ export class UsuariosComponent implements OnInit {
           sOptions += '</tr>';
           Index++;
         }
-      $('#tlbUsuarios').html('');
-      $('#tlbUsuarios').html(sOptions);
-      // tslint:disable-next-line:max-line-length
-      $('#tlbUsuarios').append('<thead><tr><th></th><th>No.</th><th>Activar/Inactivar</th><th>Nombre</th><th>Usuario</th><th>Email</th><th>Activo</th></tr></thead>');
-      $('#tlbUsuarios').DataTable();
-      $('.tooltipped').tooltip();
+        $('#tlbUsuarios').html('');
+        $('#tlbUsuarios').html(sOptions);
+        // tslint:disable-next-line:max-line-length
+        $('#tlbUsuarios').append('<thead><tr><th></th><th>No.</th><th>Activar/Inactivar</th><th>Nombre</th><th>Usuario</th><th>Email</th><th>Activo</th></tr></thead>');
+        $('#tlbUsuarios').DataTable();
+        $('.tooltipped').tooltip();
       },
       error: function () {
         console.log('No se pudo establecer conexión con la base de datos');
@@ -127,7 +125,7 @@ export class UsuariosComponent implements OnInit {
               _Mensaje = 'No se pudo agregar el usuario';
             }
           },
-          error: function() {
+          error: function () {
             _Mensaje = 'No se pudo establecer conexión a la base de datos';
           }
         });
@@ -219,8 +217,10 @@ export class UsuariosComponent implements OnInit {
       method: 'get',
       async: false,
       success: function (json) {
-        let sOptions = ''; let i: number; let Modulo = '';
-        for (i = 0; i < json.Menus.length; i ++) {
+        let sOptions = '';
+        let i: number;
+        let Modulo = '';
+        for (i = 0; i < json.Menus.length; i++) {
           Modulo = (json.Menus[i].Pantalla === null ? json.Menus[i].SubMenu : json.Menus[i].Pantalla);
           sOptions += '<tr id="' + json.Menus[i].ID + '">';
           sOptions += '<td>' + Modulo + '</td>';

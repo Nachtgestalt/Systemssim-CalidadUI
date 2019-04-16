@@ -1,6 +1,17 @@
 <div class="card-panel">
   <div class="row">
     <form class="col s12">
+      <div class="row" style="text-align: right">
+        <div class="col s12">
+          <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+            <i class="material-icons left">arrow_back</i>
+          </button>
+          &nbsp;&nbsp;
+          <button (click)="DisposeNewAreaConfeccion()" class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega una nueva área" data-target="modalNewAreaConfeccion" type="button" name="btnAddAreaConfeccion">Agregar
+            <i class="material-icons right">send</i>
+          </button>
+        </div>
+      </div>
       <div class="row">
         <div class="input-field col s3">
           <i class="material-icons prefix">font_download</i>
@@ -31,17 +42,6 @@
         </table>
       </div>
       <br />
-      <div class="row" style="text-align: right">
-        <div class="col s12">
-          <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
-            <i class="material-icons left">arrow_back</i>
-          </button>
-          &nbsp;&nbsp;
-          <button (click)="DisposeNewAreaConfeccion()" class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega una nueva área" data-target="modalNewAreaConfeccion" type="button" name="btnAddAreaConfeccion">Agregar
-            <i class="material-icons right">send</i>
-          </button>
-        </div>
-      </div>
     </form>
   </div>
 </div>
@@ -100,7 +100,7 @@
         <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
       </div>
       <div class="col s6" style="text-align: right">
-        <a (click)="NewAreaConfeccion()" onclick="javascript: GetCheckPosicion()" class="waves-effect waves-green btn-flat">Aceptar</a>
+        <a (click)="NewAreaConfeccion()" onclick="GetCheckPosicion()" class="waves-effect waves-green btn-flat">Aceptar</a>
       </div>
     </div>
   </div>
@@ -140,7 +140,7 @@
         <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
       </div>
       <div class="col s6" style="text-align: right">
-        <a (ckick)="EditAreaConfeccion()" class="waves-effect waves-green btn-flat">Aceptar</a>
+        <a (click)="EditAreaConfeccion()" class="waves-effect waves-green btn-flat">Aceptar</a>
       </div>
     </div>
   </div>

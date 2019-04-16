@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Globals } from '../Globals';
 declare var $: any;
-declare var jQuery: any;
 import 'jquery';
-import { ToastrService } from '../../../node_modules/ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-auditoriatendido',
@@ -373,9 +372,7 @@ export class AuditoriatendidoComponent implements OnInit {
       this._toast.warning('Se debe seleccionar una mesa valida', '');
     } else if ($('#AUDIT_CANTIDAD')[0].value === '' || $('#AUDIT_CANTIDAD')[0].value <= 0) {
       this._toast.warning('Se debe ingresar una cantidad valida', '');
-    } /*else if (this.GetOrdenTrabajo() === false ) {
-      this._toast.warning('Se debe ingresar una orden de trabajo valida', '');
-    }*/ else {
+    } else {
       const tlb = $('#bdyCorteAuditoria');
       let sOptions = '';
       let _iindex = 1;

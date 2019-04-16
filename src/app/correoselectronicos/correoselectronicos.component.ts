@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Globals } from './../Globals';
+import { Globals } from '../Globals';
 declare var $: any;
-declare var jQuery: any;
 import 'jquery';
-import { ToastrService } from '../../../node_modules/ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-correoselectronicos',
@@ -41,7 +40,7 @@ export class CorreoselectronicosComponent implements OnInit {
           for (let i = 0; i < json.CorreosA.length; i++) {
             sOptions += '<tr>';
             // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(' + json.CorreosA[i].UsuarioId + '); EditAlertasCierreAuditoriaUsu();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEdtCorreos" data-position="bottom" data-tooltip="Edita el usuario seleccionado"><i class="material-icons right">edit</i></a></td>';
+            sOptions += '<td><a onclick="SetId(' + json.CorreosA[i].UsuarioId + '); EditAlertasCierreAuditoriaUsu();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEdtCorreos" data-position="bottom" data-tooltip="Edita el usuario seleccionado"><i class="material-icons right">edit</i></a></td>';
             sOptions += '<td>' + index + '</td>';
             sOptions += '<td>' + json.CorreosA[i].Email + '</td>';
             if (json.CorreosA[i].Corte) {
@@ -80,7 +79,7 @@ export class CorreoselectronicosComponent implements OnInit {
               sOptions += '<td style="text-align: center"><label><input disabled="disabled" id="Terminado" type="checkbox" class="filled-in"><span></span></label></td>';
             }
             // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(' + json.CorreosA[i].UsuarioId + ');" class="waves-effect waves-light red btn tooltipped modal-trigger" data-target="modalDeleteAlerta" data-position="bottom" data-tooltip="Elimina las alertas para el usuario seleccionado"><i class="material-icons right">delete</i></a></td>';
+            sOptions += '<td><a onclick="SetId(' + json.CorreosA[i].UsuarioId + ');" class="waves-effect waves-light red btn tooltipped modal-trigger" data-target="modalDeleteAlerta" data-position="bottom" data-tooltip="Elimina las alertas para el usuario seleccionado"><i class="material-icons right">delete</i></a></td>';
             sOptions += '</tr>';
             index++;
           }
@@ -162,7 +161,7 @@ export class CorreoselectronicosComponent implements OnInit {
           for (let i = 0; i < json.Usuarios.length; i++) {
             sOptions += '<tr>';
             // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(' + json.Usuarios[i].ID + '); DisposeCheckPerCorreo();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalCorreos" data-position="bottom" data-tooltip="Edita el usuario seleccionado"><i class="material-icons right">check</i></a></td>';
+            sOptions += '<td><a onclick="SetId(' + json.Usuarios[i].ID + '); DisposeCheckPerCorreo();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalCorreos" data-position="bottom" data-tooltip="Edita el usuario seleccionado"><i class="material-icons right">check</i></a></td>';
             sOptions += '<td>' + index + '</td>';
             sOptions += '<td>' + json.Usuarios[i].Nombre + '</td>';
             sOptions += '<td>' + json.Usuarios[i].Usuario + '</td>';

@@ -279,4 +279,6 @@ hr.border {
 .example-radio-button {
   margin: 10px;
 }
-
+.active {
+  border-bottom: white solid 2px;
+}

@@ -3,7 +3,7 @@ import { Globals } from '../Globals';
 declare var $: any;
 declare var jQuery: any;
 import 'jquery';
-import { ToastrService } from '../../../node_modules/ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-mesa',
@@ -47,7 +47,7 @@ export class MesaComponent implements OnInit {
           for (let i = 0; i < json.Vst_Cortadores.length; i++) {
             sOptions += '<tr>';
             // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(' + json.Vst_Cortadores[i].ID + '); DisposeEditMesa(); GetInfoMesa();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditMesa" data-position="bottom" data-tooltip="Edita la mesa seleccionada"><i class="material-icons right">edit</i></a></td>';
+            sOptions += '<td><a onclick="SetId(' + json.Vst_Cortadores[i].ID + '); DisposeEditMesa(); GetInfoMesa();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditMesa" data-position="bottom" data-tooltip="Edita la mesa seleccionada"><i class="material-icons right">edit</i></a></td>';
             sOptions += '<td>' + index + '</td>';
             sOptions += '<td>' + json.Vst_Cortadores[i].Clave + '</td>';
             sOptions += '<td>' + json.Vst_Cortadores[i].Nombre + '</td>';

@@ -47,7 +47,7 @@ export class ClientesComponent implements OnInit {
             for (let index = 0; index < json.length; index++) {
               sOptions += '<tr>';
               // tslint:disable-next-line:max-line-length
-              sOptions += '<td><a onclick="javascript: SetId(' + json[index].IdClienteRef + '); ObtieneReferenciasPorCliente();" class="btn tooltipped waves-effect waves-light modal-trigger" data-target="mdlDetalle"><strong><u>Detallar</u></strong></a></td>';
+              sOptions += '<td><a onclick="SetId(' + json[index].IdClienteRef + '); ObtieneReferenciasPorCliente();" class="btn tooltipped waves-effect waves-light modal-trigger" data-target="mdlDetalle"><strong><u>Detallar</u></strong></a></td>';
               sOptions += '<td>' + json[index].Descripcion  + '</td>';
               sOptions += '<td>' + json[index].Observaciones + '</td>';
               sOptions += '</tr>';

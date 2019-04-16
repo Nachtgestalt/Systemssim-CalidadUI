@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Globals } from '../Globals';
 declare var $: any;
-declare var jQuery: any;
 import 'jquery';
 import { ToastrService } from 'ngx-toastr';
 
@@ -52,7 +51,7 @@ export class AreaconfeccionComponent implements OnInit {
           for (let i = 0; i < json.Vst_Confeccion.length; i++) {
             sOptions += '<tr>';
             // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(' + json.Vst_Confeccion[i].ID + '); DisposeEditArea(); GetInfoOperacionConfeccion();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditAreaConfeccion" data-position="bottom" data-tooltip="Edita el área seleccionada"><i class="material-icons right">edit</i></a></td>';
+            sOptions += '<td><a onclick="SetId(' + json.Vst_Confeccion[i].ID + '); DisposeEditArea(); GetInfoOperacionConfeccion();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditAreaConfeccion" data-position="bottom" data-tooltip="Edita el área seleccionada"><i class="material-icons right">edit</i></a></td>';
             sOptions += '<td>' + index + '</td>';
             sOptions += '<td>' + json.Vst_Confeccion[i].Clave + '</td>';
             sOptions += '<td>' + json.Vst_Confeccion[i].Nombre + '</td>';

@@ -3,7 +3,7 @@ import { Globals } from '../Globals';
 declare var $: any;
 declare var jQuery: any;
 import 'jquery';
-import { ToastrService } from '../../../node_modules/ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-defectocorte',
@@ -47,7 +47,7 @@ export class DefectocorteComponent implements OnInit {
           for (let i = 0; i < json.Vst_Cortadores.length; i++) {
             sOptions += '<tr>';
             // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(' + json.Vst_Cortadores[i].ID + '); DisposeEditDefectoCortador(); GetInfoDefecto();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditDefectoCortador" data-position="bottom" data-tooltip="Edita el defecto  seleccionado"><i class="material-icons right">edit</i></a></td>';
+            sOptions += '<td><a onclick="SetId(' + json.Vst_Cortadores[i].ID + '); DisposeEditDefectoCortador(); GetInfoDefecto();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditDefectoCortador" data-position="bottom" data-tooltip="Edita el defecto  seleccionado"><i class="material-icons right">edit</i></a></td>';
             sOptions += '<td>' + index + '</td>';
             sOptions += '<td>' + json.Vst_Cortadores[i].Clave + '</td>';
             sOptions += '<td>' + json.Vst_Cortadores[i].Nombre + '</td>';

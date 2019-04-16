@@ -1,4 +1,4 @@
-import { Globals } from './../Globals';
+import { Globals } from '../Globals';
 import { Component, OnInit } from '@angular/core';
 declare var $: any;
 declare var jQuery: any;

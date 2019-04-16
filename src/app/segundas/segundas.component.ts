@@ -98,7 +98,7 @@ export class SegundasComponent implements OnInit, OnDestroy, AfterViewInit {
           for (let i = 0; i < json.estilos.length; i++) {
             sOptions += '<tr>';
             // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(\'' + json.estilos[i].estilo + '|' + json.estilos[i].des_estilo + '\'); DisposeCatSegundas();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalPorcentajes" data-position="bottom" data-tooltip="Agrega porcentajes de segundas al estilo"><i class="material-icons right">edit</i></a></td>';
+            sOptions += '<td><a onclick="SetId(\'' + json.estilos[i].estilo + '|' + json.estilos[i].des_estilo + '\'); DisposeCatSegundas();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalPorcentajes" data-position="bottom" data-tooltip="Agrega porcentajes de segundas al estilo"><i class="material-icons right">edit</i></a></td>';
             sOptions += '<td>' + _Index + '</td>';
             sOptions += '<td>' + json.estilos[i].estilo + '</td>';
             sOptions += '<td>' + json.estilos[i].des_estilo + '</td>';

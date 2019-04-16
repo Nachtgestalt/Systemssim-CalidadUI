@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { Globals } from '../Globals';
+import {Component, OnInit} from '@angular/core';
+import {Globals} from '../Globals';
+
 declare var $: any;
-declare var jQuery: any;
 import 'jquery';
-import { ToastrService } from '../../../node_modules/ngx-toastr';
+import {ToastrService} from 'ngx-toastr';
 
 @Component({
   selector: 'app-auditoriacorte',
@@ -15,7 +15,8 @@ export class AuditoriacorteComponent implements OnInit {
 
   constructor(
     private _toast: ToastrService
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
     $('.tooltipped').tooltip();
@@ -23,7 +24,6 @@ export class AuditoriacorteComponent implements OnInit {
     $('#modalDetailsAuditoria').modal();
     $('#modalCloseAuditoria').modal();
     $('select').formSelect();
-    //this.GetClients();
     this.GetCortadores();
     this.GetPosicionCortador();
     this.GetDefectosCortadores();
@@ -75,10 +75,10 @@ export class AuditoriacorteComponent implements OnInit {
           for (let i = 0; i < json.Vst_Cortadores.length; i++) {
             if (i === 0) {
               $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             } else {
               // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             }
           }
           $(ddl).formSelect();
@@ -104,10 +104,10 @@ export class AuditoriacorteComponent implements OnInit {
           for (let i = 0; i < json.Vst_Cortadores.length; i++) {
             if (i === 0) {
               $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             } else {
               // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             }
           }
           $(ddl).formSelect();
@@ -133,10 +133,10 @@ export class AuditoriacorteComponent implements OnInit {
           for (let i = 0; i < json.Vst_Cortadores.length; i++) {
             if (i === 0) {
               $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             } else {
               // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             }
           }
           $(ddl).formSelect();
@@ -265,9 +265,7 @@ export class AuditoriacorteComponent implements OnInit {
     $('#ddlDefecto').formSelect();
     $('#ddlCortado').val(0);
     $('#ddlCortado').formSelect();
-    //$('#ddlCliente').val(0);
     $('#AUDIT_CANTIDAD').val('');
-    //$('#ddlOT').val('');
     $('#blah')[0].src = 'http://placehold.it/180';
   }
 
@@ -275,12 +273,12 @@ export class AuditoriacorteComponent implements OnInit {
     console.log('ValidateAddCortadorAuditoria');
     if ($('#ddlCliente').val() === null) {
       this._toast.warning('Se debe seleccionar un cliente valido', '');
-    } else if ($('#ddlOT').val() === '' ) {
+    } else if ($('#ddlOT').val() === '') {
       this._toast.warning('Se debe seleccionar una orden de trabajo valida', '');
     } else if ($('#ddlSerie')[0].value === '0') {
       this._toast.warning('Se debe serleccionar una serie valida', '');
-    // } else if ($('#ddlNoBulto')[0].value === '0') {
-    //   this._toast.warning('Se debe seleccionar un número de bulto valido', '');
+      // } else if ($('#ddlNoBulto')[0].value === '0') {
+      //   this._toast.warning('Se debe seleccionar un número de bulto valido', '');
     } else if ($('#ddlPosicion')[0].value === '0') {
       this._toast.warning('Se debe seleccionar una posición valida', '');
     } else if ($('#ddlDefecto')[0].value === '0') {
@@ -289,9 +287,7 @@ export class AuditoriacorteComponent implements OnInit {
       this._toast.warning('Se debe seleccionar una tolerancia valida', '');
     } else if ($('#AUDIT_CANTIDAD')[0].value === '' || $('#AUDIT_CANTIDAD')[0].value <= 0) {
       this._toast.warning('Se debe ingresar una cantidad valida', '');
-    } /*else if (this.GetOrdenTrabajo() === false ) {
-      this._toast.warning('La orden de trabajo ingresada no es valida', '');
-    } */ else {
+    } else {
       const tlb = $('#bdyCorteAuditoria');
       let sOptions = '';
       let _iindex = 1;
@@ -346,7 +342,7 @@ export class AuditoriacorteComponent implements OnInit {
           'excelHtml5',
           'csvHtml5',
           'pdfHtml5'
-         ]
+        ]
       });
       $('.tooltipped').tooltip();
       this.DisposeNewRowCortador();
@@ -355,25 +351,26 @@ export class AuditoriacorteComponent implements OnInit {
 
   GetOrdenTrabajo(): boolean {
     console.log('GetOrdenTrabajo');
-    console.log(Globals.UriRioSulApi + 'AuditoriaCorte/ObtieneOrdenesTrabajoDynamics?IdClienteRef=' + $('#ddlCliente').val() + '&OrdenT=' + $('#ddlOT').val());
+    console.log(Globals.UriRioSulApi + 'AuditoriaCorte/ObtieneOrdenesTrabajoDynamics?IdClienteRef=' +
+      $('#ddlCliente').val() + '&OrdenT=' + $('#ddlOT').val());
     let Result = false;
     $.ajax({
       // tslint:disable-next-line:max-line-length
       url: Globals.UriRioSulApi + 'AuditoriaCorte/ObtieneOrdenesTrabajoDynamics?IdClienteRef=' + $('#ddlCliente').val() + '&OrdenT=' + $('#ddlOT').val(),
-          dataType: 'json',
-          contents: 'application/json; charset=utf-8',
-          method: 'get',
-          async: false,
-          success: function (json) {
-            if (json.Message.IsSuccessStatusCode) {
-              for (let index = 0; index < json.OrdenTrabajo.length; index++) {
-                Result = true;
-              }
-            }
-          },
-          error: function () {
-            console.log('No se ha podido establecer conexión');
+      dataType: 'json',
+      contents: 'application/json; charset=utf-8',
+      method: 'get',
+      async: false,
+      success: function (json) {
+        if (json.Message.IsSuccessStatusCode) {
+          for (let index = 0; index < json.OrdenTrabajo.length; index++) {
+            Result = true;
           }
+        }
+      },
+      error: function () {
+        console.log('No se ha podido establecer conexión');
+      }
     });
     return Result;
   }
@@ -405,7 +402,7 @@ export class AuditoriacorteComponent implements OnInit {
             sOptions += '<td>' + json.RES[i].Planta + '</td>';
             if (json.RES[i].FechaRegistroFin === null) {
               // tslint:disable-next-line:max-line-length
-              sOptions += '<td><a onclick="javascript: SetId(' + json.RES[i].IdAuditoria + ')" class="waves-effect waves-green btn-flat modal-trigger" data-target="modalCloseAuditoria"><strong><u>Cerrar</u></strong></a></td>';
+              sOptions += '<td><a onclick="SetId(' + json.RES[i].IdAuditoria + ')" class="waves-effect waves-green btn-flat modal-trigger" data-target="modalCloseAuditoria"><strong><u>Cerrar</u></strong></a></td>';
             } else {
               sOptions += '<td style="text-align: center">Cerrada</td>';
             }
@@ -430,7 +427,7 @@ export class AuditoriacorteComponent implements OnInit {
               'excelHtml5',
               'csvHtml5',
               'pdfHtml5'
-             ]
+            ]
           });
           $('.tooltipped').tooltip();
         }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Globals } from './../Globals';
+import { Globals } from '../Globals';
 
 @Injectable({
   providedIn: 'root'

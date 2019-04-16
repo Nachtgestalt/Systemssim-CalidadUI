@@ -7,7 +7,7 @@ import {Globals} from '../../Globals';
 })
 export class ClientesService {
 
-  private URL_CLIENTES = `${Globals.UriRioSulApi}Cliente`
+  private URL_CLIENTES = `${Globals.UriRioSulApi}Cliente`;
 
   constructor(private _http: HttpClient) { }
 

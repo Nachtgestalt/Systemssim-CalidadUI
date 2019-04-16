@@ -4,7 +4,7 @@ declare var $: any;
 declare var jQuery: any;
 declare var M: any;
 import 'jquery';
-import { ToastrService } from '../../../node_modules/ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 import {DataTableDirective} from 'angular-datatables';
 import {Subject} from 'rxjs';
 import {MatTableDataSource} from '@angular/material';

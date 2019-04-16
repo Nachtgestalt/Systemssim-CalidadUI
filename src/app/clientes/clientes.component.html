@@ -1,5 +1,18 @@
 <div class="card-panel">
   <form>
+    <div class="row" style="text-align: right">
+      <div class="col s12">
+        <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+          <i class="material-icons left">arrow_back</i>
+        </button>
+        &nbsp;&nbsp;
+        <button (click)="DisposeRegistrosTabla()" class="btn tooltipped waves-effect waves-light modal-trigger"
+                data-target="mdlNewRefCru" data-position="bottom" data-tooltip="Agrega una nueva referencia cruzada"
+                type="button" name="btnAddRefCruzada">Agregar
+          <i class="material-icons right">send</i>
+        </button>
+      </div>
+    </div>
     <div class="row">
       <div class="input-field col s3">
         <i class="material-icons prefix">account_box</i>
@@ -12,7 +25,8 @@
         <label for="CLI_OBSERVACION">Observación</label>
       </div>
       <div class="col s6" style="text-align: right">
-        <button class="btn tooltipped waves-effect waves-light" (click)="GetClientsRefCru();" data-position="bottom" data-tooltip="Consultar clientes por filtro seleccionado" type="button" name="btnSearchClientRef">Buscar
+        <button class="btn tooltipped waves-effect waves-light" (click)="GetClientsRefCru();" data-position="bottom"
+                data-tooltip="Consultar clientes por filtro seleccionado" type="button" name="btnSearchClientRef">Buscar
           <i class="material-icons right">search</i>
         </button>
       </div>
@@ -21,27 +35,16 @@
     <div class="row">
       <table id="tlbClientesRefCru" class="row-border">
         <thead>
-          <tr>
-            <th></th>
-            <th>Descripción</th>
-            <th>Observación</th>
-          </tr>
+        <tr>
+          <th></th>
+          <th>Descripción</th>
+          <th>Observación</th>
+        </tr>
         </thead>
         <tbody></tbody>
       </table>
     </div>
-    <br />
-    <div class="row" style="text-align: right">
-      <div class="col s12">
-        <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
-          <i class="material-icons left">arrow_back</i>
-        </button>
-        &nbsp;&nbsp;
-        <button (click)="DisposeRegistrosTabla()" class="btn tooltipped waves-effect waves-light modal-trigger" data-target="mdlNewRefCru" data-position="bottom" data-tooltip="Agrega una nueva referencia cruzada" type="button" name="btnAddRefCruzada">Agregar
-          <i class="material-icons right">send</i>
-        </button>
-      </div>
-    </div>
+    <br/>
   </form>
 </div>
 
@@ -57,16 +60,16 @@
         </div>
       </div>
       <div class="row">
-          <table class="row-border hover" id="tlbClientesRefDetails">
-            <thead>
-              <tr>
-                <th>No.</th>
-                <th>Clave</th>
-                <th>Nombre</th>
-                <th>Nombre Corto</th>
-              </tr>
-            </thead>
-          </table>
+        <table class="row-border hover" id="tlbClientesRefDetails">
+          <thead>
+          <tr>
+            <th>No.</th>
+            <th>Clave</th>
+            <th>Nombre</th>
+            <th>Nombre Corto</th>
+          </tr>
+          </thead>
+        </table>
       </div>
     </form>
   </div>
@@ -87,28 +90,32 @@
       <div class="row">
         <div class="input-field col s4">
           <i class="material-icons prefix">account_box</i>
-          <input id="BUS_CLIENTE" data-position="bottom" data-tooltip="Búsqueda por clave de cliente, nombre completo y nombre corto" type="text" class="validate" />
+          <input id="BUS_CLIENTE" data-position="bottom"
+                 data-tooltip="Búsqueda por clave de cliente, nombre completo y nombre corto" type="text"
+                 class="validate"/>
           <label for="BUS_CLIENTE">Búsqueda</label>
         </div>
         <div class="col s8" style="text-align: right">
-            <button class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar clientes por filtro seleccionado" (click)="GetClients();" type="button" name="btnSearchUser">Buscar
-              <i class="material-icons right">search</i>
-            </button>
-          </div>
+          <button class="btn tooltipped waves-effect waves-light" data-position="bottom"
+                  data-tooltip="Consultar clientes por filtro seleccionado" (click)="GetClients();" type="button"
+                  name="btnSearchUser">Buscar
+            <i class="material-icons right">search</i>
+          </button>
+        </div>
       </div>
       <br/>
       <div class="row">
         <table class="row-border hover" id="tlbClientes">
           <thead>
-            <tr>
-              <th>Clave</th>
-              <th>Nombre</th>
-              <th>Siglas</th>
-              <th>Rfc</th>
-              <th>Estatus</th>
-              <th>C.P.</th>
-              <th>Contacto</th>
-            </tr>
+          <tr>
+            <th>Clave</th>
+            <th>Nombre</th>
+            <th>Siglas</th>
+            <th>Rfc</th>
+            <th>Estatus</th>
+            <th>C.P.</th>
+            <th>Contacto</th>
+          </tr>
           </thead>
           <tbody id="tbdy_Clientes_Ref"></tbody>
         </table>
@@ -121,8 +128,11 @@
         <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
       </div>
       <div class="col s6" style="text-align: right">
-        <a (click)="ValidateRowsTableSelect()" data-target="mdlNewCliRef" onclick="javascript: ValidateRowsSelectTable()" class="waves-effect waves-green btn-flat modal-trigger">Aceptar</a>
-      <div>
+        <a (click)="ValidateRowsTableSelect()" data-target="mdlNewCliRef"
+           onclick="ValidateRowsSelectTable()" class="waves-effect waves-green btn-flat modal-trigger">Aceptar</a>
+        <div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -135,14 +145,16 @@
       <div class="row">
         <div class="input-field col s12">
           <i class="material-icons prefix">font_download</i>
-          <input id="CLI_NOMBRE_NEW" data-position="bottom" data-tooltip="Nombre del cliente, referencia cruzada" type="text" class="validate" />
+          <input id="CLI_NOMBRE_NEW" data-position="bottom" data-tooltip="Nombre del cliente, referencia cruzada"
+                 type="text" class="validate"/>
           <label for="CLI_NOMBRE_NEW">Nombre:</label>
         </div>
       </div>
       <div class="row">
         <div class="input-field col s12">
           <i class="material-icons prefix">explicit</i>
-          <input id="CLI_OBSERVACIONES_NEW" data-position="bottom" data-tooltip="Observaciones del cliente, referencia cruzada" type="text" class="validate">
+          <input id="CLI_OBSERVACIONES_NEW" data-position="bottom"
+                 data-tooltip="Observaciones del cliente, referencia cruzada" type="text" class="validate">
           <label for="CLI_OBSERVACIONES_NEW">Obs.:</label>
         </div>
       </div>
@@ -154,9 +166,10 @@
         <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
       </div>
       <div class="col s6" style="text-align: right">
-        <a onclick="javascript: GetClientsTable()" (click)="SaveClient()" class="waves-effect waves-green btn-flat">Aceptar</a>
-      <div>
+        <a onclick="GetClientsTable()" (click)="SaveClient()" class="waves-effect waves-green btn-flat">Aceptar</a>
+        <div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
-

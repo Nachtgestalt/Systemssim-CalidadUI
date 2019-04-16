@@ -3,7 +3,7 @@ import {Globals} from '../Globals';
 declare var M: any;
 declare var $: any;
 import 'jquery';
-import {ToastrService} from '../../../node_modules/ngx-toastr';
+import {ToastrService} from 'ngx-toastr';
 import {MatTableDataSource} from '@angular/material';
 import {TerminadoService} from '../services/terminado/terminado.service';
 import {AuditoriaTerminadoService} from '../services/terminado/auditoria-terminado.service';
@@ -412,7 +412,7 @@ export class AuditoriaprocesosespecialesComponent implements OnInit, OnDestroy, 
       this._procesosService.createAuditoria(data)
         .subscribe(
           res => {
-            this._toast.success('Se agrego correctamente auditoria terminado', '');
+            this._toast.success('Se agrego correctamente auditoria', '');
             console.log(res);
             const elem = document.querySelector('#modalNewAuditoria');
             const instance = M.Modal.getInstance(elem);

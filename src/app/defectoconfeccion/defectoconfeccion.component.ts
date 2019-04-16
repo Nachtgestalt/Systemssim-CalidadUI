@@ -3,7 +3,7 @@ import { Globals } from '../Globals';
 declare var $: any;
 declare var jQuery: any;
 import 'jquery';
-import { ToastrService } from '../../../node_modules/ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-defectoconfeccion',
@@ -47,7 +47,7 @@ export class DefectoconfeccionComponent implements OnInit {
           for (let i = 0; i < json.Vst_Confeccion.length; i++) {
             sOptions += '<tr>';
             // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(' + json.Vst_Confeccion[i].ID + '); DisposeEditDefectoConfeccion(); GetInfoDefectoConfeccion();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditDefectoConfeccion" data-position="bottom" data-tooltip="Edita el defecto confección seleccionado"><i class="material-icons right">edit</i></a></td>';
+            sOptions += '<td><a onclick="SetId(' + json.Vst_Confeccion[i].ID + '); DisposeEditDefectoConfeccion(); GetInfoDefectoConfeccion();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditDefectoConfeccion" data-position="bottom" data-tooltip="Edita el defecto confección seleccionado"><i class="material-icons right">edit</i></a></td>';
             sOptions += '<td>' + index + '</td>';
             sOptions += '<td>' + json.Vst_Confeccion[i].Clave + '</td>';
             sOptions += '<td>' + json.Vst_Confeccion[i].Nombre + '</td>';

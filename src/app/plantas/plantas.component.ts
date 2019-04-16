@@ -3,7 +3,7 @@ import { Globals } from '../Globals';
 declare var $: any;
 declare var jQuery: any;
 import 'jquery';
-import { ToastrService } from '../../../node_modules/ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-plantas',
@@ -36,7 +36,7 @@ export class PlantasComponent implements OnInit {
           for (let i = 0; i < json.Vst_Plantas.length; i++) {
             sOptions += '<tr>';
             // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(' + '&#39;' + json.Vst_Plantas[i].Planta + '&#39;' + '); " class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalRelacionArea" data-position="bottom" data-tooltip="Modifica la relación entre áreas y plantas"><i class="material-icons right">edit</i></a></td>';
+            sOptions += '<td><a onclick="SetId(' + '&#39;' + json.Vst_Plantas[i].Planta + '&#39;' + ') " class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalRelacionArea" data-position="bottom" data-tooltip="Modifica la relación entre áreas y plantas"><i class="material-icons right">edit</i></a></td>';
             sOptions += '<td>' + Index + '</td>';
             sOptions += '<td>' + json.Vst_Plantas[i].Planta + '</td>';
             sOptions += '<td>' + json.Vst_Plantas[i].Descripcion + '</td>';

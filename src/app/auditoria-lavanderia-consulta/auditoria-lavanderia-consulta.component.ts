@@ -49,7 +49,7 @@ export class AuditoriaLavanderiaConsultaComponent implements OnInit {
   constructor(private _clientesService: ClientesService,
               private _lavanderiaService: LavanderiaService,
               private _reporteService: ReportesService,
-              private domSanitizer: DomSanitizer,) {
+              private domSanitizer: DomSanitizer) {
   }
 
   ngOnInit() {

@@ -3,7 +3,7 @@ import { Globals } from '../Globals';
 declare var $: any;
 declare var jQuery: any;
 import 'jquery';
-import { ToastrService } from '../../../node_modules/ngx-toastr';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-toleranciacorte',
@@ -38,7 +38,7 @@ export class ToleranciacorteComponent implements OnInit {
           for (let index = 0; index < json.Tolerancias.length; index++) {
             sOptions += '<tr>';
             // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="javascript: SetId(' + json.Tolerancias[index].IdTolerancia + '); GetToleranciaById();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEdtTolerancia" data-position="bottom" data-tooltip="Muestra los detalles del registro seleccionado"><i class="material-icons right">search</i></a></td>';
+            sOptions += '<td><a onclick="SetId(' + json.Tolerancias[index].IdTolerancia + '); GetToleranciaById();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEdtTolerancia" data-position="bottom" data-tooltip="Muestra los detalles del registro seleccionado"><i class="material-icons right">search</i></a></td>';
             sOptions += '<td>' + contador + '</td>';
             sOptions += '<td>' + json.Tolerancias[index].Descripcion + '</td>';
             if (json.Tolerancias[index].ToleranciaPositiva) {
