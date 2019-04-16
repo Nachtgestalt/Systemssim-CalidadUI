@@ -80,4 +80,41 @@ export class CorteService {
     }
     return this._http.get(url, {headers, params});
   }
+
+  getDefecto(id) {
+    const url = `${this.URL_CORTADORES}/ObtieneInfoDefecto`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('ID', id);
+    return this._http.get(url, {headers, params});
+  }
+
+  createDefecto(payload) {
+    const url = `${this.URL_CORTADORES}/NuevoDefecto`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.post(url, JSON.stringify(payload), {headers});
+  }
+
+  updateDefecto(payload) {
+    const url = `${this.URL_CORTADORES}/ActualizaDefecto`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    // const params = new HttpParams().append('ID', id);
+    const body = JSON.stringify(payload);
+    return this._http.post(url, body, {headers});
+  }
+
+  inactivaActivaDefecto(id) {
+    const url = `${this.URL_CORTADORES}/ActivaInactivaDefecto`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('IdDefecto', id);
+    return this._http.get(url, {headers, params});
+  }
+
+  deleteDefecto(id) {
+    const url = `${this.URL_CORTADORES}/Defecto`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('IdDefecto', id);
+    // params = params.append('tipo', catalogo);
+    return this._http.delete(url, {headers, params});
+  }
+
 }

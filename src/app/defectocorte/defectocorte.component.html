@@ -5,7 +5,7 @@
         <i class="material-icons left">arrow_back</i>
       </button>
       &nbsp;&nbsp;
-      <button (click)="DisposeNewDefectoCortador()" class="btn tooltipped waves-effect waves-light modal-trigger"
+      <button (click)="reset()" class="btn tooltipped waves-effect waves-light modal-trigger"
               data-position="bottom" data-tooltip="Agrega un nuevo defecto cortador"
               data-target="modalNewDefectoCortador" type="button" name="btnAddDefectoCortador">Agregar
         <i class="material-icons right">send</i>
@@ -13,16 +13,18 @@
     </div>
   </div>
   <div class="row">
-    <form class="col s12">
+    <form class="col s12" [formGroup]="formFilter">
       <div class="row">
         <div class="input-field col s3">
           <i class="material-icons prefix">font_download</i>
-          <input id="CLAVE_CORTADOR" type="text" class="validate">
+          <input id="CLAVE_CORTADOR" type="text" class="validate"
+          formControlName="Clave">
           <label for="CLAVE_CORTADOR">Clave</label>
         </div>
         <div class="input-field col s3">
           <i class="material-icons prefix">account_box</i>
-          <input id="NOMBRE_CORTADOR" type="text" class="validate">
+          <input id="NOMBRE_CORTADOR" type="text" class="validate"
+          formControlName="Nombre">
           <label for="NOMBRE_CORTADOR">Nombre</label>
         </div>
         <div class="col s6" style="text-align: right">
@@ -34,7 +36,8 @@
         </div>
       </div>
       <div class="row">
-        <table id="tlbDefectoCortadores" class="row-border hover">
+        <table id="tlbDefectoCortadores" class="row-border hover"
+               datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
           <thead>
           <tr>
             <th></th>
@@ -46,11 +49,10 @@
           </tr>
           </thead>
           <tbody>
-          <tr>
           <tr *ngFor="let defecto of defectos; let i = index" matTooltip="Doble click para eliminar"
               (dblclick)="eliminar(defecto)">
             <td>
-              <button class="btn modal-trigger" data-target="modalEditCortador"
+              <button class="btn modal-trigger" data-target="modalEditDefectoCortador"
                       matTooltip="Editar"
                       [disabled]="defecto.Activo === false"
                       (click)="getDetalle(defecto)">
@@ -79,42 +81,36 @@
 <div id="modalNewDefectoCortador" class="modal modal-fixed-footer">
   <div class="modal-content">
     <h4>Nuevo Defecto</h4>
-    <form class="col s12">
+    <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s6">
           <i class="material-icons prefix">account_box</i>
-          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate">
+          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate"
+                 formControlName="Clave">
           <label for="CVE_NEW_CORTADOR">Clave</label>
         </div>
         <div class="input-field col s6">
           <i class="material-icons prefix">account_circle</i>
-          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate">
+          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate"
+                 formControlName="Nombre">
           <label for="NOMBRE_NEW_CORTADOR">Nombre:</label>
         </div>
       </div>
-      <!--      <div class="row">-->
-      <!--        <div class="input-field col s6">-->
-      <!--          <i class="material-icons prefix">font_download</i>-->
-      <!--          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate">-->
-      <!--          <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>-->
-      <!--        </div>-->
-      <!--        <div class="input-field col s6">-->
-      <!--          <i class="material-icons prefix">font_download</i>-->
-      <!--          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate">-->
-      <!--          <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>-->
-      <!--        </div>-->
-      <!--      </div>-->
       <div class="row">
         <label>Imagen Defecto</label>
-        <div class="file-field input-field">
-          <div class="btn">
-            <span>Buscar</span>
-            <input id="ImageDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
+      </div>
+      <div class="row">
+        <label class="image-upload-container btn btn-bwm">
+          <span>Selecciona imagen</span>
+          <input #imageInput
+                 type="file"
+                 accept="image/*"
+                 (change)="processFile(imageInput, true)">
+        </label>
+        <div *ngIf="selectedFile" class="img-preview-container">
+          <div class="img-preview"
+               [ngStyle]="{'background-image': 'url('+ selectedFile + ')'}">
           </div>
-          <div class="file-path-wrapper">
-            <input class="file-path validate" type="text" placeholder="Carga Archivo"/>
-          </div>
-          <img id="blah" src="http://placehold.it/180" alt="your image"/>
         </div>
       </div>
     </form>
@@ -134,44 +130,55 @@
 <div id="modalEditDefectoCortador" class="modal modal-fixed-footer">
   <div class="modal-content">
     <h4>Edita el Defecto en Cortador</h4>
-    <form class="col s12">
+    <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s4">
           <i class="material-icons prefix">account_box</i>
-          <input id="CVE_EDT_DEFECTO" name="CVE_EDT_DEFECTO" maxlength="10" type="text" class="validate">
+          <input id="CVE_EDT_DEFECTO" name="CVE_EDT_DEFECTO" maxlength="10" type="text" class="validate"
+          formControlName="Clave">
           <label class="active" for="CVE_EDT_DEFECTO">Clave</label>
         </div>
         <div class="input-field col s4">
           <i class="material-icons prefix">account_circle</i>
-          <input id="NOMBRE_EDT_DEFECTO" name="NOMBRE_EDT_DEFECTO" maxlength="150" type="text" class="validate">
+          <input id="NOMBRE_EDT_DEFECTO" name="NOMBRE_EDT_DEFECTO" maxlength="150" type="text" class="validate"
+          formControlName="Nombre">
           <label class="active" for="NOMBRE_EDT_DEFECTO">Nombre:</label>
         </div>
       </div>
-      <div class="row">
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="OBSERVACIONES_EDT_DEFECTO" name="OBSERVACIONES_EDT_DEFECTO" maxlength="10" type="text"
-                 class="validate">
-          <label class="active" for="OBSERVACIONES_EDT_DEFECTO">Obs.:</label>
-        </div>
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="DESCRIPCION_EDT_DEFECTO" name="DESCRIPCION_EDT_DEFECTO" maxlength="250" type="text"
-                 class="validate">
-          <label class="active" for="DESCRIPCION_EDT_DEFECTO">Descripcion:</label>
-        </div>
-      </div>
+      <!--      <div class="row">-->
+      <!--        <div class="input-field col s6">-->
+      <!--          <i class="material-icons prefix">font_download</i>-->
+      <!--          <input id="OBSERVACIONES_EDT_DEFECTO" name="OBSERVACIONES_EDT_DEFECTO" maxlength="10" type="text"-->
+      <!--                 class="validate">-->
+      <!--          <label class="active" for="OBSERVACIONES_EDT_DEFECTO">Obs.:</label>-->
+      <!--        </div>-->
+      <!--        <div class="input-field col s6">-->
+      <!--          <i class="material-icons prefix">font_download</i>-->
+      <!--          <input id="DESCRIPCION_EDT_DEFECTO" name="DESCRIPCION_EDT_DEFECTO" maxlength="250" type="text"-->
+      <!--                 class="validate">-->
+      <!--          <label class="active" for="DESCRIPCION_EDT_DEFECTO">Descripcion:</label>-->
+      <!--        </div>-->
+      <!--      </div>-->
       <div class="row">
         <label>Imagen Defecto</label>
-        <div class="file-field input-field" id="divImagen">
-          <div class="btn">
-            <span>Buscar</span>
-            <input id="ImageDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
-          </div>
-          <div class="file-path-wrapper">
-            <input class="file-path validate" type="text" placeholder="Carga Archivo"/>
-          </div>
+      </div>
+      <div class="row">
+        <label class="image-upload-container btn btn-bwm">
+          <span>Selecciona imagen</span>
+          <input #imageInput2
+                 type="file"
+                 accept="image/*"
+                 (change)="processFile(imageInput2, false)">
+        </label>
 
+        <div class="img-preview-container" *ngIf="noMostrar">
+          <img alt="Imagen defecto" [src]="selectedFileEdit" width="400" height="400">
+        </div>
+
+        <div *ngIf="selectedFile" class="img-preview-container">
+          <div class="img-preview{{selectedFile === 'fail' ? '-error' : ''}}"
+               [ngStyle]="{'background-image': 'url('+ selectedFile + ')'}">
+          </div>
         </div>
       </div>
     </form>
