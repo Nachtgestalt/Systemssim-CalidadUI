@@ -1,117 +1,178 @@
-import { Component, OnInit } from '@angular/core';
-import { Globals } from '../Globals';
-declare var $: any;
-declare var jQuery: any;
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import 'jquery';
-import { ToastrService } from 'ngx-toastr';
+import {ToastrService} from 'ngx-toastr';
+import {DataTableDirective} from 'angular-datatables';
+import {Subject} from 'rxjs';
+import {CorteService} from '../services/corte/corte.service';
+import swal from 'sweetalert';
+import {FormControl, FormGroup} from '@angular/forms';
+
+declare var $: any;
 
 @Component({
   selector: 'app-corte',
   templateUrl: './corte.component.html',
   styleUrls: ['./corte.component.css']
 })
-export class CorteComponent implements OnInit {
+export class CorteComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild(DataTableDirective) dtElement: DataTableDirective;
+  private json_usuario = JSON.parse(sessionStorage.getItem('currentUser'));
+  dtOptions = {
+    language: {
+      processing: 'Procesando...',
+      search: 'Buscar:',
+      lengthMenu: 'Mostrar _MENU_ elementos',
+      info: '_START_ - _END_ de _TOTAL_ elementos',
+      infoEmpty: 'Mostrando ningún elemento.',
+      infoFiltered: '(filtrado _MAX_ elementos total)',
+      infoPostFix: '',
+      loadingRecords: 'Cargando registros...',
+      zeroRecords: 'No se encontraron registros',
+      emptyTable: 'No hay datos disponibles en la tabla',
+      paginate: {
+        first: 'Primero',
+        previous: 'Anterior',
+        next: 'Siguiente',
+        last: 'Último'
+      },
+    }
+  };
 
-  constructor(
-    private _toast: ToastrService
-  ) { }
+  cortadores = [];
+
+  dtTrigger: Subject<any> = new Subject();
+
+  form: FormGroup;
+  formFilter: FormGroup;
+
+  constructor(private _toast: ToastrService,
+              private _cortadoresService: CorteService) {
+  }
 
   ngOnInit() {
     $('.tooltipped').tooltip();
     $('#modalNewCortador').modal();
-    $('#modalEditDeCortador').modal();
+    $('#modalEditCortador').modal();
     $('#modalEnableCortador').modal();
     $('#lblModulo').text('Corte - Cortadores');
-    this.GetCortadores();
+    this.initFormFilterGroup();
+    this.initFormGroup();
+    this.obtenerCortadores();
   }
 
-  GetCortadores() {
-    let sOptions = '';
-    let _request = '';
-    if ($('#CLAVE_CORTADOR').val() !== '' && $('#NOMBRE_CORTADOR').val() === '') {
-      _request += '?Clave=' +  $('#CLAVE_CORTADOR').val();
-    } else if ($('#NOMBRE_CORTADOR').val() !== '' && $('#CLAVE_CORTADOR').val() === '') {
-      _request += '?Nombre=' +  $('#NOMBRE_CORTADOR').val();
-    } else {
-      _request += '?Nombre=' +  $('#NOMBRE_CORTADOR').val() + '?Clave=' +  $('#CLAVE_CORTADOR').val();
-    }
-    $.ajax({
-      url: Globals.UriRioSulApi + 'Cortadores/ObtieneCortadores' + _request,
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          let index = 1;
-          for (let i = 0; i < json.Vst_Cortadores.length; i++) {
-            sOptions += '<tr>';
-            // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="SetId(' + json.Vst_Cortadores[i].ID + '); DisposeEditCortadores(); GetInfoCortador();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditCortador" data-position="bottom" data-tooltip="Edita el cortador seleccionado"><i class="material-icons right">edit</i></a></td>';
-            sOptions += '<td>' + index + '</td>';
-            sOptions += '<td>' + json.Vst_Cortadores[i].Clave + '</td>';
-            sOptions += '<td>' + json.Vst_Cortadores[i].Nombre + '</td>';
-            if (json.Vst_Cortadores[i].Activo) {
-              sOptions += '<td style="text-align: center">SI</td>';
-            } else {
-              sOptions += '<td style="text-align: center">NO</td>';
-            }
-            if (json.Vst_Cortadores[i].Activo === true) {
-              // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Cortadores[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableCortador" data-tooltiped="Activa / Inactiva el cortador seleccionado"><strong><u>Inactivar</u></strong></a></td>';
-            } else {
-              // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Cortadores[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableCortador" data-tooltiped="Activa / Inactiva el cortador seleccionado"><strong><u>Activar</u></strong></a></td>';
-            }
-            sOptions += '</tr>';
-            index ++;
-          }
-          $('#tlbCortadores').html('');
-          $('#tlbCortadores').html('<tbody>' + sOptions + '</tbody>');
-          // tslint:disable-next-line:max-line-length
-          $('#tlbCortadores').append('<thead><th></th><th>No.</th><th>Clave Cortador</th><th>Nombre Cortador</th><th>Estatus</th><th></th></thead>');
-          $('#tlbCortadores').DataTable({
-            sorting: true,
-            bDestroy: true,
-            ordering: true,
-            bPaginate: true,
-            pageLength: 6,
-            bInfo: true,
-            dom: 'Bfrtip',
-            processing: true,
-            buttons: [
-              'copyHtml5',
-              'excelHtml5',
-              'csvHtml5',
-              'pdfHtml5'
-             ]
+  ngAfterViewInit(): void {
+    this.dtTrigger.next();
+  }
+
+  ngOnDestroy(): void {
+    // Do not forget to unsubscribe the event
+    this.dtTrigger.unsubscribe();
+  }
+
+  initFormGroup() {
+    this.form = new FormGroup({
+      'ID': new FormControl(),
+      'IdSubModulo': new FormControl(1),
+      'IdUsuario': new FormControl(this.json_usuario.ID),
+      'Clave': new FormControl(),
+      'Nombre': new FormControl(),
+      'Descripcion': new FormControl('a'),
+      'Observaciones': new FormControl('a')
+    });
+  }
+
+  initFormFilterGroup() {
+    this.formFilter = new FormGroup({
+      'Clave': new FormControl(''),
+      'Nombre': new FormControl('')
+    });
+  }
+
+  obtenerCortadores() {
+    this._cortadoresService.listCortadores(this.formFilter.controls['Clave'].value, this.formFilter.controls['Nombre'].value)
+      .subscribe(
+      (cortadores: any) => {
+        console.log(cortadores);
+        if (cortadores.Message.IsSuccessStatusCode) {
+          this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+            // Destroy the table first
+            dtInstance.destroy();
+            this.cortadores = cortadores.Vst_Cortadores;
+            // Call the dtTrigger to rerender again
+            this.dtTrigger.next();
           });
-          $('.tooltipped').tooltip();
         }
       },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
+      error => {
+        console.log(error);
+        this._toast.error('No se pudo establecer conexión a la base de datos', '');
       }
-    });
+    );
   }
 
-  GetEnabledCortador() {
-    $.ajax({
-      url: Globals.UriRioSulApi + 'Cortadores/ActivaInactivaCortador?Idcortador=' + $('#HDN_ID').val(),
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          $('#modalEnableCortador').modal('close');
+  getDetalle(cortador) {
+    this.reset();
+    this._cortadoresService.getCortador(cortador.ID)
+      .subscribe(
+        (res: any) => {
+          console.log(res);
+          this.form.patchValue(res.Vst_Cortador);
         }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
+      );
+  }
+
+  GetEnabledCortador(cortador) {
+    const options = {
+      text: '¿Estas seguro de modificar este cortador?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
       }
-    });
-    this.GetCortadores();
+    };
+    swal(options)
+      .then((willDelete) => {
+          if (willDelete) {
+            this._cortadoresService.inactivaActivaCortador(cortador.ID)
+              .subscribe(
+                (res: any) => {
+                  // console.log(res);
+                  if (res.Message.IsSuccessStatusCode) {
+                    this._toast.success('Cortador actualizado con exito', '');
+                    this.obtenerCortadores();
+                  }
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                }
+              );
+          }
+        }
+      );
+    // $.ajax({
+    //   url: Globals.UriRioSulApi + 'Cortadores/ActivaInactivaCortador?Idcortador=' + $('#HDN_ID').val(),
+    //   dataType: 'json',
+    //   contents: 'application/json; charset=utf-8',
+    //   method: 'get',
+    //   async: false,
+    //   success: function (json) {
+    //     if (json.Message.IsSuccessStatusCode) {
+    //       $('#modalEnableCortador').modal('close');
+    //     }
+    //   },
+    //   error: function () {
+    //     console.log('No se pudo establecer coneción a la base de datos');
+    //   }
+    // });
+    // this.obtenerCortadores();
   }
 
   NewCortador() {
@@ -119,126 +180,95 @@ export class CorteComponent implements OnInit {
       this._toast.warning('Se debe ingresar una clave de cortador', '');
     } else if ($('#NOMBRE_NEW_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de cortador', '');
-    } else if ($('#OBSERVACIONES_NEW_CORTADOR').val() === '') {
-      this._toast.warning('Se debe ingresar las observaciones del cortador', '');
     } else {
-      let Result = false;
-      $.ajax({
-        // tslint:disable-next-line:max-line-length
-        url: Globals.UriRioSulApi + 'Cortadores/ValidaCortadorSubModulo?SubModulo=1&Clave=' + $('#CVE_NEW_CORTADOR').val() + '&Nombre=' + $('#NOMBRE_NEW_CORTADOR').val(),
-        dataType: 'json',
-        contents: 'application/json; charset=utf-8',
-        method: 'get',
-        async: false,
-        success: function (json) {
-          if (json.Message.IsSuccessStatusCode) {
-            Result = json.Hecho;
-          }
-        },
-        error: function () {
-          console.log('No se pudo establecer conexión a la base de datos');
-        }
-      });
-      if (Result) {
-        let Mensaje = '';
-        const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
-        $.ajax({
-          url: Globals.UriRioSulApi + 'Cortadores/NuevoCortador',
-          type: 'POST',
-          contentType: 'application/json; charset=utf-8',
-          async: false,
-          data: JSON.stringify({
-            IdSubModulo: 1,
-            IdUsuario: Json_Usuario.ID,
-            Clave: $('#CVE_NEW_CORTADOR').val(),
-            Nombre: $('#NOMBRE_NEW_CORTADOR').val(),
-            Descripcion: $('#DESCRIPCION_NEW_CORTADOR').val(),
-            Observaciones: $('#OBSERVACIONES_NEW_CORTADOR').val()
-          }),
-          success: function (json) {
-            if (json.Message.IsSuccessStatusCode) {
-              Mensaje = 'Se agrego correctamente el cortador';
+      this._cortadoresService.createCortador(this.form.value)
+        .subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Se agrego correctamente el cortador', '');
+              $('#modalNewCortador').modal('close');
+              this.obtenerCortadores();
+            } else {
+              this._toast.warning('Algo salio mal', '');
             }
           },
-          error: function () {
-            console.log('No se pudo establecer conexión a la base de datos');
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           }
-        });
-        if (Mensaje !== '') {
-          this._toast.success(Mensaje, '');
-          $('#modalNewCortador').modal('close');
-        }
-      } else {
-        this._toast.warning('La clave de cortador ya se encuentra registrada en el sistema', '');
-      }
+        );
     }
   }
 
-  EditCortador() {
+  editCortador() {
     if ($('#CVE_EDT_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar una clave de cortador', '');
     } else if ($('#NOMBRE_EDT_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de cortador', '');
-    } else if ($('#OBSERVACIONES_EDT_CORTADOR').val() === '') {
-      this._toast.warning('Se debe ingresar las observaciones del cortador', '');
     } else {
-      let Result = false;
-      $.ajax({
-        // tslint:disable-next-line:max-line-length
-        url: Globals.UriRioSulApi + 'Cortadores/ValidaCortadorSubModulo?SubModulo=1&Clave=' + $('#CVE_EDT_CORTADOR').val() + '&Nombre=' + $('#NOMBRE_EDT_CORTADOR').val(),
-        dataType: 'json',
-        contents: 'application/json; charset=utf-8',
-        method: 'get',
-        async: false,
-        success: function (json) {
-          if (json.Message.IsSuccessStatusCode) {
-            Result = json.Hecho;
-          }
-        },
-        error: function () {
-          console.log('No se pudo establecer conexión a la base de datos');
-        }
-      });
-      if (Result) {
-        let Mensaje = '';
-        const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
-        $.ajax({
-          url: Globals.UriRioSulApi + 'Cortadores/ActualizaCortador',
-          type: 'POST',
-          contentType: 'application/json; charset=utf-8',
-          async: false,
-          data: JSON.stringify({
-            ID: $('#HDN_ID').val(),
-            IdUsuario: Json_Usuario.ID,
-            Clave: $('#CVE_EDT_CORTADOR').val(),
-            Nombre: $('#NOMBRE_EDT_CORTADOR').val(),
-            Descripcion: $('#DESCRIPCION_EDT_CORTADOR').val(),
-            Observaciones: $('#OBSERVACIONES_EDT_CORTADOR').val()
-          }),
-          success: function (json) {
-            if (json.Message.IsSuccessStatusCode) {
-              Mensaje = 'Se agrego correctamente el cortador';
+      this._cortadoresService.updateCortador(this.form.value)
+        .subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Se actualizo correctamente el cortador', '');
+              $('#modalEditCortador').modal('close');
+              this.obtenerCortadores();
+            } else {
+              this._toast.warning('Algo salio mal', '');
             }
           },
-          error: function () {
-            console.log('No se pudo establecer conexión a la base de datos');
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           }
-        });
-        if (Mensaje !== '') {
-          this._toast.success(Mensaje, '');
-          $('#modalEditCortador').modal('close');
-        }
-      } else {
-        this._toast.warning('La clave de cortador ya se encuentra registrada en el sistema', '');
-      }
+        );
     }
   }
 
-  DisposeNewCortador() {
-    $('#CLAVE_CORTADOR').val('');
-    $('#NOMBRE_CORTADOR').val('');
-    $('#DESCRIPCION_NEW_CORTADOR').val('');
-    $('#OBSERVACIONES_NEW_CORTADOR').val('');
+  eliminar(cortador) {
+    console.log('eliminar: ', cortador);
+    swal({
+      text: '¿Estas seguro de eliminar este cortador?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._cortadoresService.deleteCortador(cortador.ID)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Cortador eliminado con exito', '');
+                  this.obtenerCortadores();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
+  }
+
+  reset() {
+    this.initFormGroup();
   }
 
 }

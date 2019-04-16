@@ -19,7 +19,7 @@
       <div class="row">
         <div class="input-field col s3">
           <i class="material-icons prefix">font_download</i>
-          <input id="CLAVE_CORTADOR" type="text" class="validate" (keyup)="applyFilter($event.target.value)">
+          <input id="CLAVE_CORTADOR" type="text" class="validate">
           <label for="CLAVE_CORTADOR">Clave</label>
         </div>
         <div class="col s9" style="text-align: right">
@@ -369,7 +369,7 @@
 <!-- MODAL EDITAR AUDITORIA -->
 <div style="width: 80%" id="modalEditCategoria" class="modal modal-fixed-footer modal-lg">
   <div class="modal-content">
-    <h4>Auditoría Calidad - {{otDetalle?.IdAuditoria}}</h4>
+    <h4>Auditoría Terminado - {{otDetalle?.IdAuditoria}}</h4>
     <div class="row">
       <div class="input-field col s4">
         <i class="material-icons prefix">details</i>

@@ -5,7 +5,9 @@
         <i class="material-icons left">arrow_back</i>
       </button>
       &nbsp;&nbsp;
-      <button (click)="DisposeNewDefectoCortador()" class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega un nuevo defecto cortador" data-target="modalNewDefectoCortador" type="button" name="btnAddDefectoCortador">Agregar
+      <button (click)="DisposeNewDefectoCortador()" class="btn tooltipped waves-effect waves-light modal-trigger"
+              data-position="bottom" data-tooltip="Agrega un nuevo defecto cortador"
+              data-target="modalNewDefectoCortador" type="button" name="btnAddDefectoCortador">Agregar
         <i class="material-icons right">send</i>
       </button>
     </div>
@@ -24,7 +26,9 @@
           <label for="NOMBRE_CORTADOR">Nombre</label>
         </div>
         <div class="col s6" style="text-align: right">
-          <button (click)="GetDefectosCortadores()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar los defectos por cortadores por filtro seleccionado" type="button" name="btnSearchDefectoCortadores">Buscar
+          <button (click)="obtenerDefectos()" class="btn tooltipped waves-effect waves-light" data-position="bottom"
+                  data-tooltip="Consultar los defectos por cortadores por filtro seleccionado" type="button"
+                  name="btnSearchDefectoCortadores">Buscar
             <i class="material-icons right">search</i>
           </button>
         </div>
@@ -32,16 +36,42 @@
       <div class="row">
         <table id="tlbDefectoCortadores" class="row-border hover">
           <thead>
+          <tr>
             <th></th>
+            <th>No.</th>
             <th>Clave Defecto</th>
             <th>Nombre Defecto</th>
             <th>Estatus</th>
             <th></th>
+          </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+          <tr>
+          <tr *ngFor="let defecto of defectos; let i = index" matTooltip="Doble click para eliminar"
+              (dblclick)="eliminar(defecto)">
+            <td>
+              <button class="btn modal-trigger" data-target="modalEditCortador"
+                      matTooltip="Editar"
+                      [disabled]="defecto.Activo === false"
+                      (click)="getDetalle(defecto)">
+                <i class="material-icons center">edit</i>
+              </button>
+            </td>
+            <td>{{i + 1}}</td>
+            <td>{{defecto.Clave}}</td>
+            <td>{{defecto.Nombre}}</td>
+            <td>{{defecto.Activo ? 'SI' : 'NO'}}</td>
+            <td class="center-align">
+              <a class="btn bold_sub"
+                 (click)="GetEnabledDefectoCortador(defecto)">
+                <u>{{defecto.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u>
+              </a>
+            </td>
+          </tr>
+          </tbody>
         </table>
       </div>
-      <br />
+      <br/>
     </form>
   </div>
 </div>
@@ -51,40 +81,40 @@
     <h4>Nuevo Defecto</h4>
     <form class="col s12">
       <div class="row">
-        <div class="input-field col s4">
+        <div class="input-field col s6">
           <i class="material-icons prefix">account_box</i>
           <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate">
           <label for="CVE_NEW_CORTADOR">Clave</label>
         </div>
-        <div class="input-field col s4">
+        <div class="input-field col s6">
           <i class="material-icons prefix">account_circle</i>
           <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate">
           <label for="NOMBRE_NEW_CORTADOR">Nombre:</label>
         </div>
       </div>
+      <!--      <div class="row">-->
+      <!--        <div class="input-field col s6">-->
+      <!--          <i class="material-icons prefix">font_download</i>-->
+      <!--          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate">-->
+      <!--          <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>-->
+      <!--        </div>-->
+      <!--        <div class="input-field col s6">-->
+      <!--          <i class="material-icons prefix">font_download</i>-->
+      <!--          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate">-->
+      <!--          <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>-->
+      <!--        </div>-->
+      <!--      </div>-->
       <div class="row">
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate">
-          <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>
-        </div>
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate">
-          <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>
-        </div>
-      </div>
-      <div class = "row">
         <label>Imagen Defecto</label>
         <div class="file-field input-field">
-           <div class="btn">
-              <span>Buscar</span>
-              <input id="ImageDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
-           </div>
-           <div class="file-path-wrapper">
-              <input class="file-path validate" type="text" placeholder="Carga Archivo" />
-           </div>
-           <img id="blah" src="http://placehold.it/180" alt="your image" />
+          <div class="btn">
+            <span>Buscar</span>
+            <input id="ImageDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text" placeholder="Carga Archivo"/>
+          </div>
+          <img id="blah" src="http://placehold.it/180" alt="your image"/>
         </div>
       </div>
     </form>
@@ -120,26 +150,28 @@
       <div class="row">
         <div class="input-field col s6">
           <i class="material-icons prefix">font_download</i>
-          <input id="OBSERVACIONES_EDT_DEFECTO" name="OBSERVACIONES_EDT_DEFECTO" maxlength="10" type="text" class="validate">
+          <input id="OBSERVACIONES_EDT_DEFECTO" name="OBSERVACIONES_EDT_DEFECTO" maxlength="10" type="text"
+                 class="validate">
           <label class="active" for="OBSERVACIONES_EDT_DEFECTO">Obs.:</label>
         </div>
         <div class="input-field col s6">
           <i class="material-icons prefix">font_download</i>
-          <input id="DESCRIPCION_EDT_DEFECTO" name="DESCRIPCION_EDT_DEFECTO" maxlength="250" type="text" class="validate">
+          <input id="DESCRIPCION_EDT_DEFECTO" name="DESCRIPCION_EDT_DEFECTO" maxlength="250" type="text"
+                 class="validate">
           <label class="active" for="DESCRIPCION_EDT_DEFECTO">Descripcion:</label>
         </div>
       </div>
-      <div class = "row">
+      <div class="row">
         <label>Imagen Defecto</label>
         <div class="file-field input-field" id="divImagen">
-           <div class="btn">
-              <span>Buscar</span>
-              <input id="ImageDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
-           </div>
-           <div class="file-path-wrapper">
-              <input class="file-path validate" type="text" placeholder="Carga Archivo" />
-           </div>
-           
+          <div class="btn">
+            <span>Buscar</span>
+            <input id="ImageDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
+          </div>
+          <div class="file-path-wrapper">
+            <input class="file-path validate" type="text" placeholder="Carga Archivo"/>
+          </div>
+
         </div>
       </div>
     </form>
@@ -151,25 +183,6 @@
       </div>
       <div class="col s6" style="text-align: right">
         <a (click)="EditDefectoCortador()" class="waves-effect waves-green btn-flat">Aceptar</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Update Enabled Cortador -->
-<div id="modalEnableDefectoCortador" class="modal">
-  <div class="modal-content">
-    <div style="text-align: center">
-      <p>¿Realmente deseas activar o desactivar el defecto cortador?</p>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <div class="row">
-      <div class="col s6" style="text-align: left">
-        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
-      </div>
-      <div class="col s6" style="text-align: right">
-        <a (click)="GetEnabledDefectoCortador();" class="waves-effect waves-green btn-flat">Aceptar</a>
       </div>
     </div>
   </div>
