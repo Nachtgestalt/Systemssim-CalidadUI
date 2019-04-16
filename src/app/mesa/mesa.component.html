@@ -5,7 +5,8 @@
         <i class="material-icons left">arrow_back</i>
       </button>
       &nbsp;&nbsp;
-      <button (click)="DisposeNewMesa()" class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega una nueva Mesa" data-target="modalNewMesa" type="button" name="btnAddMesa">Agregar
+      <button (click)="reset()" class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom"
+              data-tooltip="Agrega una nueva Mesa" data-target="modalNewMesa" type="button" name="btnAddMesa">Agregar
         <i class="material-icons right">send</i>
       </button>
     </div>
@@ -24,54 +25,71 @@
           <label for="NOMBRE_CORTADOR">Nombre</label>
         </div>
         <div class="col s6" style="text-align: right">
-          <button (click)="GetMesa()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar los cortadores por mesa " type="button" name="btnSearchMesa">Buscar
+          <button (click)="obtenerMesas()" class="btn tooltipped waves-effect waves-light" data-position="bottom"
+                  data-tooltip="Consultar los cortadores por mesa " type="button" name="btnSearchMesa">Buscar
             <i class="material-icons right">search</i>
           </button>
         </div>
       </div>
       <div class="row">
-        <table id="tlbMesa" class="row-border hover">
+        <table id="tlbDefectoCortadores" class="row-border hover"
+               datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
           <thead>
+          <tr>
             <th></th>
-            <th>Clave Mesa</th>
-            <th>Nombre Mesa</th>
+            <th>No.</th>
+            <th>Clave Defecto</th>
+            <th>Nombre Defecto</th>
             <th>Estatus</th>
             <th></th>
+          </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+          <tr *ngFor="let mesa of mesas; let i = index" matTooltip="Doble click para eliminar"
+              (dblclick)="eliminar(mesa)">
+            <td>
+              <button class="btn modal-trigger" data-target="modalEditMesa"
+                      matTooltip="Editar"
+                      [disabled]="mesa.Activo === false"
+                      (click)="getDetalle(mesa)">
+                <i class="material-icons center">edit</i>
+              </button>
+            </td>
+            <td>{{i + 1}}</td>
+            <td>{{mesa.Clave}}</td>
+            <td>{{mesa.Nombre}}</td>
+            <td>{{mesa.Activo ? 'SI' : 'NO'}}</td>
+            <td class="center-align">
+              <a class="btn bold_sub"
+                 (click)="GetEnabledMesa(mesa)">
+                <u>{{mesa.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u>
+              </a>
+            </td>
+          </tr>
+          </tbody>
         </table>
       </div>
-      <br />
+      <br/>
     </form>
   </div>
 </div>
 
-<div id="modalNewMesa" class="modal modal-fixed-footer">
+<div id="modalNewMesa" class="modal modal-fixed-footer" style="width: 40%; height: 40%;">
   <div class="modal-content">
-    <h4>Nuevo Cortador por Mesa</h4>
-    <form class="col s12">
+    <h4>Nueva Mesa</h4>
+    <form class="col s12" [formGroup]="form">
       <div class="row">
-        <div class="input-field col s4">
+        <div class="input-field col s6">
           <i class="material-icons prefix">account_box</i>
-          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate">
+          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate"
+                 formControlName="Clave">
           <label for="CVE_NEW_CORTADOR">Clave</label>
         </div>
-        <div class="input-field col s4">
+        <div class="input-field col s6">
           <i class="material-icons prefix">account_circle</i>
-          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate">
+          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate"
+                 formControlName="Nombre">
           <label for="NOMBRE_NEW_CORTADOR">Nombre:</label>
-        </div>
-      </div>
-      <div class="row">
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate">
-          <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>
-        </div>
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate">
-          <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>
         </div>
       </div>
     </form>
@@ -88,32 +106,22 @@
   </div>
 </div>
 
-<div id="modalEditMesa" class="modal modal-fixed-footer">
+<div id="modalEditMesa" class="modal modal-fixed-footer" style="width: 40%; height: 40%">
   <div class="modal-content">
     <h4>Edita el Cortador por Mesa</h4>
-    <form class="col s12">
+    <form class="col s12" [formGroup]="form">
       <div class="row">
-        <div class="input-field col s4">
+        <div class="input-field col s6">
           <i class="material-icons prefix">account_box</i>
-          <input id="CVE_EDT_MESA" maxlength="10" type="text" class="validate">
+          <input id="CVE_EDT_MESA" maxlength="10" type="text" class="validate"
+                 formControlName="Clave">
           <label class="active" for="CVE_EDT_MESA">Clave</label>
         </div>
-        <div class="input-field col s4">
+        <div class="input-field col s6">
           <i class="material-icons prefix">account_circle</i>
-          <input id="NOMBRE_EDT_MESA" maxlength="150" type="text" class="validate">
+          <input id="NOMBRE_EDT_MESA" maxlength="150" type="text" class="validate"
+                 formControlName="Nombre">
           <label class="active" for="NOMBRE_EDT_MESA">Nombre:</label>
-        </div>
-      </div>
-      <div class="row">
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="OBSERVACIONES_EDT_MESA" maxlength="10" type="text" class="validate">
-          <label class="active" for="OBSERVACIONES_EDT_MESA">Obs.:</label>
-        </div>
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="DESCRIPCION_EDT_MESA" maxlength="250" type="text" class="validate">
-          <label class="active" for="DESCRIPCION_EDT_MESA">Descripcion:</label>
         </div>
       </div>
     </form>
@@ -124,26 +132,8 @@
         <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
       </div>
       <div class="col s6" style="text-align: right">
-        <a class="waves-effect waves-green btn-flat">Aceptar</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Update Enabled Cortador -->
-<div id="modalEnableMesa" class="modal">
-  <div class="modal-content">
-    <div style="text-align: center">
-      <p>¿Realmente deseas activar o desactivar el cortador por mesa?</p>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <div class="row">
-      <div class="col s6" style="text-align: left">
-        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
-      </div>
-      <div class="col s6" style="text-align: right">
-        <a (click)="GetEnabledMesa();" class="waves-effect waves-green btn-flat">Aceptar</a>
+        <a class="waves-effect waves-green btn-flat"
+        (click)="EditMesa()">Aceptar</a>
       </div>
     </div>
   </div>

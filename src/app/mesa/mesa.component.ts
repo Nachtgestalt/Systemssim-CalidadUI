@@ -1,20 +1,54 @@
-import { Component, OnInit } from '@angular/core';
-import { Globals } from '../Globals';
-declare var $: any;
-declare var jQuery: any;
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Globals} from '../Globals';
 import 'jquery';
-import { ToastrService } from 'ngx-toastr';
+import {ToastrService} from 'ngx-toastr';
+import {DataTableDirective} from 'angular-datatables';
+import {Subject} from 'rxjs';
+import {FormControl, FormGroup} from '@angular/forms';
+import {CorteService} from '../services/corte/corte.service';
+import swal from 'sweetalert';
+
+declare var $: any;
 
 @Component({
   selector: 'app-mesa',
   templateUrl: './mesa.component.html',
   styleUrls: ['./mesa.component.css']
 })
-export class MesaComponent implements OnInit {
+export class MesaComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild(DataTableDirective) dtElement: DataTableDirective;
+  dtTrigger: Subject<any> = new Subject();
+  private json_usuario = JSON.parse(sessionStorage.getItem('currentUser'));
+  dtOptions = {
+    language: {
+      processing: 'Procesando...',
+      search: 'Buscar:',
+      lengthMenu: 'Mostrar _MENU_ elementos',
+      info: '_START_ - _END_ de _TOTAL_ elementos',
+      infoEmpty: 'Mostrando ningún elemento.',
+      infoFiltered: '(filtrado _MAX_ elementos total)',
+      infoPostFix: '',
+      loadingRecords: 'Cargando registros...',
+      zeroRecords: 'No se encontraron registros',
+      emptyTable: 'No hay datos disponibles en la tabla',
+      paginate: {
+        first: 'Primero',
+        previous: 'Anterior',
+        next: 'Siguiente',
+        last: 'Último'
+      },
+    }
+  };
+
+  mesas = [];
+  form: FormGroup;
+  formFilter: FormGroup;
 
   constructor(
+    private _cortadoresService: CorteService,
     private _toast: ToastrService
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
     $('.tooltipped').tooltip();
@@ -22,80 +56,106 @@ export class MesaComponent implements OnInit {
     $('#modalEditMesa').modal();
     $('#modalEnableMesa').modal();
     $('#lblModulo').text('Corte - # Mesa');
-    this.GetMesa();
+    this.initFormFilterGroup();
+    this.initFormGroup();
+    this.obtenerMesas();
   }
 
-  GetMesa() {
-    let sOptions = '';
-    let _request = '';
-    if ($('#CLAVE_CORTADOR').val() !== '' && $('#NOMBRE_CORTADOR').val() === '') {
-      _request += '?Clave=' +  $('#CLAVE_CORTADOR').val();
-    } else if ($('#NOMBRE_CORTADOR').val() !== '' && $('#CLAVE_CORTADOR').val() === '') {
-      _request += '?Nombre=' +  $('#NOMBRE_CORTADOR').val();
-    } else {
-      _request += '?Nombre=' +  $('#NOMBRE_CORTADOR').val() + '?Clave=' +  $('#CLAVE_CORTADOR').val();
-    }
-    $.ajax({
-      url: Globals.UriRioSulApi + 'Cortadores/ObtieneMesa' + _request,
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          let index = 1;
-          for (let i = 0; i < json.Vst_Cortadores.length; i++) {
-            sOptions += '<tr>';
-            // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="SetId(' + json.Vst_Cortadores[i].ID + '); DisposeEditMesa(); GetInfoMesa();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditMesa" data-position="bottom" data-tooltip="Edita la mesa seleccionada"><i class="material-icons right">edit</i></a></td>';
-            sOptions += '<td>' + index + '</td>';
-            sOptions += '<td>' + json.Vst_Cortadores[i].Clave + '</td>';
-            sOptions += '<td>' + json.Vst_Cortadores[i].Nombre + '</td>';
-            if (json.Vst_Cortadores[i].Activo) {
-              sOptions += '<td style="text-align: center">SI</td>';
-            } else {
-              sOptions += '<td style="text-align: center">NO</td>';
-            }
-            if (json.Vst_Cortadores[i].Activo === true) {
-              // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Cortadores[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableMesa" data-tooltiped="Activa / Inactiva la mesa seleccionado"><strong><u>Inactivar</u></strong></a></td>';
-            } else {
-              // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Cortadores[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableMesa" data-tooltiped="Activa / Inactiva la mesa seleccionado"><strong><u>Activar</u></strong></a></td>';
-            }
-            sOptions += '</tr>';
-            index ++;
-          }
-          $('#tlbMesa').html('');
-          $('#tlbMesa').html('<tbody>' + sOptions + '</tbody>');
-          // tslint:disable-next-line:max-line-length
-          $('#tlbMesa').append('<thead><th></th><th>No.</th><th>Clave Mesa</th><th>Nombre Mesa</th><th>Estatus</th><th></th></thead>');
-          $('#tlbMesa').DataTable({
-            sorting: true,
-            bDestroy: true,
-            ordering: true,
-            bPaginate: true,
-            pageLength: 6,
-            bInfo: true,
-            dom: 'Bfrtip',
-            processing: true,
-            buttons: [
-              'copyHtml5',
-              'excelHtml5',
-              'csvHtml5',
-              'pdfHtml5'
-             ]
-          });
-          $('.tooltipped').tooltip();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
+  ngAfterViewInit(): void {
+    this.dtTrigger.next();
+  }
+
+  ngOnDestroy(): void {
+    // Do not forget to unsubscribe the event
+    this.dtTrigger.unsubscribe();
+  }
+
+  initFormGroup() {
+    this.form = new FormGroup({
+      'ID': new FormControl(),
+      'IdSubModulo': new FormControl(1),
+      'IdUsuario': new FormControl(this.json_usuario.ID),
+      'Clave': new FormControl(),
+      'Nombre': new FormControl(),
+      'Descripcion': new FormControl('a'),
+      'Observaciones': new FormControl('a'),
+      'Imagen': new FormControl(),
     });
   }
 
-  GetEnabledMesa() {
+  initFormFilterGroup() {
+    this.formFilter = new FormGroup({
+      'Clave': new FormControl(''),
+      'Nombre': new FormControl('')
+    });
+  }
+
+  obtenerMesas() {
+    this._cortadoresService.listMesas(this.formFilter.controls['Clave'].value, this.formFilter.controls['Nombre'].value)
+      .subscribe(
+        (defectos: any) => {
+          console.log(defectos);
+          if (defectos.Message.IsSuccessStatusCode) {
+            this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+              // Destroy the table first
+              dtInstance.destroy();
+              this.mesas = defectos.Vst_Cortadores;
+              // Call the dtTrigger to rerender again
+              this.dtTrigger.next();
+            });
+          }
+        },
+        error => {
+          console.log(error);
+          this._toast.error('No se pudo establecer conexión a la base de datos', '');
+        }
+      );
+  }
+
+  getDetalle(defecto) {
+    this.reset();
+    this._cortadoresService.getMesa(defecto.ID)
+      .subscribe(
+        (res: any) => {
+          console.log(res);
+          this.form.patchValue(res.Vst_Cortador);
+        }
+      );
+  }
+
+  GetEnabledMesa(mesa) {
+    const options = {
+      text: '¿Estas seguro de modificar esta mesa?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    };
+    swal(options)
+      .then((willDelete) => {
+        if (willDelete) {
+          this._cortadoresService.inactivaActivaDefecto(mesa.ID)
+            .subscribe(
+              res => {
+                console.log(res);
+                this._toast.success('Mesa actualizada con exito', '');
+                this.obtenerMesas();
+              },
+              error => {
+                console.log(error);
+                this._toast.error('No se pudo establecer conexión a la base de datos', '');
+              }
+            );
+        }
+      });
     $.ajax({
       url: Globals.UriRioSulApi + 'Cortadores/ActivaInactivaMesa?IdMesa=' + $('#HDN_ID').val(),
       dataType: 'json',
@@ -111,7 +171,7 @@ export class MesaComponent implements OnInit {
         console.log('No se pudo establecer coneción a la base de datos');
       }
     });
-    this.GetMesa();
+    this.obtenerMesas();
   }
 
   NewMesa() {
@@ -119,58 +179,23 @@ export class MesaComponent implements OnInit {
       this._toast.warning('Se debe ingresar una clave de mesa', '');
     } else if ($('#NOMBRE_NEW_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de mesa', '');
-    } else if ($('#OBSERVACIONES_NEW_CORTADOR').val() === '') {
-      this._toast.warning('Se debe ingresar las observaciones del mesa', '');
     } else {
-      let Result = false;
-      $.ajax({
-        // tslint:disable-next-line:max-line-length
-        url: Globals.UriRioSulApi + 'Cortadores/ValidaMesaSubModulo?SubModulo=2&Clave=' + $('#CVE_NEW_CORTADOR').val() + '&Nombre=' + $('#NOMBRE_NEW_CORTADOR').val(),
-        dataType: 'json',
-        contents: 'application/json; charset=utf-8',
-        method: 'get',
-        async: false,
-        success: function (json) {
-          if (json.Message.IsSuccessStatusCode) {
-            Result = json.Hecho;
-          }
-        },
-        error: function () {
-          console.log('No se pudo establecer conexión a la base de datos');
-        }
-      });
-      if (Result) {
-        let Mensaje = '';
-        const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
-        $.ajax({
-          url: Globals.UriRioSulApi + 'Cortadores/NuevoMesa',
-          type: 'POST',
-          contentType: 'application/json; charset=utf-8',
-          async: false,
-          data: JSON.stringify({
-            IdSubModulo: 1,
-            IdUsuario: Json_Usuario.ID,
-            Clave: $('#CVE_NEW_CORTADOR').val(),
-            Nombre: $('#NOMBRE_NEW_CORTADOR').val(),
-            Descripcion: $('#DESCRIPCION_NEW_CORTADOR').val(),
-            Observaciones: $('#OBSERVACIONES_NEW_CORTADOR').val()
-          }),
-          success: function (json) {
-            if (json.Message.IsSuccessStatusCode) {
-              Mensaje = 'Se agrego correctamente el corte de mesa';
+      this._cortadoresService.createMesa(this.form.value)
+        .subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Se agrego correctamente la mesa', '');
+              $('#modalNewMesa').modal('close');
+              this.obtenerMesas();
+            } else {
+              this._toast.warning('Algo salio mal', '');
             }
           },
-          error: function () {
-            console.log('No se pudo establecer conexión a la base de datos');
-          }
-        });
-        if (Mensaje !== '') {
-          this._toast.success(Mensaje, '');
-          $('#modalNewMesa').modal('close');
-        }
-      } else {
-        this._toast.warning('La clave de mesa ya se encuentra registrada en el sistema', '');
-      }
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
+          });
     }
   }
 
@@ -179,66 +204,69 @@ export class MesaComponent implements OnInit {
       this._toast.warning('Se debe ingresar una clave de cortador de mesa', '');
     } else if ($('#NOMBRE_EDT_MESA').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de cortador de mesa', '');
-    } else if ($('#OBSERVACIONES_EDT_MESA').val() === '') {
-      this._toast.warning('Se debe ingresar las observaciones del cortador de mesa', '');
     } else {
-      let Result = false;
-      $.ajax({
-        // tslint:disable-next-line:max-line-length
-        url: Globals.UriRioSulApi + 'Cortadores/ValidaMesaSubModulo?SubModulo=4&Clave=' + $('#CVE_EDT_MESA').val() + '&Nombre=' + $('#NOMBRE_EDT_MESA').val(),
-        dataType: 'json',
-        contents: 'application/json; charset=utf-8',
-        method: 'get',
-        async: false,
-        success: function (json) {
-          if (json.Message.IsSuccessStatusCode) {
-            Result = json.Hecho;
-          }
-        },
-        error: function () {
-          console.log('No se pudo establecer conexión a la base de datos');
-        }
-      });
-      if (Result) {
-        let Mensaje = '';
-        const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
-        $.ajax({
-          url: Globals.UriRioSulApi + 'Cortadores/ActualizaMesa',
-          type: 'POST',
-          contentType: 'application/json; charset=utf-8',
-          async: false,
-          data: JSON.stringify({
-            ID: $('#HDN_ID').val(),
-            IdUsuario: Json_Usuario.ID,
-            Clave: $('#CVE_EDT_MESA').val(),
-            Nombre: $('#NOMBRE_EDT_MESA').val(),
-            Descripcion: $('#DESCRIPCION_EDT_MESA').val(),
-            Observaciones: $('#OBSERVACIONES_EDT_MESA').val()
-          }),
-          success: function (json) {
-            if (json.Message.IsSuccessStatusCode) {
-              Mensaje = 'Se agrego correctamente el corte de la mesa';
+      this._cortadoresService.updateMesa(this.form.value)
+        .subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Se actualizo correctamente la mesa', '');
+              $('#modalEditMesa').modal('close');
+              this.reset();
+              this.obtenerMesas();
+            } else {
+              this._toast.warning('Algo salio mal', '');
             }
           },
-          error: function () {
-            console.log('No se pudo establecer conexión a la base de datos');
-          }
-        });
-        if (Mensaje !== '') {
-          this._toast.success(Mensaje, '');
-          $('#modalEditMesa').modal('close');
-        }
-      } else {
-        this._toast.warning('La clave de corte de mesa ya se encuentra registrada en el sistema', '');
-      }
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
+          });
     }
   }
 
-  DisposeNewMesa() {
-    $('#CLAVE_CORTADOR').val('');
-    $('#NOMBRE_CORTADOR').val('');
-    $('#DESCRIPCION_NEW_CORTADOR').val('');
-    $('#OBSERVACIONES_NEW_CORTADOR').val('');
+  eliminar(defecto) {
+    console.log('eliminar: ', defecto);
+    swal({
+      text: '¿Estas seguro de eliminar esta mesa?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._cortadoresService.deleteMesa(defecto.ID)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Mesa eliminada con exito', '');
+                  this.obtenerMesas();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
+  }
+
+  reset() {
+    this.initFormGroup();
   }
 
 }
