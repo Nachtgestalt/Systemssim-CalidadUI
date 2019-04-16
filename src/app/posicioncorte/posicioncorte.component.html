@@ -5,7 +5,7 @@
         <i class="material-icons left">arrow_back</i>
       </button>
       &nbsp;&nbsp;
-      <button (click)="DisposeNewPosicionCortador()" class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega una nueva posición cortador" data-target="modalNewPosicionCortador" type="button" name="btnAddPosicionCortador">Agregar
+      <button (click)="openModalAgregar()" class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega una nueva posición cortador" data-target="modalNewPosicionCortador" type="button" name="btnAddPosicionCortador">Agregar
         <i class="material-icons right">send</i>
       </button>
     </div>
@@ -24,21 +24,47 @@
           <label for="NOMBRE_CORTADOR">Nombre</label>
         </div>
         <div class="col s6" style="text-align: right">
-          <button (click)="GetPosicionCortador()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar las posiciones po posición del cortador, filtro seleccionado" type="button" name="btnSearchPosicionCortador">Buscar
+          <button (click)="obtenerPosiciones()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar las posiciones po posición del cortador, filtro seleccionado" type="button" name="btnSearchPosicionCortador">Buscar
             <i class="material-icons right">search</i>
           </button>
         </div>
       </div>
       <div class="row">
-        <table id="tlbPosicionCortador" class="row-border hover">
+        <table id="tlbDefectoCortadores" class="row-border hover"
+               datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
           <thead>
+          <tr>
             <th></th>
-            <th>Clave Posición</th>
-            <th>Nombre Posición</th>
+            <th>No.</th>
+            <th>Clave Defecto</th>
+            <th>Nombre Defecto</th>
             <th>Estatus</th>
             <th></th>
+          </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+          <tr *ngFor="let posicion of posiciones; let i = index" matTooltip="Doble click para eliminar"
+              (dblclick)="eliminar(posicion)">
+            <td>
+              <button class="btn modal-trigger" data-target="modalEditDefectoCortador"
+                      matTooltip="Editar"
+                      [disabled]="posicion.Activo === false"
+                      (click)="getDetalle(posicion)">
+                <i class="material-icons center">edit</i>
+              </button>
+            </td>
+            <td>{{i + 1}}</td>
+            <td>{{posicion.Clave}}</td>
+            <td>{{posicion.Nombre}}</td>
+            <td>{{posicion.Activo ? 'SI' : 'NO'}}</td>
+            <td class="center-align">
+              <a class="btn bold_sub"
+                 (click)="GetEnabledPosicionCortador(posicion)">
+                <u>{{posicion.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u>
+              </a>
+            </td>
+          </tr>
+          </tbody>
         </table>
       </div>
       <br />
@@ -49,41 +75,67 @@
 <div id="modalNewPosicionCortador" class="modal modal-fixed-footer">
   <div class="modal-content">
     <h4>Nueva Posición Cortador</h4>
-    <form class="col s12">
+    <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s4">
           <i class="material-icons prefix">account_box</i>
-          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate">
+          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate"
+          formControlName="Clave">
           <label for="CVE_NEW_CORTADOR">Clave</label>
         </div>
         <div class="input-field col s4">
           <i class="material-icons prefix">account_circle</i>
-          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate">
+          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate"
+          formControlName="Nombre">
           <label for="NOMBRE_NEW_CORTADOR">Nombre:</label>
         </div>
       </div>
       <div class="row">
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate">
-          <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>
+        <div class="row">
+          <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+            <!-- Checkbox Column -->
+            <ng-container matColumnDef="select">
+              <th mat-header-cell *matHeaderCellDef>
+                <mat-checkbox (change)="$event ? masterToggle() : null"
+                              [checked]="selection.hasValue() && isAllSelected()"
+                              [indeterminate]="selection.hasValue() && !isAllSelected()"
+                              [aria-label]="checkboxLabel()">
+                </mat-checkbox>
+              </th>
+              <td mat-cell *matCellDef="let row">
+                <mat-checkbox (click)="$event.stopPropagation()"
+                              (change)="$event ? selection.toggle(row) : null"
+                              [checked]="selection.isSelected(row)"
+                              [aria-label]="checkboxLabel(row)">
+                </mat-checkbox>
+              </td>
+            </ng-container>
+
+            <!-- Position Column -->
+            <ng-container matColumnDef="posicion">
+              <th mat-header-cell *matHeaderCellDef> No</th>
+              <td mat-cell *matCellDef="let element; let i = index"> {{i + 1}} </td>
+            </ng-container>
+
+            <!-- Name Column -->
+            <ng-container matColumnDef="clave">
+              <th mat-header-cell *matHeaderCellDef> CLAVE</th>
+              <td mat-cell *matCellDef="let element"> {{element.Clave}} </td>
+            </ng-container>
+
+            <!-- Weight Column -->
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef> NOMBRE</th>
+              <td mat-cell *matCellDef="let element"> {{element.Nombre}} </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                (click)="selection.toggle(row)">
+            </tr>
+          </table>
         </div>
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate">
-          <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>
-        </div>
-      </div>
-      <div class="row">
-        <table id="tlbPosicionDefecto" class="row-border hover">
-          <thead>
-            <th></th>
-            <th>No.</th>
-            <th>Clave Defecto</th>
-            <th>Nombre Defecto</th>
-          </thead>
-          <tbody id="tdby_Posicion"></tbody>
-        </table>
       </div>
     </form>
   </div>
@@ -146,25 +198,6 @@
       </div>
       <div class="col s6" style="text-align: right">
         <a (click)="EditPosicionCortador()" class="waves-effect waves-green btn-flat">Aceptar</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Update Enabled Cortador -->
-<div id="modalEnablePosicionCortador" class="modal">
-  <div class="modal-content">
-    <div style="text-align: center">
-      <p>¿Realmente deseas activar o desactivar la posición del cortador?</p>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <div class="row">
-      <div class="col s6" style="text-align: left">
-        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
-      </div>
-      <div class="col s6" style="text-align: right">
-        <a (click)="GetEnabledPosicionCortador();" class="waves-effect waves-green btn-flat">Aceptar</a>
       </div>
     </div>
   </div>

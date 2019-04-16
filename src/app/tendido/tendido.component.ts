@@ -1,20 +1,58 @@
-import { Component, OnInit } from '@angular/core';
-import { Globals } from '../Globals';
-declare var $: any;
-declare var jQuery: any;
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import 'jquery';
-import { ToastrService } from 'ngx-toastr';
+import {ToastrService} from 'ngx-toastr';
+import {FormControl, FormGroup} from '@angular/forms';
+import {CorteService} from '../services/corte/corte.service';
+import {DataTableDirective} from 'angular-datatables';
+import {Subject} from 'rxjs';
+import swal from 'sweetalert';
+
+declare var $: any;
 
 @Component({
   selector: 'app-tendido',
   templateUrl: './tendido.component.html',
   styleUrls: ['./tendido.component.css']
 })
-export class TendidoComponent implements OnInit {
+export class TendidoComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild(DataTableDirective) dtElement: DataTableDirective;
+  dtTrigger: Subject<any> = new Subject();
+  private json_usuario = JSON.parse(sessionStorage.getItem('currentUser'));
+  dtOptions = {
+    language: {
+      processing: 'Procesando...',
+      search: 'Buscar:',
+      lengthMenu: 'Mostrar _MENU_ elementos',
+      info: '_START_ - _END_ de _TOTAL_ elementos',
+      infoEmpty: 'Mostrando ningún elemento.',
+      infoFiltered: '(filtrado _MAX_ elementos total)',
+      infoPostFix: '',
+      loadingRecords: 'Cargando registros...',
+      zeroRecords: 'No se encontraron registros',
+      emptyTable: 'No hay datos disponibles en la tabla',
+      paginate: {
+        first: 'Primero',
+        previous: 'Anterior',
+        next: 'Siguiente',
+        last: 'Último'
+      },
+    }
+  };
+  optionModule = [
+    {value: 1, viewValue: 'Automático'},
+    {value: 2, viewValue: 'Manual'},
+    {value: 3, viewValue: 'Ambos'}
+  ];
+  tendidos = [];
+
+  formFilter: FormGroup;
+  form: FormGroup;
 
   constructor(
+    private _cortadoresService: CorteService,
     private _toast: ToastrService
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
     $('.tooltipped').tooltip();
@@ -22,96 +60,109 @@ export class TendidoComponent implements OnInit {
     $('#modalEditTendido').modal();
     $('#modalEnableTendido').modal();
     $('#lblModulo').text('Tendido - Corte');
-    this.GetTendido();
+    this.initFormGroupFilter();
+    this.initFormGroup();
+    this.obtenerTendidos();
   }
 
-  GetTendido() {
-    let sOptions = '';
-    let _request = '';
-    if ($('#CLAVE_CORTADOR').val() !== '' && $('#NOMBRE_CORTADOR').val() === '') {
-      _request += '?Clave=' +  $('#CLAVE_CORTADOR').val();
-    } else if ($('#NOMBRE_CORTADOR').val() !== '' && $('#CLAVE_CORTADOR').val() === '') {
-      _request += '?Nombre=' +  $('#NOMBRE_CORTADOR').val();
-    } else {
-      _request += '?Nombre=' +  $('#NOMBRE_CORTADOR').val() + '?Clave=' +  $('#CLAVE_CORTADOR').val();
-    }
-    $.ajax({
-      url: Globals.UriRioSulApi + 'Cortadores/ObtieneTendido' + _request,
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          let index = 1;
-          for (let i = 0; i < json.Vst_Cortadores.length; i++) {
-            sOptions += '<tr>';
-            // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="SetId(' + json.Vst_Cortadores[i].ID + '); DisposeEditTendido(); GetInfoTendido();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditTendido" data-position="bottom" data-tooltip="Edita el tendido seleccionado"><i class="material-icons right">edit</i></a></td>';
-            sOptions += '<td>' + index + '</td>';
-            sOptions += '<td>' + json.Vst_Cortadores[i].Clave + '</td>';
-            sOptions += '<td>' + json.Vst_Cortadores[i].Nombre + '</td>';
-            if (json.Vst_Cortadores[i].Activo) {
-              sOptions += '<td style="text-align: center">SI</td>';
-            } else {
-              sOptions += '<td style="text-align: center">NO</td>';
-            }
-            if (json.Vst_Cortadores[i].Activo === true) {
-              // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Cortadores[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableTendido" data-tooltiped="Activa / Inactiva el tendido seleccionado"><strong><u>Inactivar</u></strong></a></td>';
-            } else {
-              // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Cortadores[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableTendido" data-tooltiped="Activa / Inactiva el tendido seleccionado"><strong><u>Activar</u></strong></a></td>';
-            }
-            sOptions += '</tr>';
-            index ++;
+  ngAfterViewInit(): void {
+    this.dtTrigger.next();
+  }
+
+  ngOnDestroy(): void {
+    // Do not forget to unsubscribe the event
+    this.dtTrigger.unsubscribe();
+  }
+
+  initFormGroupFilter() {
+    this.formFilter = new FormGroup({
+      'Clave': new FormControl(''),
+      'Nombre': new FormControl('')
+    });
+  }
+
+  initFormGroup() {
+    this.form = new FormGroup({
+      'ID': new FormControl(),
+      'IdSubModulo': new FormControl(2),
+      'IdUsuario': new FormControl(this.json_usuario.ID),
+      'Clave': new FormControl(),
+      'Nombre': new FormControl(),
+      'Descripcion': new FormControl(''),
+      'Observaciones': new FormControl(''),
+      'TipoTendido': new FormControl(1)
+    });
+  }
+
+  obtenerTendidos() {
+    this._cortadoresService.listTendidos(this.formFilter.controls['Clave'].value, this.formFilter.controls['Nombre'].value)
+      .subscribe(
+        (tendidos: any) => {
+          console.log(tendidos);
+          if (tendidos.Message.IsSuccessStatusCode) {
+            this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+              // Destroy the table first
+              dtInstance.destroy();
+              this.tendidos = tendidos.Vst_Cortadores;
+              // Call the dtTrigger to rerender again
+              this.dtTrigger.next();
+            });
           }
-          $('#tlbTendido').html('');
-          $('#tlbTendido').html('<tbody>' + sOptions + '</tbody>');
-          // tslint:disable-next-line:max-line-length
-          $('#tlbTendido').append('<thead><th></th><th>No.</th><th>Clave Tendido</th><th>Nombre Tendido</th><th>Estatus</th><th></th></thead>');
-          $('#tlbTendido').DataTable({
-            sorting: true,
-            bDestroy: true,
-            ordering: true,
-            bPaginate: true,
-            pageLength: 6,
-            bInfo: true,
-            dom: 'Bfrtip',
-            processing: true,
-            buttons: [
-              'copyHtml5',
-              'excelHtml5',
-              'csvHtml5',
-              'pdfHtml5'
-             ]
-          });
-          $('.tooltipped').tooltip();
+        },
+        error => {
+          console.log(error);
+          this._toast.error('No se pudo establecer conexión a la base de datos', '');
         }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
-    });
+      );
   }
 
-  GetEnabledTendido() {
-    $.ajax({
-      url: Globals.UriRioSulApi + 'Cortadores/ActivaInactivaTendido?IdTendido=' + $('#HDN_ID').val(),
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          $('#modalEnableTendido').modal('close');
+  getDetalle(tendido) {
+    this.reset();
+    this._cortadoresService.getCortador(tendido.ID)
+      .subscribe(
+        (res: any) => {
+          console.log(res);
+          this.form.patchValue(res.Vst_Cortador);
         }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
+      );
+  }
+
+  GetEnabledTendido(tendido) {
+    const options = {
+      text: '¿Estas seguro de modificar este tendido?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
       }
-    });
-    this.GetTendido();
+    };
+    swal(options)
+      .then((willDelete) => {
+          if (willDelete) {
+            this._cortadoresService.inactivaActivaTendido(tendido.ID)
+              .subscribe(
+                (res: any) => {
+                  // console.log(res);
+                  if (res.Message.IsSuccessStatusCode) {
+                    this._toast.success('Tendido actualizado con exito', '');
+                    this.obtenerTendidos();
+                  }
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                }
+              );
+          }
+        }
+      );
   }
 
   NewTendido() {
@@ -119,58 +170,24 @@ export class TendidoComponent implements OnInit {
       this._toast.warning('Se debe ingresar una clave de tendido', '');
     } else if ($('#NOMBRE_NEW_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de tendido', '');
-    } else if ($('#OBSERVACIONES_NEW_CORTADOR').val() === '') {
-      this._toast.warning('Se debe ingresar las observaciones del tendido', '');
     } else {
-      let Result = false;
-      $.ajax({
-        // tslint:disable-next-line:max-line-length
-        url: Globals.UriRioSulApi + 'Cortadores/ValidaTendidoSubModulo?SubModulo=2&Clave=' + $('#CVE_NEW_CORTADOR').val() + '&Nombre=' + $('#NOMBRE_NEW_CORTADOR').val(),
-        dataType: 'json',
-        contents: 'application/json; charset=utf-8',
-        method: 'get',
-        async: false,
-        success: function (json) {
-          if (json.Message.IsSuccessStatusCode) {
-            Result = json.Hecho;
-          }
-        },
-        error: function () {
-          console.log('No se pudo establecer conexión a la base de datos');
-        }
-      });
-      if (Result) {
-        let Mensaje = '';
-        const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
-        $.ajax({
-          url: Globals.UriRioSulApi + 'Cortadores/NuevoTendido',
-          type: 'POST',
-          contentType: 'application/json; charset=utf-8',
-          async: false,
-          data: JSON.stringify({
-            IdSubModulo: 1,
-            IdUsuario: Json_Usuario.ID,
-            Clave: $('#CVE_NEW_CORTADOR').val(),
-            Nombre: $('#NOMBRE_NEW_CORTADOR').val(),
-            Descripcion: $('#DESCRIPCION_NEW_CORTADOR').val(),
-            Observaciones: $('#OBSERVACIONES_NEW_CORTADOR').val()
-          }),
-          success: function (json) {
-            if (json.Message.IsSuccessStatusCode) {
-              Mensaje = 'Se agrego correctamente el tendido';
+      this._cortadoresService.createTendido(this.form.value)
+        .subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Se agrego correctamente el tendido', '');
+              $('#modalNewTendido').modal('close');
+              this.obtenerTendidos();
+            } else {
+              this._toast.warning('Algo salio mal', '');
             }
           },
-          error: function () {
-            console.log('No se pudo establecer conexión a la base de datos');
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           }
-        });
-        if (Mensaje !== '') {
-          this._toast.success(Mensaje, '');
-          $('#modalNewTendido').modal('close');
-        }
-      } else {
-        this._toast.warning('La clave de tendido ya se encuentra registrada en el sistema', '');
-      }
+        );
     }
   }
 
@@ -179,66 +196,68 @@ export class TendidoComponent implements OnInit {
       this._toast.warning('Se debe ingresar una clave de tendido', '');
     } else if ($('#NOMBRE_EDT_TENDIDO').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de tendido', '');
-    } else if ($('#OBSERVACIONES_EDT_TENDIDO').val() === '') {
-      this._toast.warning('Se debe ingresar las observaciones del tendido', '');
     } else {
-      let Result = false;
-      $.ajax({
-        // tslint:disable-next-line:max-line-length
-        url: Globals.UriRioSulApi + 'Cortadores/ValidaTendidoSubModulo?SubModulo=1&Clave=' + $('#CVE_EDT_TENDIDO').val() + '&Nombre=' + $('#NOMBRE_EDT_TENDIDO').val(),
-        dataType: 'json',
-        contents: 'application/json; charset=utf-8',
-        method: 'get',
-        async: false,
-        success: function (json) {
-          if (json.Message.IsSuccessStatusCode) {
-            Result = json.Hecho;
-          }
-        },
-        error: function () {
-          console.log('No se pudo establecer conexión a la base de datos');
-        }
-      });
-      if (Result) {
-        let Mensaje = '';
-        const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
-        $.ajax({
-          url: Globals.UriRioSulApi + 'Cortadores/ActualizaTendido',
-          type: 'POST',
-          contentType: 'application/json; charset=utf-8',
-          async: false,
-          data: JSON.stringify({
-            ID: $('#HDN_ID').val(),
-            IdUsuario: Json_Usuario.ID,
-            Clave: $('#CVE_EDT_TENDIDO').val(),
-            Nombre: $('#NOMBRE_EDT_TENDIDO').val(),
-            Descripcion: $('#DESCRIPCION_EDT_TENDIDO').val(),
-            Observaciones: $('#OBSERVACIONES_EDT_TENDIDO').val()
-          }),
-          success: function (json) {
-            if (json.Message.IsSuccessStatusCode) {
-              Mensaje = 'Se agrego correctamente el tendido';
+      this._cortadoresService.updateTendido(this.form.value)
+        .subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Se actualizo correctamente el tendido', '');
+              $('#modalEditTendido').modal('close');
+              this.obtenerTendidos();
+            } else {
+              this._toast.warning('Algo salio mal', '');
             }
           },
-          error: function () {
-            console.log('No se pudo establecer conexión a la base de datos');
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           }
-        });
-        if (Mensaje !== '') {
-          this._toast.success(Mensaje, '');
-          $('#modalEditTendido').modal('close');
-        }
-      } else {
-        this._toast.warning('La clave de tendido ya se encuentra registrada en el sistema', '');
-      }
+        );
     }
   }
 
-  DisposeNewTendido() {
-    $('#CLAVE_CORTADOR').val('');
-    $('#NOMBRE_CORTADOR').val('');
-    $('#DESCRIPCION_NEW_CORTADOR').val('');
-    $('#OBSERVACIONES_NEW_CORTADOR').val('');
+  eliminar(cortador) {
+    console.log('eliminar: ', cortador);
+    swal({
+      text: '¿Estas seguro de eliminar este tendido?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._cortadoresService.deleteCortador(cortador.ID)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Tendido eliminado con exito', '');
+                  this.obtenerTendidos();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
   }
 
+  reset() {
+    this.initFormGroup();
+  }
 }

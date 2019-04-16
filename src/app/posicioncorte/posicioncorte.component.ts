@@ -1,18 +1,57 @@
-import { Component, OnInit } from '@angular/core';
-import { Globals } from '../Globals';
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Globals} from '../Globals';
+import 'jquery';
+import {ToastrService} from 'ngx-toastr';
+import {DataTableDirective} from 'angular-datatables';
+import {Subject} from 'rxjs';
+import {CorteService} from '../services/corte/corte.service';
+import {FormControl, FormGroup} from '@angular/forms';
+import {MatTableDataSource} from '@angular/material';
+import {SelectionModel} from '@angular/cdk/collections';
+
 declare var $: any;
 declare var jQuery: any;
-import 'jquery';
-import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-posicioncorte',
   templateUrl: './posicioncorte.component.html',
   styleUrls: ['./posicioncorte.component.css']
 })
-export class PosicioncorteComponent implements OnInit {
+export class PosicioncorteComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild(DataTableDirective) dtElement: DataTableDirective;
+  private json_usuario = JSON.parse(sessionStorage.getItem('currentUser'));
+  dtOptions = {
+    language: {
+      processing: 'Procesando...',
+      search: 'Buscar:',
+      lengthMenu: 'Mostrar _MENU_ elementos',
+      info: '_START_ - _END_ de _TOTAL_ elementos',
+      infoEmpty: 'Mostrando ningún elemento.',
+      infoFiltered: '(filtrado _MAX_ elementos total)',
+      infoPostFix: '',
+      loadingRecords: 'Cargando registros...',
+      zeroRecords: 'No se encontraron registros',
+      emptyTable: 'No hay datos disponibles en la tabla',
+      paginate: {
+        first: 'Primero',
+        previous: 'Anterior',
+        next: 'Siguiente',
+        last: 'Último'
+      },
+    }
+  };
+  dtTrigger: Subject<any> = new Subject();
 
+  displayedColumns: string[] = ['select', 'posicion', 'clave', 'nombre'];
+  dataSource = new MatTableDataSource<any>([]);
+  selection = new SelectionModel<any>(true, []);
+
+  posiciones = [];
+
+  form: FormGroup;
+  formFilter: FormGroup;
   constructor(
+    private _cortadoresService: CorteService,
     private _toast: ToastrService
   ) { }
 
@@ -22,80 +61,65 @@ export class PosicioncorteComponent implements OnInit {
     $('#modalEditPosicionCortador').modal();
     $('#modalEnablePosicionCortador').modal();
     $('#lblModulo').text('Corte - Posición');
-    this.GetPosicionCortador();
+    this.initFormFilterGroup();
+    this.initFormGroup();
+    this.obtenerPosiciones();
   }
 
-  GetPosicionCortador() {
-    let sOptions = '';
-    let _request = '';
-    if ($('#CLAVE_CORTADOR').val() !== '' && $('#NOMBRE_CORTADOR').val() === '') {
-      _request += '?Clave=' +  $('#CLAVE_CORTADOR').val();
-    } else if ($('#NOMBRE_CORTADOR').val() !== '' && $('#CLAVE_CORTADOR').val() === '') {
-      _request += '?Nombre=' +  $('#NOMBRE_CORTADOR').val();
-    } else {
-      _request += '?Nombre=' +  $('#NOMBRE_CORTADOR').val() + '?Clave=' +  $('#CLAVE_CORTADOR').val();
-    }
-    $.ajax({
-      url: Globals.UriRioSulApi + 'Cortadores/ObtienePosicion' + _request,
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          let index = 1;
-          for (let i = 0; i < json.Vst_Cortadores.length; i++) {
-            sOptions += '<tr>';
-            // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="SetId(' + json.Vst_Cortadores[i].ID + '); DisposeEditPosicionCortador(); GetInfoPosicion();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditPosicionCortador" data-position="bottom" data-tooltip="Edita el defecto  seleccionado"><i class="material-icons right">edit</i></a></td>';
-            sOptions += '<td>' + index + '</td>';
-            sOptions += '<td>' + json.Vst_Cortadores[i].Clave + '</td>';
-            sOptions += '<td>' + json.Vst_Cortadores[i].Nombre + '</td>';
-            if (json.Vst_Cortadores[i].Activo) {
-              sOptions += '<td style="text-align: center">SI</td>';
-            } else {
-              sOptions += '<td style="text-align: center">NO</td>';
-            }
-            if (json.Vst_Cortadores[i].Activo === true) {
-              // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Cortadores[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnablePosicionCortador" data-tooltiped="Activa / Inactiva la posición del cortador seleccionado"><strong><u>Inactivar</u></strong></a></td>';
-            } else {
-              // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Cortadores[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnablePosicionCortador" data-tooltiped="Activa / Inactiva la posición del cortador seleccionado"><strong><u>Activar</u></strong></a></td>';
-            }
-            sOptions += '</tr>';
-            index ++;
-          }
-          $('#tlbPosicionCortador').html('');
-          $('#tlbPosicionCortador').html('<tbody>' + sOptions + '</tbody>');
-          // tslint:disable-next-line:max-line-length
-          $('#tlbPosicionCortador').append('<thead><th></th><th>No.</th><th>Clave Posición</th><th>Nombre Posición</th><th>Estatus</th><th></th></thead>');
-          $('#tlbPosicionCortador').DataTable({
-            sorting: true,
-            bDestroy: true,
-            ordering: true,
-            bPaginate: true,
-            pageLength: 6,
-            bInfo: true,
-            dom: 'Bfrtip',
-            processing: true,
-            buttons: [
-              'copyHtml5',
-              'excelHtml5',
-              'csvHtml5',
-              'pdfHtml5'
-             ]
-          });
-          $('.tooltipped').tooltip();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
+  ngAfterViewInit(): void {
+    this.dtTrigger.next();
+  }
+
+  ngOnDestroy(): void {
+    // Do not forget to unsubscribe the event
+    this.dtTrigger.unsubscribe();
+  }
+
+  initFormGroup() {
+    this.form = new FormGroup({
+      'ID': new FormControl(),
+      'IdSubModulo': new FormControl(1),
+      'IdUsuario': new FormControl(this.json_usuario.ID),
+      'Clave': new FormControl(),
+      'Nombre': new FormControl(),
+      'Descripcion': new FormControl('a'),
+      'Observaciones': new FormControl('a'),
+      'Imagen': new FormControl(),
     });
   }
 
-  GetEnabledPosicionCortador() {
+  initFormFilterGroup() {
+    this.formFilter = new FormGroup({
+      'Clave': new FormControl(''),
+      'Nombre': new FormControl('')
+    });
+  }
+
+  obtenerPosiciones() {
+    this._cortadoresService.listPosiciones(this.formFilter.controls['Clave'].value, this.formFilter.controls['Nombre'].value)
+      .subscribe(
+        (defectos: any) => {
+          console.log(defectos);
+          if (defectos.Message.IsSuccessStatusCode) {
+            this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+              // Destroy the table first
+              dtInstance.destroy();
+              this.posiciones = defectos.Vst_Cortadores;
+              // Call the dtTrigger to rerender again
+              this.dtTrigger.next();
+            });
+          }
+        },
+        error => {
+          console.log(error);
+          this._toast.error('No se pudo establecer conexión a la base de datos', '');
+        }
+      );
+  }
+
+  getDetalle(posicion) {}
+
+  GetEnabledPosicionCortador(posicion) {
     $.ajax({
       url: Globals.UriRioSulApi + 'Cortadores/ActivaInactivaPosicion?IdPosicion=' + $('#HDN_ID').val(),
       dataType: 'json',
@@ -111,7 +135,12 @@ export class PosicioncorteComponent implements OnInit {
         console.log('No se pudo establecer coneción a la base de datos');
       }
     });
-    this.GetPosicionCortador();
+    this.obtenerPosiciones();
+  }
+
+  openModalAgregar() {
+    this.initFormGroup();
+    this.getDefectosActivos();
   }
 
   NewPosicionCortador() {
@@ -119,9 +148,8 @@ export class PosicioncorteComponent implements OnInit {
       this._toast.warning('Se debe ingresar una clave de posición del cortador', '');
     } else if ($('#NOMBRE_NEW_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de posición del cortador', '');
-    } else if ($('#OBSERVACIONES_NEW_CORTADOR').val() === '') {
-      this._toast.warning('Se debe ingresar las observaciones de posición del cortador', '');
     } else {
+      // this.form
       let Result = false;
       $.ajax({
         // tslint:disable-next-line:max-line-length
@@ -175,7 +203,15 @@ export class PosicioncorteComponent implements OnInit {
     }
   }
 
-  GetPosicionDefectosActivos() {
+  getDefectosActivos() {
+    this.selection = new SelectionModel(true, []);
+    this._cortadoresService.listDefectos('', '', 'True')
+      .subscribe(
+        (res: any) => {
+          console.log(res);
+          this.dataSource = new MatTableDataSource(res.Vst_Cortadores);
+        }
+      );
     let sOptions = '';
     $.ajax({
       url: Globals.UriRioSulApi + 'Cortadores/ObtieneDefectosActivos',
@@ -285,12 +321,25 @@ export class PosicioncorteComponent implements OnInit {
     }
   }
 
-  DisposeNewPosicionCortador() {
-    $('#CLAVE_CORTADOR').val('');
-    $('#NOMBRE_CORTADOR').val('');
-    $('#DESCRIPCION_NEW_CORTADOR').val('');
-    $('#OBSERVACIONES_NEW_CORTADOR').val('');
-    this.GetPosicionDefectosActivos();
+  eliminar(posicion) {}
+
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
+  }
+
+  masterToggle() {
+    this.isAllSelected() ?
+      this.selection.clear() :
+      this.dataSource.data.forEach(row => this.selection.select(row));
+  }
+
+  checkboxLabel(row?): string {
+    if (!row) {
+      return `${this.isAllSelected() ? 'select' : 'deselect'} all`;
+    }
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.position + 1}`;
   }
 
 }

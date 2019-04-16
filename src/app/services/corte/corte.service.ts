@@ -169,4 +169,110 @@ export class CorteService {
     // params = params.append('tipo', catalogo);
     return this._http.delete(url, {headers, params});
   }
+
+  // ================ Posicion ===================
+  listPosiciones(clave = '', nombre = '', activo?) {
+    const url = `${this.URL_CORTADORES}/ObtienePosicion`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams();
+    if (clave !== '') {
+      params = params.append('Clave', clave);
+    }
+    if (nombre !== '') {
+      params = params.append('Nombre', nombre);
+    }
+    if (activo) {
+      params = params.append('Activo', activo);
+    }
+    return this._http.get(url, {headers, params});
+  }
+
+  getPosicion(id) {
+    const url = `${this.URL_CORTADORES}/ObtieneInfoPosicion`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('ID', id);
+    return this._http.get(url, {headers, params});
+  }
+
+  createPosicion(payload) {
+    const url = `${this.URL_CORTADORES}/NuevoPosicion`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.post(url, JSON.stringify(payload), {headers});
+  }
+
+  updatePosicion(payload) {
+    const url = `${this.URL_CORTADORES}/ActualizaPosicion`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    // const params = new HttpParams().append('ID', id);
+    const body = JSON.stringify(payload);
+    return this._http.post(url, body, {headers});
+  }
+
+  inactivaActivaPosicion(id) {
+    const url = `${this.URL_CORTADORES}/ActivaInactivaPosicion`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('IdPosicion', id);
+    return this._http.get(url, {headers, params});
+  }
+
+  deletePosicion(id) {
+    const url = `${this.URL_CORTADORES}/Posicion`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('IdPosicion', id);
+    // params = params.append('tipo', catalogo);
+    return this._http.delete(url, {headers, params});
+  }
+
+  // ================ Tendido ===================
+  listTendidos(clave = '', nombre = '', activo?) {
+    const url = `${this.URL_CORTADORES}/ObtieneTendido`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams();
+    if (clave !== '') {
+      params = params.append('Clave', clave);
+    }
+    if (nombre !== '') {
+      params = params.append('Nombre', nombre);
+    }
+    if (activo) {
+      params = params.append('Activo', activo);
+    }
+    return this._http.get(url, {headers, params});
+  }
+
+  getTendido(id) {
+    const url = `${this.URL_CORTADORES}/ObtieneInfoTendido`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('ID', id);
+    return this._http.get(url, {headers, params});
+  }
+
+  createTendido(payload) {
+    const url = `${this.URL_CORTADORES}/NuevoTendido`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.post(url, JSON.stringify(payload), {headers});
+  }
+
+  updateTendido(payload) {
+    const url = `${this.URL_CORTADORES}/ActualizaTendido`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    // const params = new HttpParams().append('ID', id);
+    const body = JSON.stringify(payload);
+    return this._http.post(url, body, {headers});
+  }
+
+  inactivaActivaTendido(id) {
+    const url = `${this.URL_CORTADORES}/ActivaInactivaTendido`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('IdTendido', id);
+    return this._http.get(url, {headers, params});
+  }
+
+  deleteTendido(id) {
+    const url = `${this.URL_CORTADORES}/Tendido`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('IdTendido', id);
+    // params = params.append('tipo', catalogo);
+    return this._http.delete(url, {headers, params});
+  }
 }
