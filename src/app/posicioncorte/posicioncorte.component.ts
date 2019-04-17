@@ -1,5 +1,4 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Globals} from '../Globals';
 import 'jquery';
 import {ToastrService} from 'ngx-toastr';
 import {DataTableDirective} from 'angular-datatables';
@@ -8,9 +7,10 @@ import {CorteService} from '../services/corte/corte.service';
 import {FormControl, FormGroup} from '@angular/forms';
 import {MatTableDataSource} from '@angular/material';
 import {SelectionModel} from '@angular/cdk/collections';
+import swal from 'sweetalert';
 
 declare var $: any;
-declare var jQuery: any;
+declare var M: any;
 
 @Component({
   selector: 'app-posicioncorte',
@@ -46,8 +46,11 @@ export class PosicioncorteComponent implements OnInit, OnDestroy, AfterViewInit 
   dataSource = new MatTableDataSource<any>([]);
   selection = new SelectionModel<any>(true, []);
 
-  posiciones = [];
+  dataSourceEdit = new MatTableDataSource<any>([]);
+  displayedColumnsEdit: string[] = ['select', 'posicion', 'clave', 'nombre'];
 
+  posiciones = [];
+  idOperacion;
   form: FormGroup;
   formFilter: FormGroup;
   constructor(
@@ -82,9 +85,9 @@ export class PosicioncorteComponent implements OnInit, OnDestroy, AfterViewInit 
       'IdUsuario': new FormControl(this.json_usuario.ID),
       'Clave': new FormControl(),
       'Nombre': new FormControl(),
-      'Descripcion': new FormControl('a'),
-      'Observaciones': new FormControl('a'),
-      'Imagen': new FormControl(),
+      'Descripcion': new FormControl(''),
+      'Observaciones': new FormControl(''),
+      'Defecto': new FormControl(),
     });
   }
 
@@ -117,25 +120,91 @@ export class PosicioncorteComponent implements OnInit, OnDestroy, AfterViewInit 
       );
   }
 
-  getDetalle(posicion) {}
+  getDetalle(posicion) {
+    this.idOperacion = posicion.ID;
+    this._cortadoresService.listDefectos('', '', 'True')
+      .subscribe(
+        (result: any) => {
+          console.log(result);
+          this.dataSourceEdit = new MatTableDataSource(result.Vst_Cortadores);
+          this.selection = new SelectionModel(true, []);
+          this._cortadoresService.getPosicion(posicion.ID)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                this.form.patchValue(res.Vst_Cortador);
+                setTimeout(() => M.updateTextFields(), 100);
+                const defectos = res.Vst_Posicion;
+                const copyDataSourceEdit = [];
+                this.dataSourceEdit.data.forEach((x) => {
+                  defectos.forEach(y => {
+                    console.log('Operaciones:', x);
+                    console.log('Y:', y);
+                    if (y.Clave === x.Clave) {
+                      copyDataSourceEdit.push(x);
+                    }
+                  });
+                });
+                console.log('Seleccion: ', copyDataSourceEdit);
+                this.selection = new SelectionModel(true, copyDataSourceEdit);
+              }
+            );
+        }
+      );
+  }
 
   GetEnabledPosicionCortador(posicion) {
-    $.ajax({
-      url: Globals.UriRioSulApi + 'Cortadores/ActivaInactivaPosicion?IdPosicion=' + $('#HDN_ID').val(),
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          $('#modalEnablePosicionCortador').modal('close');
+    const options = {
+      text: '¿Estas seguro de modificar este cortador?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
         }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
       }
-    });
-    this.obtenerPosiciones();
+    };
+    swal(options)
+      .then((willDelete) => {
+          if (willDelete) {
+            this._cortadoresService.inactivaActivaPosicion(posicion.ID)
+              .subscribe(
+                (res: any) => {
+                  // console.log(res);
+                  if (res.Message.IsSuccessStatusCode) {
+                    this._toast.success('Posición actualizada con exito', '');
+                    this.obtenerPosiciones();
+                  }
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                }
+              );
+          }
+        }
+      );
+    // $.ajax({
+    //   url: Globals.UriRioSulApi + 'Cortadores/ActivaInactivaPosicion?IdPosicion=' + $('#HDN_ID').val(),
+    //   dataType: 'json',
+    //   contents: 'application/json; charset=utf-8',
+    //   method: 'get',
+    //   async: false,
+    //   success: function (json) {
+    //     if (json.Message.IsSuccessStatusCode) {
+    //       $('#modalEnablePosicionCortador').modal('close');
+    //     }
+    //   },
+    //   error: function () {
+    //     console.log('No se pudo establecer coneción a la base de datos');
+    //   }
+    // });
+    // this.obtenerPosiciones();
   }
 
   openModalAgregar() {
@@ -149,57 +218,30 @@ export class PosicioncorteComponent implements OnInit, OnDestroy, AfterViewInit 
     } else if ($('#NOMBRE_NEW_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de posición del cortador', '');
     } else {
-      // this.form
-      let Result = false;
-      $.ajax({
-        // tslint:disable-next-line:max-line-length
-        url: Globals.UriRioSulApi + 'Cortadores/ValidaPosicionSubModulo?SubModulo=7&Clave=' + $('#CVE_NEW_CORTADOR').val() + '&Nombre=' + $('#NOMBRE_NEW_CORTADOR').val(),
-        dataType: 'json',
-        contents: 'application/json; charset=utf-8',
-        method: 'get',
-        async: false,
-        success: function (json) {
-          if (json.Message.IsSuccessStatusCode) {
-            Result = json.Hecho;
-          }
-        },
-        error: function () {
-          console.log('No se pudo establecer conexión a la base de datos');
+      const defectos = this.selection.selected;
+      defectos.forEach(
+        (x: any) => {
+          x.IdCortador = x.ID;
         }
-      });
-      if (Result) {
-        let Mensaje = '';
-        const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
-        $.ajax({
-          url: Globals.UriRioSulApi + 'Cortadores/NuevoPosicion',
-          type: 'POST',
-          contentType: 'application/json; charset=utf-8',
-          async: false,
-          data: JSON.stringify({
-            IdSubModulo: 1,
-            IdUsuario: Json_Usuario.ID,
-            Clave: $('#CVE_NEW_CORTADOR').val(),
-            Nombre: $('#NOMBRE_NEW_CORTADOR').val(),
-            Descripcion: $('#DESCRIPCION_NEW_CORTADOR').val(),
-            Observaciones: $('#OBSERVACIONES_NEW_CORTADOR').val(),
-            Posicion: $('#HDN_ARR').val()
-          }),
-          success: function (json) {
-            if (json.Message.IsSuccessStatusCode) {
-              Mensaje = 'Se agrego correctamente la posición cortador';
+      );
+      this.form.controls['Defecto'].patchValue(defectos);
+      this._cortadoresService.createPosicion(this.form.value)
+        .subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Posición guardada con exito', '');
+              $('#modalNewPosicionCortador').modal('close');
+              this.obtenerPosiciones();
+              this.initFormGroup();
+            } else {
+              this._toast.warning('Algo no ha salido bien', '');
             }
           },
-          error: function () {
-            console.log('No se pudo establecer conexión a la base de datos');
-          }
-        });
-        if (Mensaje !== '') {
-          this._toast.success(Mensaje, '');
-          $('#modalNewPosicionCortador').modal('close');
-        }
-      } else {
-        this._toast.warning('La clave de defecto cortador ya se encuentra registrada en el sistema', '');
-      }
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
+          });
     }
   }
 
@@ -212,53 +254,6 @@ export class PosicioncorteComponent implements OnInit, OnDestroy, AfterViewInit 
           this.dataSource = new MatTableDataSource(res.Vst_Cortadores);
         }
       );
-    let sOptions = '';
-    $.ajax({
-      url: Globals.UriRioSulApi + 'Cortadores/ObtieneDefectosActivos',
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          let Index = 1;
-          for (let i = 0; i < json.Vst_Cortadores.length; i++) {
-            sOptions += '<tr>';
-            // tslint:disable-next-line:max-line-length
-            sOptions += '<td style="text-align:center"><label><input id="chk_' + json.Vst_Cortadores[i].ID + '" type="checkbox" class="filled-in" /><span></span></label></td>';
-            sOptions += '<td>' + Index + '</td>';
-            sOptions += '<td>' + json.Vst_Cortadores[i].Clave + '</td>';
-            sOptions += '<td>' + json.Vst_Cortadores[i].Nombre + '</td>';
-            sOptions += '</tr>';
-
-            Index++;
-          }
-          $('#tlbPosicionDefecto').html('');
-          $('#tlbPosicionDefecto').html('<tbody id="tdby_Posicion">' + sOptions + '</tbody>');
-          $('#tlbPosicionDefecto').append('<thead><th></th><th>No.</th><th>Clave Defecto</th><th>Nombre Defecto</th></thead>');
-          $('#tlbPosicionDefecto').DataTable({
-            sorting: true,
-            bDestroy: true,
-            ordering: true,
-            bPaginate: true,
-            pageLength: 6,
-            bInfo: true,
-            dom: 'Bfrtip',
-            processing: true,
-            buttons: [
-              'copyHtml5',
-              'excelHtml5',
-              'csvHtml5',
-              'pdfHtml5'
-             ]
-          });
-          $('.tooltipped').tooltip();
-        }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
-    });
   }
 
   EditPosicionCortador() {
@@ -266,62 +261,72 @@ export class PosicioncorteComponent implements OnInit, OnDestroy, AfterViewInit 
       this._toast.warning('Se debe ingresar una clave de posición de cortador', '');
     } else if ($('#NOMBRE_EDT_POSICION').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de posición de cortador', '');
-    } else if ($('#OBSERVACIONES_EDT_POSICION').val() === '') {
-      this._toast.warning('Se debe ingresar las observaciones de la posición cortador', '');
     } else {
-      let Result = false;
-      $.ajax({
-        // tslint:disable-next-line:max-line-length
-        url: Globals.UriRioSulApi + 'Cortadores/ValidaPosicionSubModulo?SubModulo=7&Clave=' + $('#CVE_EDT_DEFECTO').val() + '&Nombre=' + $('#NOMBRE_EDT_POSICION').val(),
-        dataType: 'json',
-        contents: 'application/json; charset=utf-8',
-        method: 'get',
-        async: false,
-        success: function (json) {
-          if (json.Message.IsSuccessStatusCode) {
-            Result = json.Hecho;
-          }
-        },
-        error: function () {
-          console.log('No se pudo establecer conexión a la base de datos');
+      const payload = this.form.value;
+      payload.Defecto = this.selection.selected;
+      payload.Defecto.forEach(
+        (x: any) => {
+          x.IdCortador = x.ID;
         }
-      });
-      if (Result) {
-        let Mensaje = '';
-        const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
-        $.ajax({
-          url: Globals.UriRioSulApi + 'Cortadores/ActualizaPosicion',
-          type: 'POST',
-          contentType: 'application/json; charset=utf-8',
-          async: false,
-          data: JSON.stringify({
-            ID: $('#HDN_ID').val(),
-            IdUsuario: Json_Usuario.ID,
-            Clave: $('#CVE_EDT_DEFECTO').val(),
-            Nombre: $('#NOMBRE_EDT_DEFECTO').val(),
-            Descripcion: $('#DESCRIPCION_EDT_DEFECTO').val(),
-            Observaciones: $('#OBSERVACIONES_EDT_DEFECTO').val()
-          }),
-          success: function (json) {
-            if (json.Message.IsSuccessStatusCode) {
-              Mensaje = 'Se agrego correctamente la posición del cortador';
+      );
+      this._cortadoresService.updatePosicion(payload)
+        .subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Se actualizo correctamente la posición', '');
+              $('#modalEditPosicionCortador').modal('close');
+              this.obtenerPosiciones();
+            } else {
+              this._toast.warning('Algo salio mal', '');
             }
           },
-          error: function () {
-            console.log('No se pudo establecer conexión a la base de datos');
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           }
-        });
-        if (Mensaje !== '') {
-          this._toast.success(Mensaje, '');
-          $('#modalEditPosicionCortador').modal('close');
-        }
-      } else {
-        this._toast.warning('La clave defecto posición ya se encuentra registrada en el sistema', '');
-      }
+        );
     }
   }
 
-  eliminar(posicion) {}
+  eliminar(posicion) {
+    const options = {
+      text: '¿Estas seguro de eliminar esta posición?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    };
+    swal(options).then((willDelete) => {
+      if (willDelete) {
+        this._cortadoresService.deletePosicion(posicion.ID)
+          .subscribe(
+            (res: any) => {
+              console.log(res);
+              if (res.Message.IsSuccessStatusCode) {
+                this._toast.success('Posición eliminada con exito', '');
+                this.obtenerPosiciones();
+              } else {
+                const mensaje = res.Hecho.split(',');
+                this._toast.warning(mensaje[0], mensaje[2]);
+              }
+            },
+            error => {
+              console.log(error);
+              this._toast.error('Error al conectar a la base de datos', '');
+            }
+          );
+      }
+    });
+  }
 
   isAllSelected() {
     const numSelected = this.selection.selected.length;

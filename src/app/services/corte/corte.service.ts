@@ -8,7 +8,8 @@ import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 export class CorteService {
   private URL_CORTADORES = `${Globals.UriRioSulApi}Cortadores`;
 
-  constructor(private _http: HttpClient) { }
+  constructor(private _http: HttpClient) {
+  }
 
   // ================ Cortadores ===================
 
@@ -112,7 +113,7 @@ export class CorteService {
   deleteDefecto(id) {
     const url = `${this.URL_CORTADORES}/Defecto`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
-    const params = new HttpParams().append('IdDefecto', id);
+    const params = new HttpParams().append('ID', id);
     // params = params.append('tipo', catalogo);
     return this._http.delete(url, {headers, params});
   }
@@ -165,7 +166,7 @@ export class CorteService {
   deleteMesa(id) {
     const url = `${this.URL_CORTADORES}/Mesa`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
-    const params = new HttpParams().append('IdMesa', id);
+    const params = new HttpParams().append('ID', id);
     // params = params.append('tipo', catalogo);
     return this._http.delete(url, {headers, params});
   }
@@ -218,7 +219,7 @@ export class CorteService {
   deletePosicion(id) {
     const url = `${this.URL_CORTADORES}/Posicion`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
-    const params = new HttpParams().append('IdPosicion', id);
+    const params = new HttpParams().append('ID', id);
     // params = params.append('tipo', catalogo);
     return this._http.delete(url, {headers, params});
   }
@@ -272,6 +273,70 @@ export class CorteService {
     const url = `${this.URL_CORTADORES}/Tendido`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('IdTendido', id);
+    // params = params.append('tipo', catalogo);
+    return this._http.delete(url, {headers, params});
+  }
+
+  // ================ Tolerancia ===================
+  listTolerancias(clave = '', nombre = '', activo?) {
+    const url = `${this.URL_CORTADORES}/ObtieneTolerancias`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams();
+    if (clave !== '') {
+      params = params.append('Clave', clave);
+    }
+    if (nombre !== '') {
+      params = params.append('Nombre', nombre);
+    }
+    if (activo) {
+      params = params.append('Activo', activo);
+    }
+    return this._http.get(url, {headers, params});
+  }
+
+  getTolerancia(id) {
+    const url = `${this.URL_CORTADORES}/ObtieneToleranciaPorId`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('IdTolerancia', id);
+    return this._http.get(url, {headers, params});
+  }
+
+  createTolerancia(payload) {
+    const url = `${this.URL_CORTADORES}/RegistraNuevaTolerancia`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.post(url, JSON.stringify(payload), {headers});
+  }
+
+  validaNuevaTolerancia(descripcion, numerador, denominador) {
+    const url = `${this.URL_CORTADORES}/ValidaNuevaTolerancia`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams();
+    params = params.append('Descripcion',  descripcion);
+    params = params.append('Numerador', numerador);
+    params = params.append('Denominador', denominador);
+
+    return this._http.get(url, {headers, params});
+  }
+
+  updateTolerancia(payload) {
+    const url = `${this.URL_CORTADORES}/Tolerancia`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    // const params = new HttpParams().append('ID', id);
+    const body = JSON.stringify(payload);
+    return this._http.put(url, body, {headers});
+  }
+
+  inactivaActivaTolerancia(id) {
+    const url = `${this.URL_CORTADORES}/ActivaInactivaTolerancia`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('IdTolerancia', id);
+    return this._http.get(url, {headers, params});
+  }
+
+  deleteTolerancia(id) {
+    const url = `${this.URL_CORTADORES}/Tolerancia`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    const params = new HttpParams().append('ID', id);
     // params = params.append('tipo', catalogo);
     return this._http.delete(url, {headers, params});
   }
