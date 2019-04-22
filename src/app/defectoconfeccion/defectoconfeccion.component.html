@@ -24,21 +24,47 @@
           <label for="NOMBRE_CORTADOR">Nombre</label>
         </div>
         <div class="col s6" style="text-align: right">
-          <button (click)="GetDefectosConfeccion()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar los defectos por confección por filtro seleccionado" type="button" name="btnSearchDefectoConfeccion">Buscar
+          <button (click)="obtenerDefectos()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar los defectos por confección por filtro seleccionado" type="button" name="btnSearchDefectoConfeccion">Buscar
             <i class="material-icons right">search</i>
           </button>
         </div>
       </div>
       <div class="row">
-        <table id="tlbDefectoConfeccion" class="row-border hover">
+        <table id="tlbDefectoCortadores" class="row-border hover"
+               datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
           <thead>
+          <tr>
             <th></th>
-            <th>Clave Defectos</th>
-            <th>Nombre Defectos</th>
+            <th>No.</th>
+            <th>Clave Defecto</th>
+            <th>Nombre Defecto</th>
             <th>Estatus</th>
             <th></th>
+          </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+          <tr *ngFor="let defecto of defectos; let i = index" matTooltip="Doble click para eliminar"
+              (dblclick)="eliminar(defecto)">
+            <td>
+              <button class="btn modal-trigger" data-target="modalEditDefectoConfeccion"
+                      matTooltip="Editar"
+                      [disabled]="defecto.Activo === false"
+                      (click)="getDetalle(defecto)">
+                <i class="material-icons center">edit</i>
+              </button>
+            </td>
+            <td>{{i + 1}}</td>
+            <td>{{defecto.Clave}}</td>
+            <td>{{defecto.Nombre}}</td>
+            <td>{{defecto.Activo ? 'SI' : 'NO'}}</td>
+            <td class="center-align">
+              <a class="btn bold_sub"
+                 (click)="GetEnabledDefectoConfeccion(defecto)">
+                <u>{{defecto.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u>
+              </a>
+            </td>
+          </tr>
+          </tbody>
         </table>
       </div>
       <br />
@@ -49,42 +75,36 @@
 <div style="width: 80%" id="modalNewDefectoConfeccion" class="modal modal-fixed-footer">
   <div class="modal-content">
     <h4>Nuevo Defecto Confección</h4>
-    <form class="col s12">
+    <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s4">
           <i class="material-icons prefix">account_box</i>
-          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate">
+          <input id="CVE_NEW_CORTADOR" maxlength="10" type="text" class="validate"
+          formControlName="Clave">
           <label for="CVE_NEW_CORTADOR">Clave</label>
         </div>
         <div class="input-field col s4">
           <i class="material-icons prefix">account_circle</i>
-          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate">
+          <input id="NOMBRE_NEW_CORTADOR" maxlength="150" type="text" class="validate"
+                 formControlName="Nombre">
           <label for="NOMBRE_NEW_CORTADOR">Nombre:</label>
         </div>
       </div>
       <div class="row">
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="OBSERVACIONES_NEW_CORTADOR" maxlength="500" type="text" class="validate">
-          <label for="OBSERVACIONES_NEW_CORTADOR">Obs.:</label>
-        </div>
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="DESCRIPCION_NEW_CORTADOR" maxlength="250" type="text" class="validate">
-          <label for="DESCRIPCION_NEW_CORTADOR">Descripcion:</label>
-        </div>
-      </div>
-      <div class = "row">
         <label>Imagen Defecto</label>
-        <div class="file-field input-field">
-           <div class="btn">
-              <span>Buscar</span>
-              <input id="ImageDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
-           </div>
-           <div class="file-path-wrapper">
-              <input class="file-path validate" type="text" placeholder="Carga Archivo" />
-           </div>
-           <img id="blah" src="http://placehold.it/180" alt="your image" />
+      </div>
+      <div class="row">
+        <label class="image-upload-container btn btn-bwm">
+          <span>Selecciona imagen</span>
+          <input #imageInput
+                 type="file"
+                 accept="image/*"
+                 (change)="processFile(imageInput, true)">
+        </label>
+        <div *ngIf="selectedFile" class="img-preview-container">
+          <div class="img-preview"
+               [ngStyle]="{'background-image': 'url('+ selectedFile + ')'}">
+          </div>
         </div>
       </div>
     </form>
@@ -104,42 +124,41 @@
 <div style="width: 80%" id="modalEditDefectoConfeccion" class="modal modal-fixed-footer">
   <div class="modal-content">
     <h4>Edita el Defecto en Confección</h4>
-    <form class="col s12">
+    <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s4">
           <i class="material-icons prefix">account_box</i>
-          <input id="CVE_EDT_DEFECTO_CONFECCION" name="CVE_EDT_DEFECTO_CONFECCION" maxlength="10" type="text" class="validate">
+          <input id="CVE_EDT_DEFECTO_CONFECCION" name="CVE_EDT_DEFECTO_CONFECCION" maxlength="10" type="text" class="validate"
+          formControlName="Clave">
           <label class="active" for="CVE_EDT_DEFECTO_CONFECCION">Clave</label>
         </div>
         <div class="input-field col s4">
           <i class="material-icons prefix">account_circle</i>
-          <input id="NOMBRE_EDT_DEFECTO_CONFECCION" name="NOMBRE_EDT_DEFECTO_CONFECCION" maxlength="150" type="text" class="validate">
+          <input id="NOMBRE_EDT_DEFECTO_CONFECCION" name="NOMBRE_EDT_DEFECTO_CONFECCION" maxlength="150" type="text" class="validate"
+          formControlName="Nombre">
           <label class="active" for="NOMBRE_EDT_DEFECTO_CONFECCION">Nombre:</label>
         </div>
       </div>
       <div class="row">
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="OBSERVACIONES_EDT_DEFECTO_CONFECCION" name="OBSERVACIONES_EDT_DEFECTO_CONFECCION" maxlength="10" type="text" class="validate">
-          <label class="active" for="OBSERVACIONES_EDT_DEFECTO_CONFECCION">Obs.:</label>
-        </div>
-        <div class="input-field col s6">
-          <i class="material-icons prefix">font_download</i>
-          <input id="DESCRIPCION_EDT_DEFECTO_CONFECCION" name="DESCRIPCION_EDT_DEFECTO_CONFECCION" maxlength="250" type="text" class="validate">
-          <label class="active" for="DESCRIPCION_EDT_DEFECTO_CONFECCION">Descripcion:</label>
-        </div>
-      </div>
-      <div class = "row">
         <label>Imagen Defecto</label>
-        <div class="file-field input-field">
-           <div class="btn">
-              <span>Buscar</span>
-              <input id="ImageDefecto" type="file" accept="image/*" onchange="readURL(this);"/>
-           </div>
-           <div class="file-path-wrapper">
-              <input class="file-path validate" type="text" placeholder="Carga Archivo" />
-           </div>
-           <img id="blah" src="http://placehold.it/180" alt="your image" />
+      </div>
+      <div class="row">
+        <label class="image-upload-container btn btn-bwm">
+          <span>Selecciona imagen</span>
+          <input #imageInput2
+                 type="file"
+                 accept="image/*"
+                 (change)="processFile(imageInput2, false)">
+        </label>
+
+        <div class="img-preview-container" *ngIf="noMostrar">
+          <img alt="Imagen defecto" [src]="selectedFileEdit" width="400" height="400">
+        </div>
+
+        <div *ngIf="selectedFile" class="img-preview-container">
+          <div class="img-preview{{selectedFile === 'fail' ? '-error' : ''}}"
+               [ngStyle]="{'background-image': 'url('+ selectedFile + ')'}">
+          </div>
         </div>
       </div>
     </form>
@@ -156,21 +175,3 @@
   </div>
 </div>
 
-<!-- Update Enabled Cortador -->
-<div id="modalEnableDefectoConfeccion" class="modal">
-  <div class="modal-content">
-    <div style="text-align: center">
-      <p>¿Realmente deseas activar o desactivar el defecto confección?</p>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <div class="row">
-      <div class="col s6" style="text-align: left">
-        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
-      </div>
-      <div class="col s6" style="text-align: right">
-        <a (click)="GetEnabledDefectoConfeccion();" class="waves-effect waves-green btn-flat">Aceptar</a>
-      </div>
-    </div>
-  </div>
-</div>

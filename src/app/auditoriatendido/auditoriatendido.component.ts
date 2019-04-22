@@ -1,8 +1,15 @@
-import { Component, OnInit } from '@angular/core';
-import { Globals } from '../Globals';
-declare var $: any;
+import {Component, ElementRef, OnInit, Renderer2, ViewChild} from '@angular/core';
+import {Globals} from '../Globals';
 import 'jquery';
-import { ToastrService } from 'ngx-toastr';
+import {ToastrService} from 'ngx-toastr';
+import {MatTableDataSource} from '@angular/material';
+import * as M from 'materialize-css/dist/js/materialize';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {CorteService} from '../services/corte/corte.service';
+import {AuditoriaCorteService} from '../services/auditoria-corte/auditoria-corte.service';
+import {forkJoin} from 'rxjs';
+
+declare var $: any;
 
 @Component({
   selector: 'app-auditoriatendido',
@@ -10,22 +17,106 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./auditoriatendido.component.css']
 })
 export class AuditoriatendidoComponent implements OnInit {
+  @ViewChild('modalNewAuditoria', {read: ElementRef}) modalAgregar: ElementRef;
+
+  dataSource: MatTableDataSource<any>;
+  displayedColumns: string[] = [
+    'Cortador', 'Serie', 'Bulto', 'Posicion', 'Defecto',
+    'Tolerancia', 'Cantidad', 'Nota', 'Imagen', 'Archivo', 'Opciones'
+  ];
+  items = [];
+  Det = [];
+
+  // Encabezado auditoria
+  ordenTrabajo = '';
+  bloquearOT = false;
+  otValida = false;
+  otDetalle;
+  loading = false;
+
+  // Catalogos
+  cortadores = [];
+  posiciones = [];
+  defectos = [];
+  tolerancias = [];
+  series = [];
+  bultos = [];
+
+  selectedFile;
+
+  form: FormGroup;
 
   constructor(
-    private _toast: ToastrService
-  ) { }
+    private _corteService: CorteService,
+    private _auditoriaCorteService: AuditoriaCorteService,
+    private _toast: ToastrService,
+    private renderer: Renderer2
+  ) {
+  }
 
   ngOnInit() {
     $('.tooltipped').tooltip();
-    $('#modalNewAuditoria').modal();
     $('select').formSelect();
-    this.GetSeries();
-    this.GetDefectosCortadores();
-    this.GetPosicionCortador();
-    this.GetTendido();
-    this.GetTipoTendido();
-    this.GetMesa();
+    // this.GetSeries();
+    // this.GetDefectosCortadores();
+    // this.GetPosicionCortador();
+    // this.GetTendido();
+    // this.GetTipoTendido();
+    // this.GetMesa();
     $('#lblModulo').text('Tendido - Auditoría');
+    this.initFormGroup();
+    this.obtenerCatalogos();
+  }
+
+  initFormGroup() {
+    this.form = new FormGroup({
+      'Cortador': new FormControl(),
+      'Serie': new FormControl(null, Validators.required),
+      'Bulto': new FormControl(null, Validators.required),
+      'Posicion': new FormControl(null, Validators.required),
+      'Defecto': new FormControl(null, Validators.required),
+      'Tolerancia': new FormControl(null, Validators.required),
+      'Cantidad': new FormControl(null, Validators.required),
+      'Nota': new FormControl(),
+      'Imagen': new FormControl(),
+      'Archivo': new FormControl(),
+      'NombreArchivo': new FormControl()
+    });
+
+    this.form.get('Serie').valueChanges
+      .subscribe(
+        serie => {
+          if (this.otValida) {
+            this._auditoriaCorteService.getBultosByOTAndSerie(this.ordenTrabajo, serie.Series)
+              .subscribe((res: any) => this.bultos = res.Bulto);
+          }
+        }
+      );
+  }
+
+  obtenerCatalogos() {
+    const cortadores$ = this._corteService.listCortadores('', '', 'True');
+    const posiciones$ = this._corteService.listPosiciones('', '', 'True');
+    const defectos$ = this._corteService.listDefectos('', '', 'True');
+    const tolerancias$ = this._corteService.listTolerancias('', '', 'True');
+
+    forkJoin(cortadores$, posiciones$, defectos$, tolerancias$)
+      .subscribe(
+        (res: any) => {
+          console.log(res);
+          this.cortadores = res[0].Vst_Cortadores;
+          this.posiciones = res[1].Vst_Cortadores;
+          this.defectos = res[2].Vst_Cortadores;
+          this.tolerancias = res[3].Tolerancias;
+        }
+      );
+
+    this._auditoriaCorteService.getSeries(this.ordenTrabajo)
+      .subscribe((res: any) => {
+        if (res.Message.IsSuccessStatusCode) {
+          this.series = res.Serie;
+        }
+      });
   }
 
   GetClients() {
@@ -100,10 +191,10 @@ export class AuditoriatendidoComponent implements OnInit {
           for (let i = 0; i < json.Vst_Cortadores.length; i++) {
             if (i === 0) {
               $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             } else {
               // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             }
           }
           $(ddl).formSelect();
@@ -175,10 +266,10 @@ export class AuditoriatendidoComponent implements OnInit {
           for (let i = 0; i < json.Vst_Cortadores.length; i++) {
             if (i === 0) {
               $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             } else {
               // tslint:disable-next-line:max-line-length
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             }
           }
           $(ddl).formSelect();
@@ -204,9 +295,9 @@ export class AuditoriatendidoComponent implements OnInit {
           for (let i = 0; i < json.Vst_Cortadores.length; i++) {
             if (i === 0) {
               $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             } else {
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             }
           }
           $(ddl).formSelect();
@@ -232,12 +323,12 @@ export class AuditoriatendidoComponent implements OnInit {
           for (let i = 0; i < json.Vst_Cortadores.length; i++) {
             if (i === 0) {
               $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             } else {
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             }
           }
-        $(ddl).formSelect();
+          $(ddl).formSelect();
         }
       },
       error: function () {
@@ -260,9 +351,9 @@ export class AuditoriatendidoComponent implements OnInit {
           for (let i = 0; i < json.Vst_Cortadores.length; i++) {
             if (i === 0) {
               $(ddl).append($('<option disabled selected></option>').attr('value', '0').text('SELECCIONE...'));
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             } else {
-              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text( json.Vst_Cortadores[i].Descripcion));
+              $(ddl).append($('<option></option>').attr('value', json.Vst_Cortadores[i].ID).text(json.Vst_Cortadores[i].Descripcion));
             }
           }
           $(ddl).formSelect();
@@ -340,7 +431,7 @@ export class AuditoriatendidoComponent implements OnInit {
               'excelHtml5',
               'csvHtml5',
               'pdfHtml5'
-             ]
+            ]
           });
           $('.tooltipped').tooltip();
         }
@@ -352,92 +443,58 @@ export class AuditoriatendidoComponent implements OnInit {
   }
 
   ValidateAddTendidoAuditoria() {
-    /*if ($('#ddlCliente')[0].value === '0') {
-      this._toast.warning('Se debe seleccionar un cliente valido', '');
-    } else*/ if ($('#ddlOT').val() === '0' ) {
-      this._toast.warning('Se debe seleccionar una orden de trabajo valida', '');
-    } else if ($('#ddlSerie')[0].value === '0') {
-      this._toast.warning('Se debe serleccionar una serie valida', '');
-    // } else if ($('#ddlNoBulto')[0].value === '0') {
-    //   this._toast.warning('Se debe seleccionar un número de bulto valido', '');
-    } else if ($('#ddlPosicion')[0].value === '0') {
-      this._toast.warning('Se debe seleccionar una posición valida', '');
-    } else if ($('#ddlDefecto')[0].value === '0') {
-      this._toast.warning('Se debe seleccionar una posición valida', '');
-    } else if ($('#ddlTendido')[0].value === '0') {
-      this._toast.warning('Se debe seleccionar un tendido valido', '');
-    } else if ($('#ddlTipoTendido')[0].value === '0') {
-      this._toast.warning('Se debe seleccionar un tipo de tendido valido', '');
-    } else if ($('#ddlMesa')[0].value === '0' ) {
-      this._toast.warning('Se debe seleccionar una mesa valida', '');
-    } else if ($('#AUDIT_CANTIDAD')[0].value === '' || $('#AUDIT_CANTIDAD')[0].value <= 0) {
-      this._toast.warning('Se debe ingresar una cantidad valida', '');
-    } else {
-      const tlb = $('#bdyCorteAuditoria');
-      let sOptions = '';
-      let _iindex = 1;
-      for (let j = 0; j < document.getElementById('bdyCorteAuditoria').getElementsByTagName('tr').length; j++) {
-        sOptions += '<tr>';
-        sOptions += '<td>' + _iindex + '</td>'; // NO
-        sOptions += '<td>' + tlb[0].rows[j].cells[1].innerText + '</td>'; // Serie
-        sOptions += '<td>' + tlb[0].rows[j].cells[2].innerText + '</td>'; // No Bulto
-        sOptions += '<td style="display: none">' + tlb[0].rows[j].cells[3].innerText + '</td>'; // ID TENDIDO
-        sOptions += '<td>' + tlb[0].rows[j].cells[4].innerText + '</td>'; // TENDIDO
-        sOptions += '<td style="display: none">' + tlb[0].rows[j].cells[5].innerText + '</td>'; // ID TIPO TENDIDO
-        sOptions += '<td>' + tlb[0].rows[j].cells[6].innerText + '</td>'; // TENDIDO
-        sOptions += '<td style="display: none">' + tlb[0].rows[j].cells[7].innerText + '</td>'; // ID POSICION
-        sOptions += '<td>' + tlb[0].rows[j].cells[8].innerText + '</td>'; // POSICION
-        sOptions += '<td style="display: none">' + tlb[0].rows[j].cells[9].innerText + '</td>'; // ID DEFECTO
-        sOptions += '<td>' + tlb[0].rows[j].cells[10].innerText + '</td>'; // DEFECTO
-        sOptions += '<td style="display: none">' + tlb[0].rows[j].cells[11].innerText + '</td>'; // ID MESA
-        sOptions += '<td>' + tlb[0].rows[j].cells[12].innerText + '</td>'; // MESA
-        sOptions += '<td>' + tlb[0].rows[j].cells[13].innerText + '</td>'; // CANTIDAD
-        sOptions += '<td style="display:none">' + tlb[0].rows[j].cells[14].innerText + '</td>'; // IMAGEN
-        sOptions += '</tr>';
-        _iindex++;
-      }
-      sOptions += '<tr>';
-      sOptions += '<td>' + _iindex + '</td>'; // NO
-      sOptions += '<td>' + $('#ddlSerie option:selected').text() + '</td>'; // Serie
-      sOptions += '<td>' + $('#ddlNoBulto option:selected').text() + '</td>'; // No Bulto
-      sOptions += '<td style="display: none">' + $('#ddlTendido')[0].value + '</td>'; // ID TENDIDO
-      sOptions += '<td>' + $('#ddlTendido option:selected').text() + '</td>'; // TENDIDO
-      sOptions += '<td style="display: none">' + $('#ddlTipoTendido')[0].value + '</td>'; // ID TIPO TENDIDO
-      sOptions += '<td>' + $('#ddlTipoTendido option:selected').text() + '</td>'; // TIPO TENDIDO
-      sOptions += '<td style="display: none">' + $('#ddlPosicion')[0].value + '</td>'; // ID POSICION
-      sOptions += '<td>' + $('#ddlPosicion option:selected').text() + '</td>'; // POSICION
-      sOptions += '<td style="display: none">' + $('#ddlDefecto')[0].value + '</td>'; // ID DEFECTO
-      sOptions += '<td>' + $('#ddlDefecto option:selected').text() + '</td>'; // DEFECTO
-      sOptions += '<td style="display: none">' + $('#ddlMesa')[0].value + '</td>'; // ID MESA
-      sOptions += '<td>' + $('#ddlMesa option:selected').text() + '</td>'; // MESA
-      sOptions += '<td>' + $('#AUDIT_CANTIDAD').val() + '</td>'; // CANTIDAD
-      // tslint:disable-next-line:max-line-length
-      sOptions += '<td style="display:none">' +  ($('#blah')[0].src === 'http://placehold.it/180' ? '' : $('#blah')[0].src) + + '</td>'; // IMAGEN
-      sOptions += '</tr>';
-
-      $('#tlbCorteAuditoria').html();
-      $('#tlbCorteAuditoria').html('<tbody id="bdyCorteAuditoria">' + sOptions + '</tbody>');
-      // tslint:disable-next-line:max-line-length
-      $('#tlbCorteAuditoria').append('<thead><th>No.</th><th>Serie</th><th>No. Bulto</th><th style="display: none"></th><th>Tendido</th><th style="display: none"></th><th>Tipo Tendido</th><th style="display: none"></th><th>Posición</th><th style="display: none"></th><th>Defecto</th><th style="display: none"></th><th>Mesa</th><th>Cantidad</th><th style="display: none"></th></thead>');
-      $('#tlbCorteAuditoria').DataTable({
-        sorting: true,
-        bDestroy: true,
-        ordering: true,
-        bPaginate: true,
-        pageLength: 6,
-        bInfo: true,
-        dom: 'Bfrtip',
-        processing: true,
-        buttons: [
-          'copyHtml5',
-          'excelHtml5',
-          'csvHtml5',
-          'pdfHtml5'
-         ]
+    if (this.form.invalid) {
+      Object.keys(this.form.controls).forEach(field => { // {1}
+        const control = this.form.get(field);            // {2}
+        control.markAsTouched({onlySelf: true});       // {3}
       });
-      $('.tooltipped').tooltip();
-      this.DisposeNewRowCortador();
+      return;
     }
+
+    if (this.ordenTrabajo !== '') {
+      this.bloquearOT = true;
+      const detalle = this.form.value;
+      const detalleItem = {
+        'Serie': detalle.Serie.Series,
+        'Bulto': detalle.Bulto.Bulto,
+        'IdTendido': detalle.Posicion.ID,
+        'IdMesa': detalle.Posicion.ID,
+        'IdPosicion': detalle.Posicion.ID,
+        'IdDefecto': detalle.Defecto.ID,
+        'Cantidad': +detalle.Cantidad,
+        'Imagen': detalle.Imagen,
+        'Nota': detalle.Nota,
+        'Archivo': detalle.Archivo
+      };
+      this.Det.push(detalleItem);
+      const {Cortador, Serie, Bulto, Posicion, Defecto, Tolerancia, Cantidad, Nota, Imagen, Archivo} = detalle;
+      const itemTable = {
+        cortador: Cortador.Nombre,
+        serie: Serie.Series,
+        bulto: Bulto.Series,
+        posicion: Posicion.Nombre,
+        defecto: Defecto.Nombre,
+        tolerancia: Tolerancia,
+        cantidad: Cantidad,
+        nota: Nota,
+        imagen: Imagen,
+        archivo: Archivo
+      };
+      this.items.push(itemTable);
+      this.dataSource = new MatTableDataSource(this.items);
+      this.initFormGroup();
+      this.selectedFile = null;
+    } else {
+      this._toast.warning('Debe seleccionar una OT valida');
+      const element = this.renderer.selectRootElement('#ddlOT');
+      setTimeout(() => element.focus(), 0);
+    }
+  }
+
+  eliminar(index) {
+    // this.Det.splice(index, 1);
+    this.items.splice(index, 1);
+    this.dataSource = new MatTableDataSource(this.items);
   }
 
   GetOrdenTrabajo(): boolean {
@@ -445,22 +502,173 @@ export class AuditoriatendidoComponent implements OnInit {
     $.ajax({
       // tslint:disable-next-line:max-line-length
       url: Globals.UriRioSulApi + 'AuditoriaCorte/ObtieneOrdenesTrabajoDynamics?IdClienteRef=' + $('#ddlCliente').val() + '&OrdenT=' + $('#ddlOT').val(),
-          dataType: 'json',
-          contents: 'application/json; charset=utf-8',
-          method: 'get',
-          async: false,
-          success: function (json) {
-            if (json.Message.IsSuccessStatusCode) {
-              for (let index = 0; index < json.OrdenTrabajo.length; index++) {
-                Result = true;
-              }
-            }
-          },
-          error: function () {
-            console.log('No se ha podido establecer conexión');
+      dataType: 'json',
+      contents: 'application/json; charset=utf-8',
+      method: 'get',
+      async: false,
+      success: function (json) {
+        if (json.Message.IsSuccessStatusCode) {
+          for (let index = 0; index < json.OrdenTrabajo.length; index++) {
+            Result = true;
           }
+        }
+      },
+      error: function () {
+        console.log('No se ha podido establecer conexión');
+      }
     });
     return Result;
+  }
+
+  detalleOT(ot) {
+    console.log(ot);
+    this.loading = true;
+    this._auditoriaCorteService.getDetalleOT(ot)
+      .subscribe(
+        (res: any) => {
+          console.log(res);
+          if (res.Message.StatusCode === 409) {
+            this.otDetalle = null;
+            this.otValida = false;
+            this._toast.warning(res.Message2, '');
+          } else {
+            this.otDetalle = res.OT;
+            this.otValida = true;
+            this.obtenerSeries();
+          }
+        }, error1 => {
+          console.log(error1);
+        },
+        () => {
+          this.loading = false;
+        }
+      );
+  }
+
+  obtenerSeries() {
+    this._auditoriaCorteService.getSeries(this.ordenTrabajo)
+      .subscribe((res: any) => {
+        if (res.Message.IsSuccessStatusCode) {
+          this.series = res.Serie;
+        }
+      });
+  }
+
+  openModalAgregar() {
+    console.log('Estoy en abrir');
+    const options = {
+      dismissible: true,
+      startingTop: '-10%',
+      onOpenStart: this.reset.bind(this),
+      onCloseEnd: this.closeModalAgregar.bind(this),
+    };
+    M.Modal.init(this.modalAgregar.nativeElement, options);
+    const modalAgregar = M.Modal.getInstance(this.modalAgregar.nativeElement);
+    modalAgregar.open();
+  }
+
+  closeModalAgregar() {
+    console.log('Estoy en cerrar');
+    const modalAgregar = M.Modal.getInstance(this.modalAgregar.nativeElement);
+    modalAgregar.destroy();
+  }
+
+  reset() {
+    console.log('Estoy en reset');
+    this.initFormGroup();
+    this.items = [];
+    this.otDetalle = null;
+    this.bloquearOT = false;
+    this.ordenTrabajo = '';
+    this.dataSource = new MatTableDataSource();
+  }
+
+  processFile(imageInput: any, nuevo: boolean, tipo) {
+    const file: File = imageInput.files[0];
+    const reader = new FileReader();
+    console.log(file);
+
+    reader.addEventListener('load', (event: any) => {
+      if (tipo === 'imagen') {
+        this.form.get('Imagen').patchValue(event.target.result);
+        this.selectedFile = event.target.result;
+      } else if (tipo === 'archivo') {
+        this.form.get('Archivo').patchValue(event.target.result);
+      }
+      // nuevo ? this.form.get('Imagen').patchValue(event.target.result) : this.formEdit.get('Imagen').patchValue(event.target.result);
+    });
+    reader.readAsDataURL(file);
+  }
+
+  openPdfInTab(archivo) {
+    const base64ImageData = archivo;
+    // let extension = this.base64MimeType(archivo);
+    // console.log(extension);
+    // data:application/pdf
+    const contentType = `application/pdf`;
+
+    const byteCharacters = atob(base64ImageData.substr(`data:${contentType};base64,`.length));
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+      const slice = byteCharacters.slice(offset, offset + 1024);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+    const blob = new Blob(byteArrays, {type: contentType});
+    const blobUrl = URL.createObjectURL(blob);
+
+    window.open(blobUrl, '_blank');
+  }
+
+  openImage(imagen) {
+    const base64ImageData = imagen;
+    const extension = this.base64MimeType(imagen);
+    console.log(extension);
+    const contentType = `image/${extension}`;
+
+    const byteCharacters = atob(base64ImageData.substr(`data:${contentType};base64,`.length));
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += 1024) {
+      const slice = byteCharacters.slice(offset, offset + 1024);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+
+      byteArrays.push(byteArray);
+    }
+    const blob = new Blob(byteArrays, {type: contentType});
+    const blobUrl = URL.createObjectURL(blob);
+
+    window.open(blobUrl, '_blank');
+  }
+
+  base64MimeType(encoded) {
+    let result = null;
+
+    if (typeof encoded !== 'string') {
+      return result;
+    }
+
+    const mime = encoded.match(/data:image+\/([a-zA-Z0-9-.+]+).*,.*/);
+
+    if (mime && mime.length) {
+      result = mime[1];
+    }
+
+    return result;
   }
 
 }

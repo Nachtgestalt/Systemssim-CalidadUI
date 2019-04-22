@@ -273,7 +273,7 @@ hr.border {
 .example-radio-group {
   display: flex;
   flex-direction: row;
-  margin: 15px 0;
+  margin: 0;
 }
 
 .example-radio-button {
@@ -281,4 +281,9 @@ hr.border {
 }
 .active {
   border-bottom: white solid 2px;
+}
+
+.row-column {
+  display: flex;
+  flex-direction: column;
 }

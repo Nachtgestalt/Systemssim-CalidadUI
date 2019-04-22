@@ -7,9 +7,7 @@ import {HttpClientModule} from '@angular/common/http';
 
 import {AppComponent} from './app.component';
 import {AngularFontAwesomeModule} from 'angular-font-awesome';
-import {Globals} from './Globals';
 import {ToastrModule} from 'ngx-toastr';
-import {LaddaModule} from 'angular2-ladda';
 import {NavmenuComponent} from './navmenu/navmenu.component';
 import {LoginComponent} from './login/login.component';
 import {HomeComponent} from './home/home.component';
@@ -58,20 +56,21 @@ import {NgDropFilesDirective} from './directives/ng-drop-files.directive';
 import {EliminarComponent} from './dialogs/eliminar/eliminar.component';
 import {MaterialModule} from './material/material.module';
 import {AddEditOperacionTerminadoComponent} from './terminado-operaciones/add-edit-operacion-terminado/add-edit-operacion-terminado.component';
-import { NumberPipePipe } from './pipes/number-pipe.pipe';
-import { QualityPageComponent } from './pages/quality-page/quality-page.component';
-import { CalidadAuditoriaComponent } from './calidad-auditoria/calidad-auditoria.component';
-import { CalidadConsultaAuditoriaComponent } from './calidad-consulta-auditoria/calidad-consulta-auditoria.component';
-import { TerminadoConsultaAuditoriaComponent } from './terminado-consulta-auditoria/terminado-consulta-auditoria.component';
+import {NumberPipePipe} from './pipes/number-pipe.pipe';
+import {QualityPageComponent} from './pages/quality-page/quality-page.component';
+import {CalidadAuditoriaComponent} from './calidad-auditoria/calidad-auditoria.component';
+import {CalidadConsultaAuditoriaComponent} from './calidad-consulta-auditoria/calidad-consulta-auditoria.component';
+import {TerminadoConsultaAuditoriaComponent} from './terminado-consulta-auditoria/terminado-consulta-auditoria.component';
 import {DigitOnlyModule} from '@uiowa/digit-only';
 
-import { registerLocaleData } from '@angular/common';
+import {registerLocaleData} from '@angular/common';
 import localeMx from '@angular/common/locales/es-MX';
-import { NumberFormatPipe } from './pipes/number-format.pipe';
-import { MarcaClienteComponent } from './marca-cliente/marca-cliente.component';
-import { AuditoriaLavanderiaComponent } from './auditoria-lavanderia/auditoria-lavanderia.component';
-import { AuditoriaLavanderiaConsultaComponent } from './auditoria-lavanderia-consulta/auditoria-lavanderia-consulta.component';
-import { AuditoriaProcesosConsultaComponent } from './auditoria-procesos-consulta/auditoria-procesos-consulta.component';
+import {NumberFormatPipe} from './pipes/number-format.pipe';
+import {MarcaClienteComponent} from './marca-cliente/marca-cliente.component';
+import {AuditoriaLavanderiaComponent} from './auditoria-lavanderia/auditoria-lavanderia.component';
+import {AuditoriaLavanderiaConsultaComponent} from './auditoria-lavanderia-consulta/auditoria-lavanderia-consulta.component';
+import {AuditoriaProcesosConsultaComponent} from './auditoria-procesos-consulta/auditoria-procesos-consulta.component';
+import {AuditoriaCorteConsultaComponent} from './auditoria-corte-consulta/auditoria-corte-consulta.component';
 
 // the second parameter 'fr' is optional
 registerLocaleData(localeMx);
@@ -135,6 +134,7 @@ registerLocaleData(localeMx);
     AuditoriaLavanderiaComponent,
     AuditoriaLavanderiaConsultaComponent,
     AuditoriaProcesosConsultaComponent,
+    AuditoriaCorteConsultaComponent,
   ],
   entryComponents: [
     AddEditOperacionTerminadoComponent
@@ -184,6 +184,7 @@ registerLocaleData(localeMx);
           {path: 'tipotendido', component: TipotendidoComponent},
           {path: 'toleranciacorte', component: ToleranciacorteComponent},
           {path: 'auditoriacorte', component: AuditoriacorteComponent},
+          {path: 'auditoriacorte-consulta', component: AuditoriaCorteConsultaComponent},
           {path: 'auditoriatendido', component: AuditoriatendidoComponent}
         ]
       },
