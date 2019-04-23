@@ -71,6 +71,7 @@ import {AuditoriaLavanderiaComponent} from './auditoria-lavanderia/auditoria-lav
 import {AuditoriaLavanderiaConsultaComponent} from './auditoria-lavanderia-consulta/auditoria-lavanderia-consulta.component';
 import {AuditoriaProcesosConsultaComponent} from './auditoria-procesos-consulta/auditoria-procesos-consulta.component';
 import {AuditoriaCorteConsultaComponent} from './auditoria-corte-consulta/auditoria-corte-consulta.component';
+import {AuditoriaTendidoConsultaComponent} from './auditoria-tendido-consulta/auditoria-tendido-consulta.component';
 
 // the second parameter 'fr' is optional
 registerLocaleData(localeMx);
@@ -135,6 +136,7 @@ registerLocaleData(localeMx);
     AuditoriaLavanderiaConsultaComponent,
     AuditoriaProcesosConsultaComponent,
     AuditoriaCorteConsultaComponent,
+    AuditoriaTendidoConsultaComponent,
   ],
   entryComponents: [
     AddEditOperacionTerminadoComponent
@@ -185,7 +187,8 @@ registerLocaleData(localeMx);
           {path: 'toleranciacorte', component: ToleranciacorteComponent},
           {path: 'auditoriacorte', component: AuditoriacorteComponent},
           {path: 'auditoriacorte-consulta', component: AuditoriaCorteConsultaComponent},
-          {path: 'auditoriatendido', component: AuditoriatendidoComponent}
+          {path: 'auditoriatendido', component: AuditoriatendidoComponent},
+          {path: 'auditoriatendido-consulta', component: AuditoriaTendidoConsultaComponent}
         ]
       },
       {

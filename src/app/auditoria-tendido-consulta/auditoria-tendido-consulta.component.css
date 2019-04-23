@@ -1,0 +1,10 @@
+.modal {
+  width: 90% !important;
+  height: 80%;
+  max-height: 90% !important;
+}
+
+.w-100 {
+  width: 100%;
+  margin-bottom: 1rem;
+}
