@@ -98,6 +98,12 @@
               <td mat-cell *matCellDef="let element"> {{element.pzas_2 | numberFormat}} </td>
             </ng-container>
 
+            <!-- Area Column-->
+            <ng-container matColumnDef="Area">
+              <th mat-header-cell *matHeaderCellDef> Área</th>
+              <td mat-cell *matCellDef="let element"> {{element.Auditoria | numberFormat}} </td>
+            </ng-container>
+
             <!-- Status Finales Column -->
             <ng-container matColumnDef="Status">
               <th mat-header-cell *matHeaderCellDef> Status</th>
@@ -118,7 +124,7 @@
                 <button type="button" name="btnAddCortador"
                         class="btn red darken-4 "
                         matTooltip="Eliminar"
-                        (click)="eliminarAuditoria(element.IdAuditoria)">
+                        (click)="eliminarAuditoria(element)">
                   <i class="material-icons center">delete_forever</i>
                 </button>
               </td>
@@ -138,7 +144,7 @@
   <div class="modal-content">
     <div class="row">
       <span class="close" (click)="closeModalAgregar()">&times;</span>
-      <h4>Nuevo Auditoría Corte</h4>
+      <h4 style="text-transform: uppercase">Nueva Auditoría {{tipoAuditoria}}</h4>
     </div>
     <div class="row">
       <div class="input-field col s4">
@@ -223,266 +229,33 @@
     </div>
     <hr class="border">
     <!--    Termina encabezado   -->
+    <div class="row-column col s6">
+      <mat-label style="font-size: 12px">TIPO AUDITORÍA</mat-label>
+      <mat-radio-group class="example-radio-group justify-content-between"
+                       [(ngModel)]="tipoAuditoria">
+        <mat-radio-button class="example-radio-button" *ngFor="let radioTipo of radioTipoAuditoria"
+                          [value]="radioTipo.value">
+          {{radioTipo.viewValue}}
+        </mat-radio-button>
+      </mat-radio-group>
+    </div>
 
-    <form class="col s12 mt-3" [formGroup]="form">
-      <div class="row">
-        <mat-form-field class="col s6"
-                        matTooltip="Se requiere que la OT sea valida para visualizar las series"
-                        [matTooltipDisabled]="otValida">
-          <mat-label>SERIE</mat-label>
-          <mat-select formControlName="Serie"
-                      [disabled]="!otValida">
-            <mat-option *ngFor="let serie of series" [value]="serie">
-              {{serie.Series}}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.controls['Serie'].invalid && form.get('Serie').touched">Campo necesario</mat-error>
-        </mat-form-field>
+    <div class="row">
+      <app-agregar-corte class="col s12 mt-3"
+                         *ngIf="tipoAuditoria === 'corte' && modalAgregarIsActive"
+                         [ordenTrabajo]="ordenTrabajo"
+                         [otValida]="otValida"
+                         (bloquearOT)="bloquearOT = $event"
+                         (Detalles)="Det = $event"></app-agregar-corte>
 
-        <mat-form-field class="col s6"
-                        matTooltip="Se requiere que la OT y la serie sea valida para visualizar las series"
-                        [matTooltipDisabled]="otValida && form.get('Serie').value">
-          <mat-label>BULTO</mat-label>
-          <mat-select formControlName="Bulto"
-                      [disabled]="!form.get('Serie').value">
-            <mat-option *ngFor="let bulto of bultos" [value]="bulto">
-              {{bulto.Bulto}}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.controls['Bulto'].invalid && form.get('Bulto').touched">Campo necesario</mat-error>
-        </mat-form-field>
-      </div>
-      <div class="row">
+      <app-agregar-tendido class="col s12 mt-3"
+                           *ngIf="tipoAuditoria === 'tendido' && modalAgregarIsActive"
+                           [ordenTrabajo]="ordenTrabajo"
+                           [otValida]="otValida"
+                           (bloquearOT)="bloquearOT = $event"
+                           (Detalles)="Det = $event"></app-agregar-tendido>
 
-        <mat-form-field class="col s3">
-          <mat-label>TENDIDO</mat-label>
-          <mat-select formControlName="Tendido">
-            <mat-option *ngFor="let tendido of tendidos" [value]="tendido">
-              {{tendido.Nombre}}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.controls['Tendido'].invalid && form.get('Tendido').touched">Campo necesario</mat-error>
-        </mat-form-field>
-
-        <div class="row-column col s3">
-          <mat-label style="font-size: 12px">TIPO TENDIDO</mat-label>
-          <mat-radio-group class="example-radio-group"
-                           [value]="form.controls['Tendido'].value ? form.controls['Tendido'].value.TipoTendido : null"
-                           aria-labelledby="example-radio-group-label"
-                           [disabled]="true">
-            <mat-radio-button class="example-radio-button" *ngFor="let option of optionModule"
-                              [value]="option.value">
-              {{option.viewValue}}
-            </mat-radio-button>
-          </mat-radio-group>
-        </div>
-
-        <mat-form-field class="col s6">
-          <mat-label>MESA</mat-label>
-          <mat-select formControlName="Mesa">
-            <mat-option *ngFor="let mesa of mesas" [value]="mesa">
-              {{mesa.Nombre}}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.controls['Mesa'].invalid && form.get('Mesa').touched">Campo necesario</mat-error>
-        </mat-form-field>
-      </div>
-      <div class="row">
-
-        <mat-form-field class="col s6">
-          <mat-label>POSICIÓN</mat-label>
-          <mat-select formControlName="Posicion">
-            <mat-option *ngFor="let posicion of posiciones" [value]="posicion">
-              {{posicion.Nombre}}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.get('Posicion').invalid && form.get('Posicion').touched">Campo necesario
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field class="col s6">
-          <mat-label>DEFECTO</mat-label>
-          <mat-select formControlName="Defecto">
-            <mat-option *ngFor="let defecto of defectos" [value]="defecto">
-              {{defecto.Nombre}}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.controls['Defecto'].invalid && form.get('Defecto').touched">Campo necesario</mat-error>
-        </mat-form-field>
-      </div>
-      <div class="row">
-        <div class="input-field col s6">
-          <input id="cantidad" class="validate" type="text" style="text-align: right;"
-                 inputmode="numeric" pattern="[0-9]*"
-                 formControlName="Cantidad" digitOnly/>
-          <label for="cantidad">CANTIDAD:</label>
-          <mat-error *ngIf="form.get('Cantidad').invalid && form.get('Cantidad').touched">Campo necesario
-          </mat-error>
-          <small style="float: right">
-            {{form.controls['Cantidad'].value ? (form.controls['Cantidad'].value | numberFormat) : ''}}
-          </small>
-        </div>
-      </div>
-      <div class="row">
-        <div class="input-field col s12">
-          <textarea class="materialize-textarea" id="textarea1" formControlName="Nota"></textarea>
-          <label for="textarea1">NOTA:</label>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col s6">
-          <label class="image-upload-container btn btn-bwm">
-            <span>
-              <i class="material-icons">image</i>
-              Selecciona imagen
-            </span>
-            <input #imageInput2
-                   type="file"
-                   accept="image/*"
-                   (change)="processFile(imageInput2, false, 'imagen')">
-          </label>
-
-          <div *ngIf="selectedFile" class="img-preview-container">
-            <div class="img-preview"
-                 [ngStyle]="{'background-image': 'url('+ selectedFile + ')'}">
-            </div>
-          </div>
-        </div>
-        <div class="file-field input-field col s6">
-          <div class="btn">
-            <span>Seleccionar Archivo</span>
-            <input type="file" accept="application/pdf"
-                   #fileInput
-                   (change)="processFile(fileInput, false, 'Archivo')">
-          </div>
-          <div class="file-path-wrapper">
-            <input class="file-path validate" type="text" formControlName="NombreArchivo">
-          </div>
-        </div>
-      </div>
-
-      <div style="text-align: right">
-        <button type="button" name="btnAddCortador"
-                class="btn light-blue darken-4 w-100"
-                data-position="bottom" data-tooltip="Agrega elemento a auditoría"
-                (click)="ValidateAddCortadorAuditoria()">Agregar
-          <i class="material-icons right">send</i>
-        </button>
-      </div>
-      <div class="row">
-        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
-          <!-- Serie Column -->
-          <ng-container matColumnDef="Serie">
-            <th mat-header-cell *matHeaderCellDef> SERIE</th>
-            <td mat-cell *matCellDef="let element"> {{element.serie}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Bulto Column -->
-          <ng-container matColumnDef="Bulto">
-            <th mat-header-cell *matHeaderCellDef> BULTO</th>
-            <td mat-cell *matCellDef="let element"> {{element.bulto}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Tendido Column -->
-          <ng-container matColumnDef="Tendido">
-            <th mat-header-cell *matHeaderCellDef> TENDIDO</th>
-            <td mat-cell *matCellDef="let element"> {{element.tendido}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Tipo Tendido Column -->
-          <ng-container matColumnDef="Tipo Tendido">
-            <th mat-header-cell *matHeaderCellDef> TIPO TENDIDO</th>
-            <td mat-cell *matCellDef="let element"> {{element.tipo_tendido}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- #Mesa Column -->
-          <ng-container matColumnDef="Mesa">
-            <th mat-header-cell *matHeaderCellDef> #MESA</th>
-            <td mat-cell *matCellDef="let element"> {{element.mesa}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Posicion Column -->
-          <ng-container matColumnDef="Posicion">
-            <th mat-header-cell *matHeaderCellDef> POSICION</th>
-            <td mat-cell *matCellDef="let element"> {{element.posicion}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Defecto Column -->
-          <ng-container matColumnDef="Defecto">
-            <th mat-header-cell *matHeaderCellDef>DEFECTO</th>
-            <td mat-cell *matCellDef="let element; let i = index">
-              {{element.defecto}}
-            </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- PZAS.RECUP Column -->
-          <ng-container matColumnDef="Cantidad">
-            <th mat-header-cell *matHeaderCellDef> CANTIDAD</th>
-            <td mat-cell *matCellDef="let element"> {{element.cantidad | numberFormat}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Nota column-->
-          <ng-container matColumnDef="Nota">
-            <th mat-header-cell *matHeaderCellDef> NOTA</th>
-            <td mat-cell *matCellDef="let element"> {{element.nota}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Imagen Column -->
-          <ng-container matColumnDef="Imagen">
-            <th mat-header-cell *matHeaderCellDef> IMAGEN</th>
-            <td mat-cell *matCellDef="let element">
-              <img [src]="element.imagen" alt="imagen" style="width:40px;height:40px;"
-                   class="cursor"
-                   matTooltip="Ver imagen"
-                   *ngIf="element.imagen !== null && element.imagen !== ''"
-                   (click)="openImage(element.imagen)">
-            </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Archivo Column -->
-          <ng-container matColumnDef="Archivo">
-            <th mat-header-cell *matHeaderCellDef class="alinear-der"> ARCHIVO</th>
-            <td mat-cell *matCellDef="let element" class="alinear-der">
-              <i class="material-icons prefix cursor" *ngIf="element.Archivo"
-                 (click)="openPdfInTab(element.Archivo)"
-                 matTooltip="Ver Archivo">
-                attach_file
-              </i>
-              <p *ngIf="!element.Archivo">No hay Archivo</p>
-            </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Opciones column-->
-          <ng-container matColumnDef="Opciones">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let element; let i = index" style="text-align: right">
-              <button class=" red darken-4 btn bold_sub"
-                      matTooltip="Eliminar"
-                      (click)="eliminar(i)">
-                <i class="material-icons">delete</i>
-              </button>
-            </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-          <tr mat-footer-row *matFooterRowDef="displayedColumns"></tr>
-        </table>
-      </div>
-    </form>
+    </div>
   </div>
   <div class="modal-footer">
     <div class="row">
@@ -499,7 +272,7 @@
 <!-- MODAL EDIT AUDITORÍA -->
 <div style="width: 80%" id="modalEditAuditoria" class="modal modal-fixed-footer modal-lg" #modalEdit>
   <div class="modal-content">
-    <h4>Auditoría Lavandería - {{otDetalle?.IdAuditoria}}</h4>
+    <h4>Auditoría Corte - {{otDetalle?.IdAuditoria}}</h4>
     <div class="row">
       <div class="input-field col s4">
         <i class="material-icons prefix">details</i>
@@ -567,262 +340,21 @@
       </div>
     </div>
     <hr class="border">
-    <form class="col s12 mt-3" [formGroup]="form">
-      <div class="row">
-        <mat-form-field class="col s6">
-          <mat-label>SERIE</mat-label>
-          <mat-select formControlName="Serie">
-            <mat-option *ngFor="let serie of series" [value]="serie">
-              {{serie.Series}}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.controls['Serie'].invalid && form.get('Serie').touched">Campo necesario</mat-error>
-        </mat-form-field>
+    <app-editar-corte *ngIf="otDetalle?.Corte && modalEditarIsActive"
+                      [status]="otDetalle?.FechaRegistroFin === null"
+                      [ordenTrabajo]="ordenTrabajo"
+                      [items]="items"
+                      [Det]="Det"
+                      (bloquearOT)="bloquearOT = $event"
+                      (Detalles)="Det = $event"></app-editar-corte>
 
-        <mat-form-field class="col s6"
-                        matTooltip="Se requiere una serie valida para visualizar los bultos"
-                        [matTooltipDisabled]="otValida && form.get('Serie').value">
-          <mat-label>BULTO</mat-label>
-          <mat-select formControlName="Bulto">
-            <mat-option *ngFor="let bulto of bultos" [value]="bulto">
-              {{bulto.Bulto}}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.controls['Bulto'].invalid && form.get('Bulto').touched">Campo necesario</mat-error>
-        </mat-form-field>
-      </div>
-      <div class="row">
-
-        <mat-form-field class="col s3">
-          <mat-label>TENDIDO</mat-label>
-          <mat-select formControlName="Tendido">
-            <mat-option *ngFor="let tendido of tendidos" [value]="tendido">
-              {{tendido.Nombre}}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.controls['Tendido'].invalid && form.get('Tendido').touched">Campo necesario</mat-error>
-        </mat-form-field>
-
-        <div class="row-column col s3">
-          <mat-label style="font-size: 12px">TIPO TENDIDO</mat-label>
-          <mat-radio-group class="example-radio-group"
-                           [value]="form.controls['Tendido'].value ? form.controls['Tendido'].value.TipoTendido : null"
-                           aria-labelledby="example-radio-group-label"
-                           [disabled]="true">
-            <mat-radio-button class="example-radio-button" *ngFor="let option of optionModule"
-                              [value]="option.value">
-              {{option.viewValue}}
-            </mat-radio-button>
-          </mat-radio-group>
-        </div>
-
-        <mat-form-field class="col s6">
-          <mat-label>MESA</mat-label>
-          <mat-select formControlName="Mesa">
-            <mat-option *ngFor="let mesa of mesas" [value]="mesa">
-              {{mesa.Nombre}}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.controls['Mesa'].invalid && form.get('Mesa').touched">Campo necesario</mat-error>
-        </mat-form-field>
-      </div>
-      <div class="row">
-
-        <mat-form-field class="col s6">
-          <mat-label>POSICIÓN</mat-label>
-          <mat-select formControlName="Posicion">
-            <mat-option *ngFor="let posicion of posiciones" [value]="posicion">
-              {{posicion.Nombre}}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.get('Posicion').invalid && form.get('Posicion').touched">Campo necesario
-          </mat-error>
-        </mat-form-field>
-
-        <mat-form-field class="col s6">
-          <mat-label>DEFECTO</mat-label>
-          <mat-select formControlName="Defecto">
-            <mat-option *ngFor="let defecto of defectos" [value]="defecto">
-              {{defecto.Nombre}}
-            </mat-option>
-          </mat-select>
-          <mat-error *ngIf="form.controls['Defecto'].invalid && form.get('Defecto').touched">Campo necesario</mat-error>
-        </mat-form-field>
-      </div>
-      <div class="row">
-        <div class="input-field col s6">
-          <input id="cantidad" class="validate" type="text" style="text-align: right;"
-                 inputmode="numeric" pattern="[0-9]*"
-                 formControlName="Cantidad" digitOnly/>
-          <label for="cantidad">CANTIDAD:</label>
-          <mat-error *ngIf="form.get('Cantidad').invalid && form.get('Cantidad').touched">Campo necesario
-          </mat-error>
-          <small style="float: right">
-            {{form.controls['Cantidad'].value ? (form.controls['Cantidad'].value | numberFormat) : ''}}
-          </small>
-        </div>
-      </div>
-      <div class="row">
-        <div class="input-field col s12">
-          <textarea class="materialize-textarea" id="textarea1" formControlName="Nota"></textarea>
-          <label for="textarea1">NOTA:</label>
-        </div>
-      </div>
-      <div class="row" *ngIf="otDetalle?.FechaRegistroFin ===null">
-        <div class="col s6">
-          <label class="image-upload-container btn btn-bwm">
-            <span>
-              <i class="material-icons">image</i>
-              Selecciona imagen
-            </span>
-            <input #imageInput2
-                   type="file"
-                   accept="image/*"
-                   (change)="processFile(imageInput2, false, 'imagen')">
-          </label>
-
-          <div *ngIf="selectedFile" class="img-preview-container">
-            <div class="img-preview"
-                 [ngStyle]="{'background-image': 'url('+ selectedFile + ')'}">
-            </div>
-          </div>
-        </div>
-        <div class="file-field input-field col s6">
-          <div class="btn">
-            <span>Seleccionar Archivo</span>
-            <input type="file" accept="application/pdf"
-                   #fileInput
-                   (change)="processFile(fileInput, false, 'archivo')">
-          </div>
-          <div class="file-path-wrapper">
-            <input class="file-path validate" type="text" formControlName="NombreArchivo">
-          </div>
-        </div>
-      </div>
-      <br/>
-      <div style="text-align: right">
-        <button type="button" name="btnAddCortador"
-                class="btn light-blue darken-4   w-100"
-                data-position="bottom" data-tooltip="Agrega elemento a auditoría"
-                (click)="ValidateAddCortadorAuditoriaEdit()"
-                [disabled]="otDetalle?.FechaRegistroFin!==null">Agregar
-          <i class="material-icons right">send</i>
-        </button>
-      </div>
-      <div class="row">
-        <table mat-table [dataSource]="dataSourceEdit" class="mat-elevation-z8">
-          <!-- Serie Column -->
-          <ng-container matColumnDef="Serie">
-            <th mat-header-cell *matHeaderCellDef> SERIE</th>
-            <td mat-cell *matCellDef="let element"> {{element.Serie}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Bulto Column -->
-          <ng-container matColumnDef="Bulto">
-            <th mat-header-cell *matHeaderCellDef> BULTO</th>
-            <td mat-cell *matCellDef="let element"> {{element.Bulto}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Tendido Column -->
-          <ng-container matColumnDef="Tendido">
-            <th mat-header-cell *matHeaderCellDef> TENDIDO</th>
-            <td mat-cell *matCellDef="let element"> {{element.NombreTendido}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Tipo Tendido Column -->
-          <ng-container matColumnDef="Tipo Tendido">
-            <th mat-header-cell *matHeaderCellDef> TIPO TENDIDO</th>
-            <td mat-cell *matCellDef="let element"> {{element.tipo_tendido}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- #Mesa Column -->
-          <ng-container matColumnDef="Mesa">
-            <th mat-header-cell *matHeaderCellDef> #MESA</th>
-            <td mat-cell *matCellDef="let element"> {{element.NombreMesa}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Posicion Column -->
-          <ng-container matColumnDef="Posicion">
-            <th mat-header-cell *matHeaderCellDef> POSICION</th>
-            <td mat-cell *matCellDef="let element"> {{element.NombrePosicion}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Defecto Column -->
-          <ng-container matColumnDef="Defecto">
-            <th mat-header-cell *matHeaderCellDef>DEFECTO</th>
-            <td mat-cell *matCellDef="let element; let i = index">
-              {{element.NombreDefecto}}
-            </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- PZAS.RECUP Column -->
-          <ng-container matColumnDef="Cantidad">
-            <th mat-header-cell *matHeaderCellDef> CANTIDAD</th>
-            <td mat-cell *matCellDef="let element"> {{element.Cantidad | numberFormat}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Nota column-->
-          <ng-container matColumnDef="Nota">
-            <th mat-header-cell *matHeaderCellDef> NOTA</th>
-            <td mat-cell *matCellDef="let element"> {{element.Nota}} </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Imagen Column -->
-          <ng-container matColumnDef="Imagen">
-            <th mat-header-cell *matHeaderCellDef> IMAGEN</th>
-            <td mat-cell *matCellDef="let element">
-              <img [src]="element.Imagen" alt="Imagen" style="width:40px;height:40px;"
-                   class="cursor"
-                   matTooltip="Ver Imagen"
-                   *ngIf="element.Imagen !== null && element.Imagen !== ''"
-                   (click)="openImage(element.Imagen)">
-            </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Archivo Column -->
-          <ng-container matColumnDef="Archivo">
-            <th mat-header-cell *matHeaderCellDef class="alinear-der"> ARCHIVO</th>
-            <td mat-cell *matCellDef="let element" class="alinear-der">
-              <i class="material-icons prefix cursor" *ngIf="element.Archivo"
-                 (click)="openPdfInTab(element.Archivo)"
-                 matTooltip="Ver Archivo">
-                attach_file
-              </i>
-              <p *ngIf="!element.Archivo">No hay Archivo</p>
-            </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <!-- Opciones column-->
-          <ng-container matColumnDef="Opciones">
-            <th mat-header-cell *matHeaderCellDef></th>
-            <td mat-cell *matCellDef="let element; let i = index" style="text-align: right">
-              <button class=" red darken-4 btn bold_sub"
-                      *ngIf="otDetalle?.FechaRegistroFin ===null"
-                      matTooltip="Eliminar"
-                      (click)="eliminarEditar(i)">
-                <i class="material-icons">delete</i>
-              </button>
-            </td>
-            <td mat-footer-cell *matFooterCellDef></td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumnsEdit"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumnsEdit;"></tr>
-          <tr mat-footer-row *matFooterRowDef="displayedColumnsEdit"></tr>
-        </table>
-      </div>
-    </form>
+    <app-editar-tendido *ngIf="otDetalle?.Tendido && modalEditarIsActive"
+                        [status]="otDetalle?.FechaRegistroFin === null"
+                        [ordenTrabajo]="ordenTrabajo"
+                        [items]="items"
+                        [Det]="Det"
+                        (bloquearOT)="bloquearOT = $event"
+                        (Detalles)="Det = $event"></app-editar-tendido>
   </div>
   <div class="modal-footer">
     <div class="row">
@@ -837,12 +369,12 @@
   </div>
 </div>
 
-<!-- MODAL DETAILS AUDITORIA -->
+<!-- MODAL DETAILS AUDITORIA-->
 <div id="modal-detalle" class="modal modal-fixed-footer modal-lg" #modalDetalle>
   <div class="modal-content">
     <div class="row">
       <span class="close" (click)="closeModalDetalle()">&times;</span>
-      <h4 class="center-align">DEFECTOS CORTE</h4>
+      <h4 class="center-align">DEFECTOS {{otDetalle?.Corte ? 'CORTE' : 'TENDIDO'}}</h4>
     </div>
     <div class="row">
       <div class="col s4">
@@ -896,7 +428,7 @@
       </div>
     </div>
     <hr class="border">
-    <div class="row mt-3">
+    <div class="row mt-3" *ngIf="otDetalle?.Corte && modalDetalleIsActive">
       <div class="center-align f-w-bold mt-3"
            style="font-size: 2rem"
            *ngIf="dataSourceDetalle?.data.length === 0">
@@ -1001,6 +533,119 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumnsDetalle"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumnsDetalle;"></tr>
         <tr mat-footer-row *matFooterRowDef="displayedColumnsDetalle"></tr>
+      </table>
+    </div>
+
+    <div class="row mt-3" *ngIf="otDetalle?.Tendido && modalDetalleIsActive">
+      <div class="center-align f-w-bold mt-3"
+           style="font-size: 2rem"
+           *ngIf="dataSourceDetalleTendido?.data.length === 0">
+        Esta auditoría no contiene defectos
+      </div>
+      <table mat-table [dataSource]="dataSourceDetalleTendido" class="mat-elevation-z8">
+        <!-- Cortador Column -->
+        <ng-container matColumnDef="Cortador">
+          <th mat-header-cell *matHeaderCellDef> # CORTADOR</th>
+          <td mat-cell *matCellDef="let element"> {{element.NombreCortador}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Serie Column -->
+        <ng-container matColumnDef="Serie">
+          <th mat-header-cell *matHeaderCellDef> SERIE</th>
+          <td mat-cell *matCellDef="let element"> {{element.Serie}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Bulto Column -->
+        <ng-container matColumnDef="Bulto">
+          <th mat-header-cell *matHeaderCellDef> BULTO</th>
+          <td mat-cell *matCellDef="let element"> {{element.Bulto}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Posicion Column -->
+        <ng-container matColumnDef="Posicion">
+          <th mat-header-cell *matHeaderCellDef> POSICIÓN</th>
+          <td mat-cell *matCellDef="let element"> {{element.NombrePosicion}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Defecto Column -->
+        <ng-container matColumnDef="Defecto">
+          <th mat-header-cell *matHeaderCellDef>DEFECTO</th>
+          <td mat-cell *matCellDef="let element; let i = index">
+            {{element.NombreDefecto}}
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Defecto Column -->
+        <ng-container matColumnDef="Tolerancia">
+          <th mat-header-cell *matHeaderCellDef>+/-</th>
+          <td mat-cell *matCellDef="let element; let i = index">
+            {{element.ToleranciaPositiva ? 'SI' : 'NO' }} / {{element.toleranciaNegativa ? 'SI' : 'NO'}}
+          </td>
+          <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold">TOTAL:</td>
+        </ng-container>
+
+        <!-- Cantidad Column -->
+        <ng-container matColumnDef="Cantidad">
+          <th mat-header-cell *matHeaderCellDef> CANTIDAD</th>
+          <td mat-cell *matCellDef="let element"> {{element.Cantidad | numberFormat}} </td>
+          <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold">{{getTotalDetalle()}}</td>
+        </ng-container>
+
+        <!-- Nota column-->
+        <ng-container matColumnDef="Nota">
+          <th mat-header-cell *matHeaderCellDef> NOTA</th>
+          <td mat-cell *matCellDef="let element"> {{element.Nota}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Imagen Column -->
+        <ng-container matColumnDef="Imagen">
+          <th mat-header-cell *matHeaderCellDef> IMAGEN</th>
+          <td mat-cell *matCellDef="let element">
+            <img [src]="element.Imagen" alt="imagen" style="width:40px;height:40px;"
+                 class="cursor"
+                 matTooltip="Ver imagen"
+                 *ngIf="element.Imagen !== null && element.Imagen !== ''"
+                 (click)="openImage(element.Imagen)">
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Archivo Column -->
+        <ng-container matColumnDef="Archivo">
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> ARCHIVO</th>
+          <td mat-cell *matCellDef="let element" class="alinear-der">
+            <i class="material-icons prefix cursor" *ngIf="element.Archivo"
+               (click)="openPdfInTab(element.Archivo)"
+               matTooltip="Ver archivo">
+              attach_file
+            </i>
+            <p *ngIf="!element.Archivo">No hay archivo</p>
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Opciones column-->
+        <ng-container matColumnDef="Opciones">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let element; let i = index" style="text-align: right">
+            <button class=" red darken-4 btn tooltiped bold_sub"
+                    matTooltip="Eliminar"
+                    (click)="eliminar(i)">
+              <i class="material-icons">delete</i>
+            </button>
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsDetalleTendido"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsDetalleTendido;"></tr>
+        <tr mat-footer-row *matFooterRowDef="displayedColumnsDetalleTendido"></tr>
       </table>
     </div>
   </div>

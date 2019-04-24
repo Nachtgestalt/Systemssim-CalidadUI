@@ -8,6 +8,7 @@ import {DomSanitizer} from '@angular/platform-browser';
 import * as moment from 'moment';
 import {AuditoriaCorteService} from '../services/auditoria-corte/auditoria-corte.service';
 import {ReportesService} from '../services/reportes/reportes.service';
+import {AuditoriaTendidoService} from '../services/auditoria-tendido/auditoria-tendido.service';
 
 declare var M: any;
 
@@ -22,11 +23,17 @@ export class AuditoriaCorteConsultaComponent implements OnInit {
   dataSourceWIP: MatTableDataSource<any>;
   displayedColumnsWIP: string[] = [
     'Corte', 'Cliente', 'Marca', 'PO', 'Cortadas', 'Fecha Inicio',
-    'Fecha fin', 'Defectos', '2das', 'Status'
+    'Fecha fin', 'Defectos', '2das', 'Area', 'Status'
   ];
   dataSourceDetalle: MatTableDataSource<any>;
   displayedColumnsDetalle: string[] = [
     'Serie', 'Bulto', 'Tendido', 'TipoTendido', 'Mesa', 'Posicion', 'Defecto', 'Cantidad', 'Nota', 'Imagen', 'Archivo'];
+
+  dataSourceDetalleTendido: MatTableDataSource<any>;
+  displayedColumnsDetalleTendido: string[] = [
+    'Cortador', 'Serie', 'Bulto', 'Posicion', 'Defecto',
+    'Tolerancia', 'Cantidad', 'Nota', 'Imagen', 'Archivo'
+  ];
 
   otDetalle;
   idClientes = [];
@@ -46,6 +53,7 @@ export class AuditoriaCorteConsultaComponent implements OnInit {
   filteredOptionsMarca: Observable<any>;
 
   constructor(private _clientesService: ClientesService,
+              private _auditoriaTendidoService: AuditoriaTendidoService,
               private _auditoriaCorteService: AuditoriaCorteService,
               private _reporteService: ReportesService,
               private domSanitizer: DomSanitizer) {
@@ -177,26 +185,32 @@ export class AuditoriaCorteConsultaComponent implements OnInit {
     M.Modal.init(this.modalDetalle.nativeElement, options);
     const modalDetalle = M.Modal.getInstance(this.modalDetalle.nativeElement);
     modalDetalle.open();
-
-    // this.totalDetalle = auditoria.total;
-
-    this._auditoriaCorteService.getAuditoriaDetail(auditoria.IdAuditoria)
-      .subscribe((res: any) => {
-        res.RES_DET.forEach(
-          x => {
-            if (x.TipoTendido === 1) {
-              x.tipo_tendido = 'Automatico';
-            } else if (x.TipoTendido === 2) {
-              x.tipo_tendido = 'Manual';
-            } else {
-              x.tipo_tendido = 'Ambos';
+    if (auditoria.Auditoria === 'Corte') {
+      this._auditoriaCorteService.getAuditoriaDetail(auditoria.IdAuditoria)
+        .subscribe((res: any) => {
+          res.RES_DET.forEach(
+            x => {
+              if (x.TipoTendido === 1) {
+                x.tipo_tendido = 'Automatico';
+              } else if (x.TipoTendido === 2) {
+                x.tipo_tendido = 'Manual';
+              } else {
+                x.tipo_tendido = 'Ambos';
+              }
             }
-          }
-        );
-        this.dataSourceDetalle = new MatTableDataSource(res.RES_DET);
-        this.otDetalle = res.RES;
-        console.log(res);
-      });
+          );
+          this.dataSourceDetalle = new MatTableDataSource(res.RES_DET);
+          this.otDetalle = res.RES;
+          console.log(res);
+        });
+    } else if (auditoria.Auditoria === 'Tendido') {
+      this._auditoriaTendidoService.getAuditoriaDetail(auditoria.IdAuditoria)
+        .subscribe((res: any) => {
+          this.dataSourceDetalleTendido = new MatTableDataSource(res.RES_DET);
+          this.otDetalle = res.RES;
+          console.log(res);
+        });
+    }
   }
 
   closeModalDetalle() {
@@ -207,17 +221,29 @@ export class AuditoriaCorteConsultaComponent implements OnInit {
 
   imprimirDetalle(auditoria) {
     console.log(auditoria);
-    this._reporteService.getReporte(auditoria.IdAuditoria, 'Corte')
-      .subscribe(
-        imprimirResp => {
-          console.log('RESULTADO IMPRIMIR RECIB0: ', imprimirResp);
-          const pdfResult: any = this.domSanitizer.bypassSecurityTrustResourceUrl(
-            URL.createObjectURL(imprimirResp)
-          );
-          // printJS(pdfResult.changingThisBreaksApplicationSecurity);
-          window.open(pdfResult.changingThisBreaksApplicationSecurity);
-          console.log(pdfResult);
-        });
+    if (auditoria.Corte) {
+      this._reporteService.getReporte(auditoria.IdAuditoria, 'Corte')
+        .subscribe(
+          imprimirResp => {
+            console.log('RESULTADO IMPRIMIR RECIB0: ', imprimirResp);
+            const pdfResult: any = this.domSanitizer.bypassSecurityTrustResourceUrl(
+              URL.createObjectURL(imprimirResp)
+            );
+            window.open(pdfResult.changingThisBreaksApplicationSecurity);
+            console.log(pdfResult);
+          });
+    } else if (auditoria.Tendido) {
+      this._reporteService.getReporte(auditoria.IdAuditoria, 'Tendido')
+        .subscribe(
+          imprimirResp => {
+            console.log('RESULTADO IMPRIMIR RECIB0: ', imprimirResp);
+            const pdfResult: any = this.domSanitizer.bypassSecurityTrustResourceUrl(
+              URL.createObjectURL(imprimirResp)
+            );
+            window.open(pdfResult.changingThisBreaksApplicationSecurity);
+            console.log(pdfResult);
+          });
+    }
   }
 
   displayFn(cliente?): string | undefined {
@@ -237,7 +263,11 @@ export class AuditoriaCorteConsultaComponent implements OnInit {
   }
 
   getTotalDetalle() {
-    return this.dataSourceDetalle.data.map(t => t.Cantidad).reduce((acc, value) => acc + value, 0);
+    if (this.otDetalle.Corte) {
+      return this.dataSourceDetalle.data.map(t => t.Cantidad).reduce((acc, value) => acc + value, 0);
+    } else {
+      return this.dataSourceDetalleTendido.data.map(t => t.Cantidad).reduce((acc, value) => acc + value, 0);
+    }
   }
 
   openPdfInTab(archivo) {

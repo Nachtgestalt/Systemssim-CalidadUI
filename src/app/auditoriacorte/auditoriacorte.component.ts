@@ -11,6 +11,7 @@ import {ClientesService} from '../services/clientes/clientes.service';
 import {DomSanitizer} from '@angular/platform-browser';
 import swal from 'sweetalert';
 import {ReportesService} from '../services/reportes/reportes.service';
+import {AuditoriaTendidoService} from '../services/auditoria-tendido/auditoria-tendido.service';
 
 declare var $: any;
 declare var M: any;
@@ -18,7 +19,7 @@ declare var M: any;
 @Component({
   selector: 'app-auditoriacorte',
   templateUrl: './auditoriacorte.component.html',
-  styleUrls: ['./auditoriacorte.component.css']
+  styleUrls: ['./auditoriacorte.component.css'],
 })
 
 export class AuditoriacorteComponent implements OnInit {
@@ -30,7 +31,7 @@ export class AuditoriacorteComponent implements OnInit {
   dataSourceWIP: MatTableDataSource<any>;
   displayedColumnsWIP: string[] = [
     'Corte', 'Cliente', 'Marca', 'PO', 'Cortadas', 'Fecha Inicio',
-    'Fecha fin', 'Defectos', '2das', 'Status', 'Opciones'
+    'Fecha fin', 'Defectos', '2das', 'Area', 'Status', 'Opciones'
   ];
   dataSource: MatTableDataSource<any>;
   displayedColumns: string[] = [
@@ -46,12 +47,19 @@ export class AuditoriacorteComponent implements OnInit {
   displayedColumnsDetalle: string[] = [
     'Serie', 'Bulto', 'Tendido', 'TipoTendido', 'Mesa', 'Posicion', 'Defecto', 'Cantidad', 'Nota', 'Imagen', 'Archivo'];
 
+  dataSourceDetalleTendido: MatTableDataSource<any>;
+  displayedColumnsDetalleTendido: string[] = [
+    'Cortador', 'Serie', 'Bulto', 'Posicion', 'Defecto',
+    'Tolerancia', 'Cantidad', 'Nota', 'Imagen', 'Archivo'
+  ];
+
+
   items = [];
   Det = [];
-  optionModule = [
-    {value: 1, viewValue: 'Automático'},
-    {value: 2, viewValue: 'Manual'},
-    {value: 3, viewValue: 'Ambos'}
+
+  radioTipoAuditoria = [
+    {value: 'tendido', viewValue: 'TENDIDO'},
+    {value: 'corte', viewValue: 'CORTE'},
   ];
 
   // Encabezado auditoria
@@ -66,6 +74,8 @@ export class AuditoriacorteComponent implements OnInit {
   mesas = [];
   series = [];
   bultos = [];
+  cortadores = [];
+  tolerancias = [];
 
   loading = false;
   selectedFile;
@@ -73,10 +83,17 @@ export class AuditoriacorteComponent implements OnInit {
   form: FormGroup;
   valueChangesSerie$;
 
+  tipoAuditoria = 'tendido';
+
+  modalAgregarIsActive = false;
+  modalEditarIsActive = false;
+  modalDetalleIsActive = false;
+
   constructor(
     private _reporteService: ReportesService,
     private _clientesService: ClientesService,
     private _auditoriaCorteService: AuditoriaCorteService,
+    private _auditoriaTendidoService: AuditoriaTendidoService,
     private _corteService: CorteService,
     private _toast: ToastrService,
     private renderer: Renderer2,
@@ -90,7 +107,7 @@ export class AuditoriacorteComponent implements OnInit {
     // $('#modalCloseAuditoria').modal();
     $('select').formSelect();
     this.initFormGroup();
-    this.obtenerCatalogos();
+    // this.obtenerCatalogos();
     this.obtenerAuditorias();
   }
 
@@ -134,12 +151,14 @@ export class AuditoriacorteComponent implements OnInit {
   }
 
   obtenerCatalogos() {
+    const cortadores$ = this._corteService.listCortadores('', '', 'True');
+    const tolerancias$ = this._corteService.listTolerancias('', '', 'True');
     const tendidos$ = this._corteService.listTendidos('', '', 'True');
     const posiciones$ = this._corteService.listPosiciones('', '', 'True');
     const defectos$ = this._corteService.listDefectos('', '', 'True');
     const mesas$ = this._corteService.listMesas('', '', 'True');
 
-    forkJoin(tendidos$, posiciones$, defectos$, mesas$)
+    forkJoin(tendidos$, posiciones$, defectos$, mesas$, cortadores$, tolerancias$)
       .subscribe(
         (res: any) => {
           console.log(res);
@@ -147,64 +166,128 @@ export class AuditoriacorteComponent implements OnInit {
           this.posiciones = res[1].Vst_Cortadores;
           this.defectos = res[2].Vst_Cortadores;
           this.mesas = res[3].Vst_Cortadores;
+          this.cortadores = res[4].Vst_Cortadores;
+          this.tolerancias = res[5].Tolerancias;
         }
       );
   }
 
   guardarAuditoria() {
     if (this.Det.length > 0) {
-      const data = {
-        'IdClienteRef': +this.otDetalle.ID_Cliente,
-        'OrdenTrabajo': this.ordenTrabajo,
-        'PO': document.getElementById('lblPO').innerText,
-        'Tela': document.getElementById('lblTela').innerText,
-        'Marca': document.getElementById('lblMarca').innerText,
-        'NumCortada': document.getElementById('lblNoCortada').innerText,
-        'Lavado': document.getElementById('lblLavado').innerText,
-        'Estilo': document.getElementById('lblEstilo').innerText,
-        'Planta': document.getElementById('lblPlanta').innerText,
-        'Ruta': document.getElementById('lblRuta').innerText,
-        'IdUsuario': this.json_usuario.ID,
-        'Det': this.Det
-      };
-      this._auditoriaCorteService.createAuditoria(data)
-        .subscribe(
-          res => {
-            this._toast.success('Se agrego correctamente auditoria', '');
-            console.log(res);
-            this.closeModalAgregar();
-            this.obtenerAuditorias();
-            this.reset();
-          },
-          error => this._toast.error('Error al conectar a la base de datos', '')
-        );
+      if (this.tipoAuditoria === 'corte') {
+        this.guardarAuditoriaCorte();
+      } else if (this.tipoAuditoria === 'tendido') {
+        this.guardarAuditoriaTendido();
+      }
     } else {
       this._toast.warning('La auditoría debe contener al menos un detalle', '');
     }
+  }
+
+  guardarAuditoriaCorte() {
+    const data = {
+      'IdClienteRef': +this.otDetalle.ID_Cliente,
+      'OrdenTrabajo': this.ordenTrabajo,
+      'PO': document.getElementById('lblPO').innerText,
+      'Tela': document.getElementById('lblTela').innerText,
+      'Marca': document.getElementById('lblMarca').innerText,
+      'NumCortada': document.getElementById('lblNoCortada').innerText,
+      'Lavado': document.getElementById('lblLavado').innerText,
+      'Estilo': document.getElementById('lblEstilo').innerText,
+      'Planta': document.getElementById('lblPlanta').innerText,
+      'Ruta': document.getElementById('lblRuta').innerText,
+      'IdUsuario': this.json_usuario.ID,
+      'Det': this.Det
+    };
+    this._auditoriaCorteService.createAuditoria(data)
+      .subscribe(
+        res => {
+          this._toast.success('Se agrego correctamente auditoria', '');
+          console.log(res);
+          this.closeModalAgregar();
+          this.obtenerAuditorias();
+          this.reset();
+        },
+        error => this._toast.error('Error al conectar a la base de datos', '')
+      );
+  }
+
+  guardarAuditoriaTendido() {
+    const data = {
+      'IdClienteRef': +this.otDetalle.ID_Cliente,
+      'OrdenTrabajo': this.ordenTrabajo,
+      'PO': document.getElementById('lblPO').innerText,
+      'Tela': document.getElementById('lblTela').innerText,
+      'Marca': document.getElementById('lblMarca').innerText,
+      'NumCortada': document.getElementById('lblNoCortada').innerText,
+      'Lavado': document.getElementById('lblLavado').innerText,
+      'Estilo': document.getElementById('lblEstilo').innerText,
+      'Planta': document.getElementById('lblPlanta').innerText,
+      'Ruta': document.getElementById('lblRuta').innerText,
+      'IdUsuario': this.json_usuario.ID,
+      'Det': this.Det
+    };
+    this._auditoriaTendidoService.createAuditoria(data)
+      .subscribe(
+        res => {
+          this._toast.success('Se agrego correctamente auditoria', '');
+          console.log(res);
+          this.closeModalAgregar();
+          this.obtenerAuditorias();
+          this.reset();
+        },
+        error => this._toast.error('Error al conectar a la base de datos', '')
+      );
   }
 
   guardarAuditoriaEdit() {
     if (this.Det.length > 0) {
-      const data = {
-        IdAuditoria: this.otDetalle.IdAuditoria,
-        Det: this.Det
-      };
-      this._auditoriaCorteService.updateAuditoria(data)
-        .subscribe(
-          res => {
-            this._toast.success('Se actualizo correctamente auditoria', '');
-            console.log(res);
-            this.closeModalEditar();
-            this.obtenerAuditorias();
-          },
-          error => this._toast.error('Error al conectar a la base de datos', '')
-        );
+      if (this.otDetalle.Corte) {
+        this.guardarAuditoriaCorteEdit();
+      } else if (this.otDetalle.Tendido) {
+        this.guardarAuditoriaTendidoEdit();
+      }
     } else {
       this._toast.warning('La auditoría debe contener al menos un detalle', '');
     }
   }
 
+  guardarAuditoriaCorteEdit() {
+    const data = {
+      IdAuditoria: this.otDetalle.IdAuditoria,
+      Det: this.Det
+    };
+    this._auditoriaCorteService.updateAuditoria(data)
+      .subscribe(
+        res => {
+          this._toast.success('Se actualizo correctamente auditoria', '');
+          console.log(res);
+          this.closeModalEditar();
+          this.obtenerAuditorias();
+        },
+        error => this._toast.error('Error al conectar a la base de datos', '')
+      );
+  }
+
+  guardarAuditoriaTendidoEdit() {
+    const data = {
+      IdAuditoria: this.otDetalle.IdAuditoria,
+      Det: this.Det
+    };
+    this._auditoriaTendidoService.updateAuditoria(data)
+      .subscribe(
+        res => {
+          this._toast.success('Se actualizo correctamente auditoria', '');
+          console.log(res);
+          this.closeModalEditar();
+          this.obtenerAuditorias();
+        },
+        error => this._toast.error('Error al conectar a la base de datos', '')
+      );
+  }
+
   openModalAgregar() {
+    this.modalAgregarIsActive = true;
     console.log('Estoy en abrir');
     const options = {
       dismissible: true,
@@ -218,12 +301,14 @@ export class AuditoriacorteComponent implements OnInit {
   }
 
   closeModalAgregar() {
+    this.modalAgregarIsActive = false;
     console.log('Estoy en cerrar');
     const modalAgregar = M.Modal.getInstance(this.modalAgregar.nativeElement);
     modalAgregar.destroy();
   }
 
   openModalDetalle(auditoria) {
+    this.modalDetalleIsActive = true;
     console.log('Estoy en abrir');
     const options = {
       dismissible: true,
@@ -235,34 +320,44 @@ export class AuditoriacorteComponent implements OnInit {
     const modalDetalle = M.Modal.getInstance(this.modalDetalle.nativeElement);
     modalDetalle.open();
 
-    // this.totalDetalle = auditoria.total;
-
-    this._auditoriaCorteService.getAuditoriaDetail(auditoria.IdAuditoria)
-      .subscribe((res: any) => {
-        res.RES_DET.forEach(
-          x => {
-            if (x.TipoTendido === 1) {
-              x.tipo_tendido = 'Automatico';
-            } else if (x.TipoTendido === 2) {
-              x.tipo_tendido = 'Manual';
-            } else {
-              x.tipo_tendido = 'Ambos';
+    if (auditoria.Auditoria === 'Corte') {
+      this._auditoriaCorteService.getAuditoriaDetail(auditoria.IdAuditoria)
+        .subscribe((res: any) => {
+          res.RES_DET.forEach(
+            x => {
+              if (x.TipoTendido === 1) {
+                x.tipo_tendido = 'Automatico';
+              } else if (x.TipoTendido === 2) {
+                x.tipo_tendido = 'Manual';
+              } else {
+                x.tipo_tendido = 'Ambos';
+              }
             }
-          }
-        );
-        this.dataSourceDetalle = new MatTableDataSource(res.RES_DET);
-        this.otDetalle = res.RES;
-        console.log(res);
-      });
+          );
+          this.dataSourceDetalle = new MatTableDataSource(res.RES_DET);
+          this.otDetalle = res.RES;
+          console.log(res);
+        });
+    } else if (auditoria.Auditoria === 'Tendido') {
+      this._auditoriaTendidoService.getAuditoriaDetail(auditoria.IdAuditoria)
+        .subscribe((res: any) => {
+          this.dataSourceDetalleTendido = new MatTableDataSource(res.RES_DET);
+          this.otDetalle = res.RES;
+          console.log(res);
+        });
+    }
   }
 
   closeModalDetalle() {
+    this.modalDetalleIsActive = false;
     console.log('Estoy en cerrar');
     const modalDetalle = M.Modal.getInstance(this.modalDetalle.nativeElement);
     modalDetalle.destroy();
   }
 
   openModalEditar(auditoria) {
+    console.log('MODAL EDITAR', auditoria);
+    this.modalEditarIsActive = true;
     console.log('Estoy en abrir');
     const options = {
       dismissible: true,
@@ -273,40 +368,69 @@ export class AuditoriacorteComponent implements OnInit {
     M.Modal.init(this.modalEdit.nativeElement, options);
     const modalEdit = M.Modal.getInstance(this.modalEdit.nativeElement);
     modalEdit.open();
-    this._auditoriaCorteService.getAuditoriaDetail(auditoria.IdAuditoria)
-      .subscribe((res: any) => {
-          this.otDetalle = res.RES;
-          this.otValida = true;
-          this.ordenTrabajo = this.otDetalle.OrdenTrabajo;
-          this.obtenerSeries();
-          setTimeout(() => M.updateTextFields(), 100);
-          if (this.otDetalle.FechaRegistroFin !== null) {
-            this.form.disable();
-          } else {
-            this.form.enable();
-          }
-          console.log(res);
-          this.items = res.RES_DET;
-          this.dataSourceEdit = new MatTableDataSource(this.items);
-          this.items.forEach(x => {
-            if (x.TipoTendido === 1) {
-              x.tipo_tendido = 'Automatico';
-            } else if (x.TipoTendido === 2) {
-              x.tipo_tendido = 'Manual';
+    if (auditoria.Auditoria === 'Corte') {
+      this._auditoriaCorteService.getAuditoriaDetail(auditoria.IdAuditoria)
+        .subscribe((res: any) => {
+            this.otDetalle = res.RES;
+            this.otValida = true;
+            this.ordenTrabajo = this.otDetalle.OrdenTrabajo;
+            this.obtenerSeries();
+            setTimeout(() => M.updateTextFields(), 100);
+            if (this.otDetalle.FechaRegistroFin !== null) {
+              this.form.disable();
             } else {
-              x.tipo_tendido = 'Ambos';
+              this.form.enable();
             }
-            this.Det.push(x);
+            console.log(res);
+            this.items = res.RES_DET;
+            this.dataSourceEdit = new MatTableDataSource(this.items);
+            this.items.forEach(x => {
+              if (x.TipoTendido === 1) {
+                x.tipo_tendido = 'Automatico';
+              } else if (x.TipoTendido === 2) {
+                x.tipo_tendido = 'Manual';
+              } else {
+                x.tipo_tendido = 'Ambos';
+              }
+              this.Det.push(x);
+            });
+          },
+          error => {
+            console.log(error);
+          },
+          () => {
           });
-        },
-        error => {
-          console.log(error);
-        },
-        () => {
-        });
+    } else if (auditoria.Auditoria === 'Tendido') {
+      this._auditoriaTendidoService.getAuditoriaDetail(auditoria.IdAuditoria)
+        .subscribe((res: any) => {
+            this.otDetalle = res.RES;
+            this.otValida = true;
+            this.ordenTrabajo = this.otDetalle.OrdenTrabajo;
+            this.obtenerSeries();
+            setTimeout(() => M.updateTextFields(), 100);
+            if (this.otDetalle.FechaRegistroFin !== null) {
+              this.form.disable();
+            } else {
+              this.form.enable();
+            }
+            console.log(res);
+            this.items = res.RES_DET;
+            this.dataSourceEdit = new MatTableDataSource(this.items);
+            this.items.forEach(x => {
+              this.Det.push(x);
+            });
+          },
+          error => {
+            console.log(error);
+          },
+          () => {
+          });
+    }
+
   }
 
   closeModalEditar() {
+    this.modalEditarIsActive = false;
     console.log('Estoy en cerrar');
     const modalEdit = M.Modal.getInstance(this.modalEdit.nativeElement);
     modalEdit.destroy();
@@ -315,17 +439,31 @@ export class AuditoriacorteComponent implements OnInit {
 
   imprimirDetalle(auditoria) {
     console.log(auditoria);
-    this._reporteService.getReporte(auditoria.IdAuditoria, 'Corte')
-      .subscribe(
-        imprimirResp => {
-          console.log('RESULTADO IMPRIMIR RECIB0: ', imprimirResp);
-          const pdfResult: any = this.domSanitizer.bypassSecurityTrustResourceUrl(
-            URL.createObjectURL(imprimirResp)
-          );
-          // printJS(pdfResult.changingThisBreaksApplicationSecurity);
-          window.open(pdfResult.changingThisBreaksApplicationSecurity);
-          console.log(pdfResult);
-        });
+    if (auditoria.Corte) {
+      this._reporteService.getReporte(auditoria.IdAuditoria, 'Corte')
+        .subscribe(
+          imprimirResp => {
+            console.log('RESULTADO IMPRIMIR RECIB0: ', imprimirResp);
+            const pdfResult: any = this.domSanitizer.bypassSecurityTrustResourceUrl(
+              URL.createObjectURL(imprimirResp)
+            );
+            // printJS(pdfResult.changingThisBreaksApplicationSecurity);
+            window.open(pdfResult.changingThisBreaksApplicationSecurity);
+            console.log(pdfResult);
+          });
+    } else if (auditoria.Tendido) {
+      this._reporteService.getReporte(auditoria.IdAuditoria, 'Tendido')
+        .subscribe(
+          imprimirResp => {
+            console.log('RESULTADO IMPRIMIR RECIB0: ', imprimirResp);
+            const pdfResult: any = this.domSanitizer.bypassSecurityTrustResourceUrl(
+              URL.createObjectURL(imprimirResp)
+            );
+            // printJS(pdfResult.changingThisBreaksApplicationSecurity);
+            window.open(pdfResult.changingThisBreaksApplicationSecurity);
+            console.log(pdfResult);
+          });
+    }
   }
 
   cerrarAuditoria() {
@@ -346,29 +484,49 @@ export class AuditoriacorteComponent implements OnInit {
     })
       .then((willDelete) => {
         if (willDelete) {
-          this._auditoriaCorteService.cierreAuditoria(this.otDetalle.IdAuditoria)
-            .subscribe(
-              (res: any) => {
-                console.log(res);
-                if (res === null) {
-                  this._toast.success('Auditoria cerrada con exito', '');
-                  this.closeModalEditar();
-                  this.obtenerAuditorias();
-                } else {
-                  this._toast.warning('Ups! Algo no salio bien', '');
+          if (this.otDetalle.Corte) {
+            this._auditoriaCorteService.cierreAuditoria(this.otDetalle.IdAuditoria)
+              .subscribe(
+                (res: any) => {
+                  console.log(res);
+                  if (res === null) {
+                    this._toast.success('Auditoria cerrada con exito', '');
+                    this.closeModalEditar();
+                    this.obtenerAuditorias();
+                  } else {
+                    this._toast.warning('Ups! Algo no salio bien', '');
+                  }
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('Error al conectar a la base de datos', '');
                 }
-              },
-              error => {
-                console.log(error);
-                this._toast.error('Error al conectar a la base de datos', '');
-              }
-            );
+              );
+          } else if (this.otDetalle.Tendido) {
+            this._auditoriaTendidoService.cierreAuditoria(this.otDetalle.IdAuditoria)
+              .subscribe(
+                (res: any) => {
+                  console.log(res);
+                  if (res === null) {
+                    this._toast.success('Auditoria cerrada con exito', '');
+                    this.closeModalEditar();
+                    this.obtenerAuditorias();
+                  } else {
+                    this._toast.warning('Ups! Algo no salio bien', '');
+                  }
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('Error al conectar a la base de datos', '');
+                }
+              );
+          }
         }
       });
   }
 
-  eliminarAuditoria(id) {
-    console.log(id);
+  eliminarAuditoria(auditoria) {
+    console.log(auditoria.IdAuditoria);
     swal({
       text: '¿Estas seguro de eliminar esta auditoria?',
       buttons: {
@@ -386,22 +544,41 @@ export class AuditoriacorteComponent implements OnInit {
     })
       .then((willDelete) => {
         if (willDelete) {
-          this._auditoriaCorteService.deleteAuditoria(id)
-            .subscribe(
-              (res: any) => {
-                console.log(res);
-                if (res.Response.IsSuccessStatusCode) {
-                  this._toast.success('Auditoria eliminada con exito', '');
-                  this.obtenerAuditorias();
-                } else {
-                  this._toast.warning('Ups! Algo no salio bien', '');
+          if (auditoria.Auditoria === 'Corte') {
+            this._auditoriaCorteService.deleteAuditoria(auditoria.IdAuditoria)
+              .subscribe(
+                (res: any) => {
+                  console.log(res);
+                  if (res.Response.IsSuccessStatusCode) {
+                    this._toast.success('Auditoria eliminada con exito', '');
+                    this.obtenerAuditorias();
+                  } else {
+                    this._toast.warning('Ups! Algo no salio bien', '');
+                  }
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('Error al conectar a la base de datos', '');
                 }
-              },
-              error => {
-                console.log(error);
-                this._toast.error('Error al conectar a la base de datos', '');
-              }
-            );
+              );
+          } else if (auditoria.Auditoria === 'Tendido') {
+            this._auditoriaTendidoService.deleteAuditoria(auditoria.IdAuditoria)
+              .subscribe(
+                (res: any) => {
+                  console.log(res);
+                  if (res.Response.IsSuccessStatusCode) {
+                    this._toast.success('Auditoria eliminada con exito', '');
+                    this.obtenerAuditorias();
+                  } else {
+                    this._toast.warning('Ups! Algo no salio bien', '');
+                  }
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('Error al conectar a la base de datos', '');
+                }
+              );
+          }
         }
       });
   }
@@ -707,7 +884,11 @@ export class AuditoriacorteComponent implements OnInit {
   }
 
   getTotalDetalle() {
-    return this.dataSourceDetalle.data.map(t => t.Cantidad).reduce((acc, value) => acc + value, 0);
+    if (this.otDetalle.Corte) {
+      return this.dataSourceDetalle.data.map(t => t.Cantidad).reduce((acc, value) => acc + value, 0);
+    } else if (this.otDetalle.Tendido) {
+      return this.dataSourceDetalleTendido.data.map(t => t.Cantidad).reduce((acc, value) => acc + value, 0);
+    }
   }
 
 }

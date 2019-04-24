@@ -72,6 +72,10 @@ import {AuditoriaLavanderiaConsultaComponent} from './auditoria-lavanderia-consu
 import {AuditoriaProcesosConsultaComponent} from './auditoria-procesos-consulta/auditoria-procesos-consulta.component';
 import {AuditoriaCorteConsultaComponent} from './auditoria-corte-consulta/auditoria-corte-consulta.component';
 import {AuditoriaTendidoConsultaComponent} from './auditoria-tendido-consulta/auditoria-tendido-consulta.component';
+import {AgregarTendidoComponent} from './auditoriacorte/agregar-tendido/agregar-tendido.component';
+import {AgregarCorteComponent} from './auditoriacorte/agregar-corte/agregar-corte.component';
+import {EditarCorteComponent} from './auditoriacorte/editar-corte/editar-corte.component';
+import {EditarTendidoComponent} from './auditoriacorte/editar-tendido/editar-tendido.component';
 
 // the second parameter 'fr' is optional
 registerLocaleData(localeMx);
@@ -137,6 +141,10 @@ registerLocaleData(localeMx);
     AuditoriaProcesosConsultaComponent,
     AuditoriaCorteConsultaComponent,
     AuditoriaTendidoConsultaComponent,
+    AgregarTendidoComponent,
+    AgregarCorteComponent,
+    EditarCorteComponent,
+    EditarTendidoComponent,
   ],
   entryComponents: [
     AddEditOperacionTerminadoComponent
