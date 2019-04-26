@@ -6,6 +6,13 @@
           <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
             <i class="material-icons left">arrow_back</i>
           </button>
+          &nbsp;&nbsp;
+          <button (click)="obtenerPlantas()" class="btn">
+            Actualizar
+            <i class="material-icons right">
+              refresh
+            </i>
+          </button>
         </div>
       </div>
       <div class="row">
@@ -20,23 +27,48 @@
           <label for="PLANTA_DESCRIPCION">Descripción</label>
         </div>
         <div class="col s6" style="text-align: right">
-          <button (click)="GetPlantasDynamics()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar las plantas registradas" type="button" name="btnSearchPlantas">Buscar
+          <button (click)="obtenerPlantas()" class="btn tooltipped waves-effect waves-light" data-position="bottom"
+                  data-tooltip="Consultar las plantas registradas" type="button" name="btnSearchPlantas">Buscar
             <i class="material-icons right">search</i>
           </button>
         </div>
       </div>
       <div class="row">
-        <table id="tlbPlanta" class="row-border hover">
+        <table id="tlbDefectoCortadores" class="row-border hover"
+               datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
           <thead>
+          <tr>
             <th></th>
             <th>No.</th>
             <th>Planta</th>
             <th>Descripción</th>
+            <!--            <th></th>-->
+          </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+          <tr *ngFor="let planta of plantas; let i = index" matTooltip="Doble click para eliminar">
+            <td>
+              <button class="btn modal-trigger" data-target="modalRelacionArea"
+                      matTooltip="Editar"
+                      [disabled]="planta.Activo === false"
+                      (click)="openModalPlantaArea(planta)">
+                <i class="material-icons center">edit</i>
+              </button>
+            </td>
+            <td>{{i + 1}}</td>
+            <td>{{planta.Planta}}</td>
+            <td>{{planta.Descripcion}}</td>
+            <!--            <td class="center-align">-->
+            <!--              <a class="btn bold_sub"-->
+            <!--                 (click)="GetEnabledOperacion(planta)">-->
+            <!--                <u>{{planta.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u>-->
+            <!--              </a>-->
+            <!--            </td>-->
+          </tr>
+          </tbody>
         </table>
       </div>
-      <br />
+      <br/>
     </form>
   </div>
 </div>
@@ -44,28 +76,64 @@
 <div id="modalRelacionArea" class="modal modal-fixed-footer">
   <div class="modal-content">
     <h4>Relación Área y Planta</h4>
-    <form class="col s12">
+    <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s4">
           <i class="material-icons prefix">business</i>
-          <input id="PLANTA_PLANTA" type="text" class="validate">
+          <input id="PLANTA_PLANTA" type="text" class="validate"
+                 formControlName="Planta">
           <label for="PLANTA_PLANTA">Planta</label>
         </div>
         <div class="input-field col s4">
           <i class="material-icons prefix">account_box</i>
-          <input id="DESCRIPCION_PLANTA" type="text" class="validate">
+          <input id="DESCRIPCION_PLANTA" type="text" class="validate"
+                 formControlName="Descripcion">
           <label for="DESCRIPCION_PLANTA">Descripción</label>
         </div>
       </div>
       <div class="row">
-        <table id="tlbArea" class="row-border hover">
-          <thead>
-            <th></th>
-            <th>No.</th>
-            <th>Clave Área</th>
-            <th>Nombre Área</th>
-          </thead>
-          <tbody id="tbdy_Area"></tbody>
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+          <!-- Checkbox Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox (change)="$event ? masterToggle() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()"
+                            [aria-label]="checkboxLabel()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="$event ? selection.toggle(row) : null"
+                            [checked]="selection.isSelected(row)"
+                            [aria-label]="checkboxLabel(row)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- Position Column -->
+          <ng-container matColumnDef="posicion">
+            <th mat-header-cell *matHeaderCellDef> No</th>
+            <td mat-cell *matCellDef="let element; let i = index"> {{i + 1}} </td>
+          </ng-container>
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="clave">
+            <th mat-header-cell *matHeaderCellDef> CLAVE</th>
+            <td mat-cell *matCellDef="let element"> {{element.Clave}} </td>
+          </ng-container>
+
+          <!-- Weight Column -->
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef> NOMBRE</th>
+            <td mat-cell *matCellDef="let element"> {{element.Nombre}} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+              (click)="selection.toggle(row)">
+          </tr>
         </table>
       </div>
     </form>
@@ -76,7 +144,7 @@
         <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
       </div>
       <div class="col s6" style="text-align: right">
-        <a class="waves-effect waves-green btn-flat">Aceptar</a>
+        <a class="waves-effect waves-green btn-flat" (click)="guardarPlantaArea()">Aceptar</a>
       </div>
     </div>
   </div>

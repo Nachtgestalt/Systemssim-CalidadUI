@@ -7,7 +7,9 @@
             <i class="material-icons left">arrow_back</i>
           </button>
           &nbsp;&nbsp;
-          <button (click)="DisposeNewAreaConfeccion()" class="btn tooltipped waves-effect waves-light modal-trigger" data-position="bottom" data-tooltip="Agrega una nueva área" data-target="modalNewAreaConfeccion" type="button" name="btnAddAreaConfeccion">Agregar
+          <button (click)="openModalAgregar()" class="btn tooltipped waves-effect waves-light modal-trigger"
+                  data-position="bottom" data-tooltip="Agrega una nueva área" data-target="modalNewAreaConfeccion"
+                  type="button" name="btnAddAreaConfeccion">Agregar
             <i class="material-icons right">send</i>
           </button>
         </div>
@@ -24,72 +26,116 @@
           <label for="DESCRIPCION_OPERACION">Nombre</label>
         </div>
         <div class="col s6" style="text-align: right">
-          <button (click)="GetAreaConfeccion()" class="btn tooltipped waves-effect waves-light" data-position="bottom" data-tooltip="Consultar las áreas de confección" type="button" name="btnSearchAreaConfeccion">Buscar
+          <button (click)="obtenerAreas()" class="btn tooltipped waves-effect waves-light" data-position="bottom"
+                  data-tooltip="Consultar las áreas de confección" type="button" name="btnSearchAreaConfeccion">Buscar
             <i class="material-icons right">search</i>
           </button>
         </div>
       </div>
       <div class="row">
-        <table id="tlbAreaConfeccion" class="row-border hover">
+        <table id="tlbDefectoCortadores" class="row-border hover"
+               datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
           <thead>
+          <tr>
             <th></th>
-            <th>Clave Area</th>
-            <th>Descripción Area</th>
+            <th>No.</th>
+            <th>Clave Área</th>
+            <th>Nombre Área</th>
             <th>Estatus</th>
             <th></th>
+          </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+          <tr *ngFor="let area of areas; let i = index" matTooltip="Doble click para eliminar"
+              (dblclick)="eliminar(area)">
+            <td>
+              <button class="btn modal-trigger" data-target="modalEditAreaConfeccion"
+                      matTooltip="Editar"
+                      [disabled]="area.Activo === false"
+                      (click)="getDetalle(area)">
+                <i class="material-icons center">edit</i>
+              </button>
+            </td>
+            <td>{{i + 1}}</td>
+            <td>{{area.Clave}}</td>
+            <td>{{area.Nombre}}</td>
+            <td>{{area.Activo ? 'SI' : 'NO'}}</td>
+            <td class="center-align">
+              <a class="btn bold_sub"
+                 (click)="GetEnabledArea(area)">
+                <u>{{area.Activo ? 'INACTIVAR' : 'ACTIVAR'}}</u>
+              </a>
+            </td>
+          </tr>
+          </tbody>
         </table>
       </div>
-      <br />
+      <br/>
     </form>
-  </div>
-</div>
-
-<!-- Update Enabled Cortador -->
-<div id="modalEnableAreaConfeccion" class="modal">
-  <div class="modal-content">
-    <div style="text-align: center">
-      <p>¿Realmente deseas activar o desactivar el área de confección?</p>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <div class="row">
-      <div class="col s6" style="text-align: left">
-        <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
-      </div>
-      <div class="col s6" style="text-align: right">
-        <a (click)="GetEnabledArea();" class="waves-effect waves-green btn-flat">Aceptar</a>
-      </div>
-    </div>
   </div>
 </div>
 
 <div id="modalNewAreaConfeccion" class="modal modal-fixed-footer">
   <div class="modal-content">
     <h4>Nueva Area Confección</h4>
-    <form class="col s12">
+    <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s4">
           <i class="material-icons prefix">account_box</i>
-          <input id="CLAVE_NEW_OPERACION" maxlength="10" type="text" class="validate">
+          <input id="CLAVE_NEW_OPERACION" maxlength="10" type="text" class="validate"
+                 formControlName="Clave">
           <label for="CLAVE_NEW_OPERACION">Clave</label>
         </div>
         <div class="input-field col s4">
           <i class="material-icons prefix">account_circle</i>
-          <input id="DESCRIPCION_NEW_OPERACION" maxlength="150" type="text" class="validate">
+          <input id="DESCRIPCION_NEW_OPERACION" maxlength="150" type="text" class="validate"
+                 formControlName="Nombre">
           <label for="DESCRIPCION_NEW_OPERACION">Nombre:</label>
         </div>
       </div>
       <div class="row">
-        <table id="tlbOperacionDefecto" class="row-border hover">
-          <thead>
-            <th></th>
-            <th>No.</th>
-            <th>Clave Área Operación</th>
-            <th>Nombre Área Operación</th>
-          </thead>
-          <tbody id="tdby_Posicion"></tbody>
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+          <!-- Checkbox Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox (change)="$event ? masterToggle() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()"
+                            [aria-label]="checkboxLabel()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="$event ? selection.toggle(row) : null"
+                            [checked]="selection.isSelected(row)"
+                            [aria-label]="checkboxLabel(row)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- Position Column -->
+          <ng-container matColumnDef="posicion">
+            <th mat-header-cell *matHeaderCellDef> No</th>
+            <td mat-cell *matCellDef="let element; let i = index"> {{i + 1}} </td>
+          </ng-container>
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="clave">
+            <th mat-header-cell *matHeaderCellDef> CLAVE OPERACIÓN</th>
+            <td mat-cell *matCellDef="let element"> {{element.Clave}} </td>
+          </ng-container>
+
+          <!-- Weight Column -->
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef> NOMBRE OPERACIÓN</th>
+            <td mat-cell *matCellDef="let element"> {{element.Nombre}} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+              (click)="selection.toggle(row)">
+          </tr>
         </table>
       </div>
     </form>
@@ -100,7 +146,8 @@
         <a class="modal-close waves-effect waves-green btn-flat">Cancelar</a>
       </div>
       <div class="col s6" style="text-align: right">
-        <a (click)="NewAreaConfeccion()" onclick="GetCheckPosicion()" class="waves-effect waves-green btn-flat">Aceptar</a>
+        <a (click)="NewAreaConfeccion()"
+           class="waves-effect waves-green btn-flat">Aceptar</a>
       </div>
     </div>
   </div>
@@ -109,27 +156,64 @@
 <div id="modalEditAreaConfeccion" class="modal modal-fixed-footer">
   <div class="modal-content">
     <h4>Edita el área de la confección</h4>
-    <form class="col s12">
+    <form class="col s12" [formGroup]="form">
       <div class="row">
         <div class="input-field col s4">
           <i class="material-icons prefix">account_box</i>
-          <input id="CVE_EDT_AREA" name="CVE_EDT_AREA" maxlength="10" type="text" class="validate">
+          <input id="CVE_EDT_AREA" name="CVE_EDT_AREA" maxlength="10" type="text" class="validate"
+                 formControlName="Clave">
           <label class="active" for="CVE_EDT_AREA">Clave</label>
         </div>
         <div class="input-field col s4">
           <i class="material-icons prefix">account_circle</i>
-          <input id="NOMBRE_EDT_AREA" name="NOMBRE_EDT_AREA" maxlength="150" type="text" class="validate">
+          <input id="NOMBRE_EDT_AREA" name="NOMBRE_EDT_AREA" maxlength="150" type="text" class="validate"
+                 formControlName="Nombre">
           <label class="active" for="NOMBRE_EDT_AREA">Nombre:</label>
         </div>
       </div>
       <div class="row">
-        <table id="tlbOperacionEdtDefecto" class="row-border hover">
-          <thead>
-            <th>No.</th>
-            <th>Clave Área</th>
-            <th>Nombre Área</th>
-          </thead>
-          <tbody id="tdby_edt_Posicion"></tbody>
+        <table mat-table [dataSource]="dataSourceEdit" class="mat-elevation-z8">
+
+          <!-- Checkbox Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox (change)="$event ? masterToggle() : null"
+                            [checked]="selection.hasValue() && isAllSelected()"
+                            [indeterminate]="selection.hasValue() && !isAllSelected()"
+                            [aria-label]="checkboxLabel()">
+              </mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let row">
+              <mat-checkbox (click)="$event.stopPropagation()"
+                            (change)="$event ? selection.toggle(row) : null"
+                            [checked]="selection.isSelected(row)"
+                            [aria-label]="checkboxLabel(row)">
+              </mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- Position Column -->
+          <ng-container matColumnDef="posicion">
+            <th mat-header-cell *matHeaderCellDef> No</th>
+            <td mat-cell *matCellDef="let element; let i = index"> {{i + 1}} </td>
+          </ng-container>
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="clave">
+            <th mat-header-cell *matHeaderCellDef> CLAVE OPERACIÓN</th>
+            <td mat-cell *matCellDef="let element"> {{element.Clave}} </td>
+          </ng-container>
+
+          <!-- Weight Column -->
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef> NOMBRE OPERACIÓN</th>
+            <td mat-cell *matCellDef="let element"> {{element.Nombre}} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumnsEdit"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumnsEdit;"
+              (click)="selection.toggle(row)">
+          </tr>
         </table>
       </div>
     </form>

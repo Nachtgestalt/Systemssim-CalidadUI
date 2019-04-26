@@ -38,9 +38,9 @@ export class CorteComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   };
 
-  cortadores = [];
-
   dtTrigger: Subject<any> = new Subject();
+
+  cortadores = [];
 
   form: FormGroup;
   formFilter: FormGroup;

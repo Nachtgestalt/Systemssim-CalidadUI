@@ -76,6 +76,7 @@ import {AgregarTendidoComponent} from './auditoriacorte/agregar-tendido/agregar-
 import {AgregarCorteComponent} from './auditoriacorte/agregar-corte/agregar-corte.component';
 import {EditarCorteComponent} from './auditoriacorte/editar-corte/editar-corte.component';
 import {EditarTendidoComponent} from './auditoriacorte/editar-tendido/editar-tendido.component';
+import {AuditoriaConfeccionConsultaComponent} from './auditoria-confeccion-consulta/auditoria-confeccion-consulta.component';
 
 // the second parameter 'fr' is optional
 registerLocaleData(localeMx);
@@ -145,6 +146,7 @@ registerLocaleData(localeMx);
     AgregarCorteComponent,
     EditarCorteComponent,
     EditarTendidoComponent,
+    AuditoriaConfeccionConsultaComponent,
   ],
   entryComponents: [
     AddEditOperacionTerminadoComponent
@@ -201,12 +203,13 @@ registerLocaleData(localeMx);
       },
       {
         path: 'confection', component: ConfectionPageComponent, children: [
-          {path: '', redirectTo: 'areaconfeccion', pathMatch: 'full'},
+          {path: '', redirectTo: 'defectoconfeccion', pathMatch: 'full'},
           {path: 'areaconfeccion', component: AreaconfeccionComponent},
           {path: 'defectoconfeccion', component: DefectoconfeccionComponent},
           {path: 'operacionconfeccion', component: OperacionconfeccionComponent},
           {path: 'plantas', component: PlantasComponent},
-          {path: 'auditoriaconfeccion', component: AuditoriaconfeccionComponent}
+          {path: 'auditoriaconfeccion', component: AuditoriaconfeccionComponent},
+          {path: 'auditoriaconfeccion-consulta', component: AuditoriaConfeccionConsultaComponent}
         ]
       },
       {

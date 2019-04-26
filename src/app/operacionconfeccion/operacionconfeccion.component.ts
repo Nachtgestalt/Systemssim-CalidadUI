@@ -1,122 +1,176 @@
-import { Component, OnInit } from '@angular/core';
-import { Globals } from '../Globals';
-declare var $: any;
-declare var jQuery: any;
+import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import 'jquery';
-import { ToastrService } from 'ngx-toastr';
+import {ToastrService} from 'ngx-toastr';
+import {DataTableDirective} from 'angular-datatables';
+import {Subject} from 'rxjs';
+import {FormControl, FormGroup} from '@angular/forms';
+import {ConfeccionService} from '../services/confeccion/confeccion.service';
+import {MatTableDataSource} from '@angular/material';
+import {SelectionModel} from '@angular/cdk/collections';
+import swal from 'sweetalert';
+
+declare var $: any;
+declare var M: any;
 
 @Component({
   selector: 'app-operacionconfeccion',
   templateUrl: './operacionconfeccion.component.html',
   styleUrls: ['./operacionconfeccion.component.css']
 })
-export class OperacionconfeccionComponent implements OnInit {
+export class OperacionconfeccionComponent implements OnInit, OnDestroy, AfterViewInit {
+  @ViewChild(DataTableDirective) dtElement: DataTableDirective;
+  private json_usuario = JSON.parse(sessionStorage.getItem('currentUser'));
+  dtOptions = {
+    language: {
+      processing: 'Procesando...',
+      search: 'Buscar:',
+      lengthMenu: 'Mostrar _MENU_ elementos',
+      info: '_START_ - _END_ de _TOTAL_ elementos',
+      infoEmpty: 'Mostrando ningún elemento.',
+      infoFiltered: '(filtrado _MAX_ elementos total)',
+      infoPostFix: '',
+      loadingRecords: 'Cargando registros...',
+      zeroRecords: 'No se encontraron registros',
+      emptyTable: 'No hay datos disponibles en la tabla',
+      paginate: {
+        first: 'Primero',
+        previous: 'Anterior',
+        next: 'Siguiente',
+        last: 'Último'
+      },
+    }
+  };
+  dtTrigger: Subject<any> = new Subject();
 
+  displayedColumns: string[] = ['select', 'posicion', 'clave', 'nombre'];
+  dataSource = new MatTableDataSource<any>([]);
+  selection = new SelectionModel<any>(true, []);
+
+  dataSourceEdit = new MatTableDataSource<any>([]);
+  displayedColumnsEdit: string[] = ['select', 'posicion', 'clave', 'nombre'];
+
+  operaciones = [];
+  idOperacion;
+  form: FormGroup;
+  formFilter: FormGroup;
   constructor(
+    private _confeccionService: ConfeccionService,
     private _toast: ToastrService
   ) { }
 
   ngOnInit() {
     $('.tooltipped').tooltip();
-    $('#modalEnableOperacionConfeccion').modal();
     $('#modalNewOperacionConfeccion').modal();
     $('#modalEditOperacionConfeccion').modal();
     $('#lblModulo').text('Confección - Operación');
-    this.GetOperacionConfeccion();
+    this.initFormFilterGroup();
+    this.initFormGroup();
+    this.obtenerOperaciones();
   }
 
-  DisposeNewOperacionConfeccion() {
-    $('#CLAVE_NEW_OPERACION').val('');
-    $('#DESCRIPCION_NEW_OPERACION').val('');
-    $('#modalNewOperacionConfeccion').val('');
-    this.GetPosicionDefectosActivos();
+  ngAfterViewInit(): void {
+    this.dtTrigger.next();
   }
 
-  GetOperacionConfeccion() {
-    let sOptions = '';
-    let _request = '';
-    if ($('#CLAVE_OPERACION').val() !== '' && $('#DESCRIPCION_OPERACION').val() === '') {
-      _request += '?Clave=' +  $('#CLAVE_OPERACION').val();
-    } else if ($('#DESCRIPCION_OPERACION').val() !== '' && $('#CLAVE_OPERACION').val() === '') {
-      _request += '?Nombre=' +  $('#DESCRIPCION_OPERACION').val();
-    }
-    $.ajax({
-      url: Globals.UriRioSulApi + 'Confeccion/ObtieneOperacionConfeccion' + _request,
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          let index = 1;
-          for (let i = 0; i < json.Vst_Confeccion.length; i++) {
-            sOptions += '<tr>';
-            // tslint:disable-next-line:max-line-length
-            sOptions += '<td><a onclick="SetId(' + json.Vst_Confeccion[i].ID + '); DisposeEditOperaciones(); GetInfoOperacionConfeccion();" class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditOperacionConfeccion" data-position="bottom" data-tooltip="Edita el defecto  seleccionado"><i class="material-icons right">edit</i></a></td>';
-            sOptions += '<td>' + index + '</td>';
-            sOptions += '<td>' + json.Vst_Confeccion[i].Clave + '</td>';
-            sOptions += '<td>' + json.Vst_Confeccion[i].Nombre + '</td>';
-            if (json.Vst_Confeccion[i].Activo) {
-              sOptions += '<td style="text-align: center">SI</td>';
-            } else {
-              sOptions += '<td style="text-align: center">NO</td>';
-            }
-            if (json.Vst_Confeccion[i].Activo === true) {
-              // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Confeccion[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableOperacionConfeccion" data-tooltiped="Activa / Inactiva la operación seleccionada"><strong><u>Inactivar</u></strong></a></td>';
-            } else {
-              // tslint:disable-next-line:max-line-length
-              sOptions += '<td style="text-align:center"><a onclick="SetId(' + json.Vst_Confeccion[i].ID + ');" class="waves-effect waves-light btn tooltiped modal-trigger" data-target="modalEnableOperacionConfeccion" data-tooltiped="Activa / Inactiva la operación seleccionada"><strong><u>Activar</u></strong></a></td>';
-            }
-            sOptions += '</tr>';
-            index ++;
+  ngOnDestroy(): void {
+    // Do not forget to unsubscribe the event
+    this.dtTrigger.unsubscribe();
+  }
+
+  initFormGroup() {
+    this.form = new FormGroup({
+      'ID': new FormControl(),
+      'IdSubModulo': new FormControl(1),
+      'IdUsuario': new FormControl(this.json_usuario.ID),
+      'Clave': new FormControl(),
+      'Nombre': new FormControl(),
+      'Descripcion': new FormControl(''),
+      'Observaciones': new FormControl(''),
+      'Defectos': new FormControl(),
+    });
+  }
+
+  initFormFilterGroup() {
+    this.formFilter = new FormGroup({
+      'Clave': new FormControl(''),
+      'Nombre': new FormControl('')
+    });
+  }
+
+  obtenerOperaciones() {
+    this._confeccionService.listOperaciones(this.formFilter.controls['Clave'].value, this.formFilter.controls['Nombre'].value)
+      .subscribe(
+        (operaciones: any) => {
+          console.log(operaciones);
+          if (operaciones.Message.IsSuccessStatusCode) {
+            this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
+              // Destroy the table first
+              dtInstance.destroy();
+              this.operaciones = operaciones.Vst_Confeccion;
+              // Call the dtTrigger to rerender again
+              this.dtTrigger.next();
+            });
           }
-          $('#tlbOperacionConfeccion').html('');
-          $('#tlbOperacionConfeccion').html('<tbody>' + sOptions + '</tbody>');
-          // tslint:disable-next-line:max-line-length
-          $('#tlbOperacionConfeccion').append('<thead><th></th><th>No.</th><th>Clave Operación</th><th>Nombre Operación</th><th>Estatus</th><th></th></thead>');
-          $('#tlbOperacionConfeccion').DataTable({
-            sorting: true,
-            bDestroy: true,
-            ordering: true,
-            bPaginate: true,
-            pageLength: 6,
-            bInfo: true,
-            dom: 'Bfrtip',
-            processing: true,
-            buttons: [
-              'copyHtml5',
-              'excelHtml5',
-              'csvHtml5',
-              'pdfHtml5'
-             ]
-          });
-          $('.tooltipped').tooltip();
+        },
+        error => {
+          console.log(error);
+          this._toast.error('No se pudo establecer conexión a la base de datos', '');
         }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
-    });
+      );
   }
 
-  GetEnabledOperacion() {
-    $.ajax({
-      url: Globals.UriRioSulApi + 'Confeccion/ActivaInactivaOperacionConfeccion?IdOperacion=' + $('#HDN_ID').val(),
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          $('#modalEnableOperacionConfeccion').modal('close');
+  getDefectosActivos() {
+    this.selection = new SelectionModel(true, []);
+    this._confeccionService.listDefectos('', '', 'True')
+      .subscribe(
+        (res: any) => {
+          console.log(res);
+          this.dataSource = new MatTableDataSource(res.Vst_Confeccion);
         }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
+      );
+  }
+
+  GetEnabledOperacion(operacion) {
+    const options = {
+      text: '¿Estas seguro de modificar esta operación?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
       }
-    });
-    this.GetOperacionConfeccion();
+    };
+    swal(options)
+      .then((willDelete) => {
+          if (willDelete) {
+            this._confeccionService.inactivaActivaOperacion(operacion.ID)
+              .subscribe(
+                (res: any) => {
+                  // console.log(res);
+                  if (res.Message.IsSuccessStatusCode) {
+                    this._toast.success('Operación actualizada con exito', '');
+                    this.obtenerOperaciones();
+                  }
+                },
+                error => {
+                  console.log(error);
+                  this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                }
+              );
+          }
+        }
+      );
+  }
+
+  openModalAgregar() {
+    this.initFormGroup();
+    this.getDefectosActivos();
   }
 
   NewOperacionConfeccion() {
@@ -125,110 +179,117 @@ export class OperacionconfeccionComponent implements OnInit {
     } else if ($('#DESCRIPCION_OPERACION').val()) {
       this._toast.warning('Se debe ingresar una descripción de la operación', '');
     } else {
-      let Result = false;
-      $.ajax({
-        // tslint:disable-next-line:max-line-length
-        url: Globals.UriRioSulApi + 'Confeccion/ValidaOperacionSubModulo?SubModulo=9&Clave=' + $('#CLAVE_NEW_OPERACION').val() + '&Nombre=' + $('#DESCRIPCION_NEW_OPERACION').val(),
-        dataType: 'json',
-        contents: 'application/json; charset=utf-8',
-        method: 'get',
-        async: false,
-        success: function (json) {
-          if (json.Message.IsSuccessStatusCode) {
-            Result = json.Hecho;
-          }
-        },
-        error: function () {
-          console.log('No se pudo establecer conexión a la base de datos');
+      const defectos = this.selection.selected;
+      defectos.forEach(
+        (x: any) => {
+          x.IdDefecto = x.ID;
         }
-      });
-      if (Result) {
-        let Mensaje = '';
-        const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
-        $.ajax({
-          url: Globals.UriRioSulApi + 'Confeccion/NuevoOperacionConfeccion',
-          type: 'POST',
-          contentType: 'application/json; charset=utf-8',
-          async: false,
-          data: JSON.stringify({
-            IdSubModulo: 9,
-            IdUsuario: Json_Usuario.ID,
-            Clave: $('#CLAVE_NEW_OPERACION').val(),
-            Nombre: $('#DESCRIPCION_NEW_OPERACION').val(),
-            Descripcion: '',
-            Observaciones: '',
-            Imagen: $('#HDN_ARR').val()
-          }),
-          success: function (json) {
-            if (json.Message.IsSuccessStatusCode) {
-              Mensaje = 'Se agrego correctamente la operación de confección';
+      );
+      this.form.controls['Defectos'].patchValue(defectos);
+      this._confeccionService.createOperacion(this.form.value)
+        .subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Posición guardada con exito', '');
+              $('#modalNewOperacionConfeccion').modal('close');
+              this.obtenerOperaciones();
+              this.initFormGroup();
+            } else {
+              this._toast.warning('Algo no ha salido bien', '');
             }
           },
-          error: function () {
-            console.log('No se pudo establecer conexión a la base de datos');
-          }
-        });
-        if (Mensaje !== '') {
-          this._toast.success(Mensaje, '');
-          $('#modalNewOperacionConfeccion').modal('close');
-        }
-      } else {
-        this._toast.warning('La clave de operación ya se encuentra registrada en el sistema', '');
-      }
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
+          });
     }
   }
 
-  GetPosicionDefectosActivos() {
-    let sOptions = '';
-    $.ajax({
-      url: Globals.UriRioSulApi + 'Confeccion/ObtieneDefectosActivosOperacion',
-      dataType: 'json',
-      contents: 'application/json; charset=utf-8',
-      method: 'get',
-      async: false,
-      success: function (json) {
-        if (json.Message.IsSuccessStatusCode) {
-          let Index = 1;
-          for (let i = 0; i < json.Vst_Confeccion.length; i++) {
-            sOptions += '<tr>';
-            // tslint:disable-next-line:max-line-length
-            sOptions += '<td style="text-align:center"><label><input id="chk_' + json.Vst_Confeccion[i].ID + '" type="checkbox" class="filled-in" /><span></span></label></td>';
-            sOptions += '<td>' + Index + '</td>';
-            sOptions += '<td>' + json.Vst_Confeccion[i].Clave + '</td>';
-            sOptions += '<td>' + json.Vst_Confeccion[i].Nombre + '</td>';
-            sOptions += '</tr>';
-
-            Index++;
-          }
-          $('#tlbOperacionDefecto').html('');
-          $('#tlbOperacionDefecto').html('<tbody id="tdby_Posicion">' + sOptions + '</tbody>');
-          $('#tlbOperacionDefecto').append('<thead><th></th><th>No.</th><th>Clave Defecto</th><th>Nombre Defecto</th></thead>');
-          $('#tlbOperacionDefecto').DataTable({
-            sorting: true,
-            bDestroy: true,
-            ordering: true,
-            bPaginate: true,
-            pageLength: 6,
-            bInfo: true,
-            dom: 'Bfrtip',
-            processing: true,
-            buttons: [
-              'copyHtml5',
-              'excelHtml5',
-              'csvHtml5',
-              'pdfHtml5'
-             ]
-          });
-          $('.tooltipped').tooltip();
+  getDetalle(operacion) {
+    this.idOperacion = operacion.ID;
+    this._confeccionService.listDefectos('', '', 'True')
+      .subscribe(
+        (result: any) => {
+          console.log(result);
+          this.dataSourceEdit = new MatTableDataSource(result.Vst_Confeccion);
+          this.selection = new SelectionModel(true, []);
+          this._confeccionService.getOperacion(operacion.ID)
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                this.form.patchValue(res.Vst_Confeccion);
+                setTimeout(() => M.updateTextFields(), 100);
+                const defectos = res.Vst_Oper_Conf;
+                const copyDataSourceEdit = [];
+                this.dataSourceEdit.data.forEach((x) => {
+                  defectos.forEach(y => {
+                    if (y.Clave === x.Clave) {
+                      copyDataSourceEdit.push(x);
+                    }
+                  });
+                });
+                console.log('Seleccion: ', copyDataSourceEdit);
+                this.selection = new SelectionModel(true, copyDataSourceEdit);
+              }
+            );
         }
-      },
-      error: function () {
-        console.log('No se pudo establecer coneción a la base de datos');
-      }
-    });
+      );
   }
 
   EditOperacionConfeccion() {
-    console.log('cambiar');
+    if ($('#CVE_EDT_POSICION').val() === '') {
+      this._toast.warning('Se debe ingresar una clave de posición de cortador', '');
+    } else if ($('#NOMBRE_EDT_POSICION').val() === '') {
+      this._toast.warning('Se debe ingresar un nombre de posición de cortador', '');
+    } else {
+      const payload = this.form.value;
+      payload.Defectos = this.selection.selected;
+      payload.Defectos.forEach(
+        (x: any) => {
+          x.IdDefecto = x.ID;
+        }
+      );
+      this._confeccionService.updateOperacion(payload)
+        .subscribe(
+          (res: any) => {
+            console.log(res);
+            if (res.Message.IsSuccessStatusCode) {
+              this._toast.success('Se actualizo correctamente la operación', '');
+              $('#modalEditOperacionConfeccion').modal('close');
+              this.obtenerOperaciones();
+            } else {
+              this._toast.warning('Algo salio mal', '');
+            }
+          },
+          error => {
+            console.log(error);
+            this._toast.error('No se pudo establecer conexión a la base de datos', '');
+          }
+        );
+    }
+  }
+
+  eliminar(operacion) {
+    // TODO: En cuanto el back termine, conectar este metodo
+  }
+
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
+  }
+
+  masterToggle() {
+    this.isAllSelected() ?
+      this.selection.clear() :
+      this.dataSource.data.forEach(row => this.selection.select(row));
+  }
+
+  checkboxLabel(row?): string {
+    if (!row) {
+      return `${this.isAllSelected() ? 'select' : 'deselect'} all`;
+    }
+    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.position + 1}`;
   }
 }
