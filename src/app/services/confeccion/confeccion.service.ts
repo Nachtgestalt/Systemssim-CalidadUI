@@ -34,6 +34,18 @@ export class ConfeccionService {
     return this._http.get(url, {headers, params});
   }
 
+  validaDefectoExiste(clave, nombre, id?) {
+    const url = `${this.URL_CONFECCION}/ValidaDefectoConfeccionSubModulo`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams().append('Clave', clave);
+    params = params.append('Nombre', nombre);
+    if (id) {
+      params = params.append('ID', id);
+    }
+    return this._http.get(url, {headers, params});
+  }
+
+
   createDefecto(payload) {
     const url = `${this.URL_CONFECCION}/NuevoDefectoConfeccion`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
@@ -87,6 +99,17 @@ export class ConfeccionService {
     return this._http.get(url, {headers, params});
   }
 
+  validaOperacionExiste(clave, nombre, id?) {
+    const url = `${this.URL_CONFECCION}/ValidaOperacionSubModulo`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams().append('Clave', clave);
+    params = params.append('Nombre', nombre);
+    if (id) {
+      params = params.append('ID', id);
+    }
+    return this._http.get(url, {headers, params});
+  }
+
   createOperacion(payload) {
     const url = `${this.URL_CONFECCION}/NuevoOperacionConfeccion`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
@@ -137,6 +160,17 @@ export class ConfeccionService {
     const url = `${this.URL_CONFECCION}/ObtieneInfoAreaConfeccion`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);
+    return this._http.get(url, {headers, params});
+  }
+
+  validaAreaExiste(clave, nombre, id?) {
+    const url = `${this.URL_CONFECCION}/ValidaAreaSubModulo`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams().append('Clave', clave);
+    params = params.append('Nombre', nombre);
+    if (id) {
+      params = params.append('ID', id);
+    }
     return this._http.get(url, {headers, params});
   }
 
@@ -219,6 +253,15 @@ export class ConfeccionService {
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);
     // params = params.append('tipo', catalogo);
+    return this._http.delete(url, {headers, params});
+  }
+
+
+  deleteConfeccion(id, catalogo) {
+    const url = `${this.URL_CONFECCION}/EliminaConfeccion`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams().append('ID', id);
+    params = params.append('tipo', catalogo);
     return this._http.delete(url, {headers, params});
   }
 }

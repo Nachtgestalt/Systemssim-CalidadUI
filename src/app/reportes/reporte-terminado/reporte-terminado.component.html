@@ -1,0 +1,54 @@
+<div class="card-panel">
+  <div class="row" style="text-align: right">
+    <div class="col s12">
+      <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
+        <i class="material-icons left">arrow_back</i>
+      </button>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col s4 center-align">
+      <span>Periodo</span>
+    </div>
+  </div>
+
+  <form [formGroup]="formFilter">
+    <div class="row">
+      <div class="col s2">
+        <div class="input-field">
+          <i class="material-icons prefix">date_range</i>
+          <input id="inicio" type="date" class="validate"
+                 formControlName="Fecha_i">
+          <label for="inicio">Inicio</label>
+          <mat-error *ngIf="formFilter.get('Fecha_i').invalid && formFilter.get('Fecha_i').touched">Campo necesario</mat-error>
+        </div>
+      </div>
+
+      <div class="col s2">
+        <div class="input-field">
+          <i class="material-icons prefix">date_range</i>
+          <input id="fin" type="date" class="validate"
+                 formControlName="Fecha_f">
+          <label for="fin">Fin</label>
+          <mat-error *ngIf="formFilter.get('Fecha_f').invalid && formFilter.get('Fecha_f').touched">Campo necesario</mat-error>
+        </div>
+      </div>
+
+      <div class="row right-align">
+        <div class="col s12">
+          <button type="button" name="btnAddCortador"
+                  style="margin-right: 1rem;"
+                  class="btn light-blue darken-4"
+                  (click)="reset()">Reiniciar
+          </button>
+          <button type="button" name="btnAddCortador"
+                  class="btn light-blue darken-4"
+                  (click)="generarReporte()">Generar Reporte
+            <i class="material-icons right">search</i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>

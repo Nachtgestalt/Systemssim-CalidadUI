@@ -181,21 +181,30 @@ export class CorteComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if ($('#NOMBRE_NEW_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de cortador', '');
     } else {
-      this._cortadoresService.createCortador(this.form.value)
+      this._cortadoresService.validaCortadorExiste(this.form.get('Clave').value, this.form.get('Nombre').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Se agrego correctamente el cortador', '');
-              $('#modalNewCortador').modal('close');
-              this.obtenerCortadores();
+          (existe: any) => {
+            if (!existe.Hecho) {
+              this._cortadoresService.createCortador(this.form.value)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Se agrego correctamente el cortador', '');
+                      $('#modalNewCortador').modal('close');
+                      this.obtenerCortadores();
+                    } else {
+                      this._toast.warning('Algo salio mal', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  }
+                );
             } else {
-              this._toast.warning('Algo salio mal', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           }
         );
     }
@@ -207,23 +216,31 @@ export class CorteComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if ($('#NOMBRE_EDT_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de cortador', '');
     } else {
-      this._cortadoresService.updateCortador(this.form.value)
+      this._cortadoresService.validaCortadorExiste(this.form.get('Clave').value, this.form.get('Nombre').value, this.form.get('ID').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Se actualizo correctamente el cortador', '');
-              $('#modalEditCortador').modal('close');
-              this.obtenerCortadores();
+          (existe: any) => {
+            if (!existe.Hecho) {
+              this._cortadoresService.updateCortador(this.form.value)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Se actualizo correctamente el cortador', '');
+                      $('#modalEditCortador').modal('close');
+                      this.obtenerCortadores();
+                    } else {
+                      this._toast.warning('Algo salio mal', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  }
+                );
             } else {
-              this._toast.warning('Algo salio mal', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
-          }
-        );
+          });
     }
   }
 

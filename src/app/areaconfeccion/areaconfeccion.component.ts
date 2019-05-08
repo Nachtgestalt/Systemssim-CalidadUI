@@ -190,22 +190,31 @@ export class AreaconfeccionComponent implements OnInit, OnDestroy, AfterViewInit
         }
       );
       this.form.controls['Operaciones'].patchValue(operaciones);
-      this._confeccionService.createArea(this.form.value)
+      this._confeccionService.validaAreaExiste(this.form.get('Clave').value, this.form.get('Nombre').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Área guardada con exito', '');
-              $('#modalNewAreaConfeccion').modal('close');
-              this.obtenerAreas();
-              this.initFormGroup();
+          (existe: any) => {
+            console.log(existe);
+            if (!existe.Hecho) {
+              this._confeccionService.createArea(this.form.value)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Área guardada con exito', '');
+                      $('#modalNewAreaConfeccion').modal('close');
+                      this.obtenerAreas();
+                      this.initFormGroup();
+                    } else {
+                      this._toast.warning('Algo no ha salido bien', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  });
             } else {
-              this._toast.warning('Algo no ha salido bien', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           });
     }
   }
@@ -254,28 +263,71 @@ export class AreaconfeccionComponent implements OnInit, OnDestroy, AfterViewInit
           x.IdOperacion = x.ID;
         }
       );
-      this._confeccionService.updateArea(payload)
+      this._confeccionService.validaAreaExiste(this.form.get('Clave').value, this.form.get('Nombre').value, this.form.get('ID').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Se actualizo correctamente el área', '');
-              $('#modalEditAreaConfeccion').modal('close');
-              this.obtenerAreas();
+          (existe: any) => {
+            if (!existe.Hecho) {
+              this._confeccionService.updateArea(payload)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Se actualizo correctamente el área', '');
+                      $('#modalEditAreaConfeccion').modal('close');
+                      this.obtenerAreas();
+                    } else {
+                      this._toast.warning('Algo salio mal', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  }
+                );
             } else {
-              this._toast.warning('Algo salio mal', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
-          }
-        );
+          });
     }
   }
 
   eliminar(area) {
-    // TODO: En cuanto el back termine conectar este metodo
+    swal({
+      text: '¿Estas seguro de eliminar esta área?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._confeccionService.deleteConfeccion(area.ID, 'Area')
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Área eliminada con exito', '');
+                  this.obtenerAreas();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
   }
 
   isAllSelected() {

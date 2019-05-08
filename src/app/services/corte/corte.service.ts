@@ -42,6 +42,17 @@ export class CorteService {
     return this._http.get(url, {headers, params});
   }
 
+  validaCortadorExiste(clave, nombre, id?) {
+    const url = `${this.URL_CORTADORES}/ValidaCortadorSubModulo`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams().append('Clave', clave);
+    params = params.append('Nombre', nombre);
+    if (id) {
+      params = params.append('ID', id);
+    }
+    return this._http.get(url, {headers, params});
+  }
+
   updateCortador(payload) {
     const url = `${this.URL_CORTADORES}/ActualizaCortador`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
@@ -86,6 +97,17 @@ export class CorteService {
     const url = `${this.URL_CORTADORES}/ObtieneInfoDefecto`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);
+    return this._http.get(url, {headers, params});
+  }
+
+  validaDefectoExiste(clave, nombre, id?) {
+    const url = `${this.URL_CORTADORES}/ValidaDefectoSubModulo`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams().append('Clave', clave);
+    params = params.append('Nombre', nombre);
+    if (id) {
+      params = params.append('ID', id);
+    }
     return this._http.get(url, {headers, params});
   }
 
@@ -142,6 +164,17 @@ export class CorteService {
     return this._http.get(url, {headers, params});
   }
 
+  validaMesaExiste(clave, nombre, id?) {
+    const url = `${this.URL_CORTADORES}/ValidaMesaSubModulo`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams().append('Clave', clave);
+    params = params.append('Nombre', nombre);
+    if (id) {
+      params = params.append('ID', id);
+    }
+    return this._http.get(url, {headers, params});
+  }
+
   createMesa(payload) {
     const url = `${this.URL_CORTADORES}/NuevoMesa`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
@@ -195,6 +228,17 @@ export class CorteService {
     return this._http.get(url, {headers, params});
   }
 
+  validaPosicionExiste(clave, nombre, id?) {
+    const url = `${this.URL_CORTADORES}/ValidaPosicionSubModulo`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams().append('Clave', clave);
+    params = params.append('Nombre', nombre);
+    if (id) {
+      params = params.append('ID', id);
+    }
+    return this._http.get(url, {headers, params});
+  }
+
   createPosicion(payload) {
     const url = `${this.URL_CORTADORES}/NuevoPosicion`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
@@ -245,6 +289,17 @@ export class CorteService {
     const url = `${this.URL_CORTADORES}/ObtieneInfoTendido`;
     const headers = new HttpHeaders().append('content-type', 'application/json');
     const params = new HttpParams().append('ID', id);
+    return this._http.get(url, {headers, params});
+  }
+
+  validaTendidoExiste(clave, nombre, id?) {
+    const url = `${this.URL_CORTADORES}/ValidaTendidoSubModulo`;
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    let params = new HttpParams().append('Clave', clave);
+    params = params.append('Nombre', nombre);
+    if (id) {
+      params = params.append('ID', id);
+    }
     return this._http.get(url, {headers, params});
   }
 

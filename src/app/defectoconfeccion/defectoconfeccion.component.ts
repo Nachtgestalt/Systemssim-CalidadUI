@@ -47,10 +47,12 @@ export class DefectoconfeccionComponent implements OnInit, OnDestroy, AfterViewI
 
   form: FormGroup;
   formFilter: FormGroup;
+
   constructor(
     private _confeccionService: ConfeccionService,
     private _toast: ToastrService
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
     $('.tooltipped').tooltip();
@@ -236,73 +238,33 @@ export class DefectoconfeccionComponent implements OnInit, OnDestroy, AfterViewI
     } else if ($('#NOMBRE_NEW_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de defecto confección', '');
     } else {
-      this._confeccionService.createDefecto(this.form.value)
+      this._confeccionService.validaDefectoExiste(this.form.get('Clave').value, this.form.get('Nombre').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Se agrego correctamente el defecto', '');
-              $('#modalNewDefectoConfeccion').modal('close');
-              this.reset();
-              this.obtenerDefectos();
+          (existe: any) => {
+            console.log(existe);
+            if (!existe.Hecho) {
+              this._confeccionService.createDefecto(this.form.value)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Se agrego correctamente el defecto', '');
+                      $('#modalNewDefectoConfeccion').modal('close');
+                      this.reset();
+                      this.obtenerDefectos();
+                    } else {
+                      this._toast.warning('Algo salio mal', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  });
             } else {
-              this._toast.warning('Algo salio mal', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
-          });
-      // let Result = false;
-      // $.ajax({
-      //   // tslint:disable-next-line:max-line-length
-      //   url: Globals.UriRioSulApi + 'Confeccion/ValidaDefectoConfeccionSubModulo?SubModulo=6&Clave=' + $('#CVE_NEW_CORTADOR').val() + '&Nombre=' + $('#NOMBRE_NEW_CORTADOR').val(),
-      //   dataType: 'json',
-      //   contents: 'application/json; charset=utf-8',
-      //   method: 'get',
-      //   async: false,
-      //   success: function (json) {
-      //     if (json.Message.IsSuccessStatusCode) {
-      //       Result = json.Hecho;
-      //     }
-      //   },
-      //   error: function () {
-      //     console.log('No se pudo establecer conexión a la base de datos');
-      //   }
-      // });
-      // if (Result) {
-      //   let Mensaje = '';
-      //   const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
-      //   $.ajax({
-      //     url: Globals.UriRioSulApi + 'Confeccion/NuevoDefectoConfeccion',
-      //     type: 'POST',
-      //     contentType: 'application/json; charset=utf-8',
-      //     async: false,
-      //     data: JSON.stringify({
-      //       IdSubModulo: 1,
-      //       IdUsuario: Json_Usuario.ID,
-      //       Clave: $('#CVE_NEW_CORTADOR').val(),
-      //       Nombre: $('#NOMBRE_NEW_CORTADOR').val(),
-      //       Descripcion: $('#DESCRIPCION_NEW_CORTADOR').val(),
-      //       Observaciones: $('#OBSERVACIONES_NEW_CORTADOR').val(),
-      //       Imagen:  ($('#blah')[0].src === 'http://placehold.it/180' ? '' : $('#blah')[0].src)
-      //     }),
-      //     success: function (json) {
-      //       if (json.Message.IsSuccessStatusCode) {
-      //         Mensaje = 'Se agrego correctamente el defecto confección';
-      //       }
-      //     },
-      //     error: function () {
-      //       console.log('No se pudo establecer conexión a la base de datos');
-      //     }
-      //   });
-      //   if (Mensaje !== '') {
-      //     this._toast.success(Mensaje, '');
-      //     $('#modalNewDefectoConfeccion').modal('close');
-      //   }
-      // } else {
-      //   this._toast.warning('La clave de defecto cortador ya se encuentra registrada en el sistema', '');
-      // }
+          }
+        );
     }
   }
 
@@ -312,73 +274,32 @@ export class DefectoconfeccionComponent implements OnInit, OnDestroy, AfterViewI
     } else if ($('#NOMBRE_EDT_DEFECTO_CONFECCION').val() === '') {
       this._toast.warning('Se debe ingresar un nombre defecto confección', '');
     } else {
-      this._confeccionService.updateDefecto(this.form.value)
+      this._confeccionService.validaDefectoExiste(this.form.get('Clave').value, this.form.get('Nombre').value, this.form.get('ID').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Se actualizo correctamente el defecto', '');
-              $('#modalEditDefectoConfeccion').modal('close');
-              this.reset();
-              this.obtenerDefectos();
+          (existe: any) => {
+            if (!existe.Hecho) {
+              this._confeccionService.updateDefecto(this.form.value)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Se actualizo correctamente el defecto', '');
+                      $('#modalEditDefectoConfeccion').modal('close');
+                      this.reset();
+                      this.obtenerDefectos();
+                    } else {
+                      this._toast.warning('Algo salio mal', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  });
             } else {
-              this._toast.warning('Algo salio mal', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
-          });
-      // let Result = false;
-      // $.ajax({
-      //   // tslint:disable-next-line:max-line-length
-      //   url: Globals.UriRioSulApi + 'Confeccion/ValidaDefectoConfeccionSubModulo?SubModulo=6&Clave=' + $('#CVE_EDT_DEFECTO_CONFECCION').val() + '&Nombre=' + $('#NOMBRE_EDT_DEFECTO_CONFECCION').val(),
-      //   dataType: 'json',
-      //   contents: 'application/json; charset=utf-8',
-      //   method: 'get',
-      //   async: false,
-      //   success: function (json) {
-      //     if (json.Message.IsSuccessStatusCode) {
-      //       Result = json.Hecho;
-      //     }
-      //   },
-      //   error: function () {
-      //     console.log('No se pudo establecer conexión a la base de datos');
-      //   }
-      // });
-      // if (Result) {
-      //   let Mensaje = '';
-      //   const Json_Usuario = JSON.parse(sessionStorage.getItem('currentUser'));
-      //   $.ajax({
-      //     url: Globals.UriRioSulApi + 'Confeccion/ActualizaDefectoConfeccion',
-      //     type: 'POST',
-      //     contentType: 'application/json; charset=utf-8',
-      //     async: false,
-      //     data: JSON.stringify({
-      //       ID: $('#HDN_ID').val(),
-      //       IdUsuario: Json_Usuario.ID,
-      //       Clave: $('#CVE_EDT_DEFECTO_CONFECCION').val(),
-      //       Nombre: $('#NOMBRE_EDT_DEFECTO_CONFECCION').val(),
-      //       Descripcion: $('#DESCRIPCION_EDT_DEFECTO_CONFECCION').val(),
-      //       Observaciones: $('#OBSERVACIONES_EDT_DEFECTO_CONFECCION').val(),
-      //       Imagen: ($('#blah')[0].src === 'http://placehold.it/180' ? '' : $('#blah')[0].src)
-      //     }),
-      //     success: function (json) {
-      //       if (json.Message.IsSuccessStatusCode) {
-      //         Mensaje = 'Se agrego correctamente el defecto confección';
-      //       }
-      //     },
-      //     error: function () {
-      //       console.log('No se pudo establecer conexión a la base de datos');
-      //     }
-      //   });
-      //   if (Mensaje !== '') {
-      //     this._toast.success(Mensaje, '');
-      //     $('#modalEditDefectoConfeccion').modal('close');
-      //   }
-      // } else {
-      //   this._toast.warning('La clave defecto confección ya se encuentra registrada en el sistema', '');
-      // }
+          }
+        );
     }
   }
 
@@ -401,23 +322,23 @@ export class DefectoconfeccionComponent implements OnInit, OnDestroy, AfterViewI
     })
       .then((willDelete) => {
         if (willDelete) {
-          // this._cortadoresService.deleteDefecto(defecto.ID)
-          //   .subscribe(
-          //     (res: any) => {
-          //       console.log(res);
-          //       if (res.Message.IsSuccessStatusCode) {
-          //         this._toast.success('Defecto eliminado con exito', '');
-          //         this.obtenerDefectos();
-          //       } else {
-          //         const mensaje = res.Hecho.split(',');
-          //         this._toast.warning(mensaje[0], mensaje[2]);
-          //       }
-          //     },
-          //     error => {
-          //       console.log(error);
-          //       this._toast.error('Error al conectar a la base de datos', '');
-          //     }
-          //   );
+          this._confeccionService.deleteConfeccion(defecto.ID, 'Defecto')
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Defecto eliminado con exito', '');
+                  this.obtenerDefectos();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
         }
       });
   }

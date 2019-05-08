@@ -37,7 +37,6 @@ import {AuditoriacorteComponent} from './auditoriacorte/auditoriacorte.component
 import {AuditoriatendidoComponent} from './auditoriatendido/auditoriatendido.component';
 import {AuditoriaconfeccionComponent} from './auditoriaconfeccion/auditoriaconfeccion.component';
 import {AuditoriaprocesosespecialesComponent} from './auditoriaprocesosespeciales/auditoriaprocesosespeciales.component';
-import {ReportecortegeneralComponent} from './reportecortegeneral/reportecortegeneral.component';
 import {CatalogPageComponent} from './pages/catalog-page/catalog-page.component';
 import {CutPageComponent} from './pages/cut-page/cut-page.component';
 import {ConfectionPageComponent} from './pages/confection-page/confection-page.component';
@@ -77,6 +76,16 @@ import {AgregarCorteComponent} from './auditoriacorte/agregar-corte/agregar-cort
 import {EditarCorteComponent} from './auditoriacorte/editar-corte/editar-corte.component';
 import {EditarTendidoComponent} from './auditoriacorte/editar-tendido/editar-tendido.component';
 import {AuditoriaConfeccionConsultaComponent} from './auditoria-confeccion-consulta/auditoria-confeccion-consulta.component';
+import {ConsultaGeneralComponent} from './consulta-general/consulta-general.component';
+import {CorteConsultaComponent} from './consulta-general/corte-consulta/corte-consulta.component';
+import {ConfeccionConsultaComponent} from './consulta-general/confeccion-consulta/confeccion-consulta.component';
+import {ProcesosConsultaComponent} from './consulta-general/procesos-consulta/procesos-consulta.component';
+import {LavanderiaConsultaComponent} from './consulta-general/lavanderia-consulta/lavanderia-consulta.component';
+import {TerminadoConsultaComponent} from './consulta-general/terminado-consulta/terminado-consulta.component';
+import {ResumenConsultaComponent} from './consulta-general/resumen-consulta/resumen-consulta.component';
+import {ReporteCorteComponent} from './reportes/reporte-corte/reporte-corte.component';
+import {ReporteConfeccionComponent} from './reportes/reporte-confeccion/reporte-confeccion.component';
+import {ReporteTerminadoComponent} from './reportes/reporte-terminado/reporte-terminado.component';
 
 // the second parameter 'fr' is optional
 registerLocaleData(localeMx);
@@ -113,7 +122,6 @@ registerLocaleData(localeMx);
     AuditoriatendidoComponent,
     AuditoriaconfeccionComponent,
     AuditoriaprocesosespecialesComponent,
-    ReportecortegeneralComponent,
     CatalogPageComponent,
     CutPageComponent,
     ConfectionPageComponent,
@@ -147,6 +155,16 @@ registerLocaleData(localeMx);
     EditarCorteComponent,
     EditarTendidoComponent,
     AuditoriaConfeccionConsultaComponent,
+    ConsultaGeneralComponent,
+    CorteConsultaComponent,
+    ConfeccionConsultaComponent,
+    ProcesosConsultaComponent,
+    LavanderiaConsultaComponent,
+    TerminadoConsultaComponent,
+    ResumenConsultaComponent,
+    ReporteCorteComponent,
+    ReporteConfeccionComponent,
+    ReporteTerminadoComponent,
   ],
   entryComponents: [
     AddEditOperacionTerminadoComponent
@@ -232,8 +250,11 @@ registerLocaleData(localeMx);
       },
       {
         path: 'reports', component: ReportsPageComponent, children: [
-          {path: '', redirectTo: 'reportecortegeneral', pathMatch: 'full'},
-          {path: 'reportecortegeneral', component: ReportecortegeneralComponent}
+          {path: '', redirectTo: 'consulta-general', pathMatch: 'full'},
+          {path: 'consulta-general', component: ConsultaGeneralComponent},
+          {path: 'reporte-corte', component: ReporteCorteComponent},
+          {path: 'reporte-confeccion', component: ReporteConfeccionComponent},
+          {path: 'reporte-terminado', component: ReporteTerminadoComponent},
         ]
       },
       {

@@ -45,10 +45,12 @@ export class DefectocorteComponent implements OnInit, OnDestroy, AfterViewInit {
 
   form: FormGroup;
   formFilter: FormGroup;
+
   constructor(
     private _cortadoresService: CorteService,
     private _toast: ToastrService
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
     $('.tooltipped').tooltip();
@@ -167,23 +169,32 @@ export class DefectocorteComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if ($('#NOMBRE_NEW_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de defecto cortador', '');
     } else {
-      this._cortadoresService.createDefecto(this.form.value)
+      this._cortadoresService.validaDefectoExiste(this.form.get('Clave').value, this.form.get('Nombre').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Se agrego correctamente el defecto', '');
-              $('#modalNewDefectoCortador').modal('close');
-              this.reset();
-              this.obtenerDefectos();
+          (existe: any) => {
+            if (!existe.Hecho) {
+              this._cortadoresService.createDefecto(this.form.value)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Se agrego correctamente el defecto', '');
+                      $('#modalNewDefectoCortador').modal('close');
+                      this.reset();
+                      this.obtenerDefectos();
+                    } else {
+                      this._toast.warning('Algo salio mal', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  });
             } else {
-              this._toast.warning('Algo salio mal', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           });
+
     }
   }
 
@@ -193,22 +204,30 @@ export class DefectocorteComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if ($('#NOMBRE_EDT_DEFECTO').val() === '') {
       this._toast.warning('Se debe ingresar un nombre defecto cortador', '');
     } else {
-      this._cortadoresService.updateDefecto(this.form.value)
+      this._cortadoresService.validaDefectoExiste(this.form.get('Clave').value, this.form.get('Nombre').value, this.form.get('ID').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Se actualizo correctamente el defecto', '');
-              $('#modalEditDefectoCortador').modal('close');
-              this.reset();
-              this.obtenerDefectos();
+          (existe: any) => {
+            if (!existe.Hecho) {
+              this._cortadoresService.updateDefecto(this.form.value)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Se actualizo correctamente el defecto', '');
+                      $('#modalEditDefectoCortador').modal('close');
+                      this.reset();
+                      this.obtenerDefectos();
+                    } else {
+                      this._toast.warning('Algo salio mal', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  });
             } else {
-              this._toast.warning('Algo salio mal', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           });
     }
   }

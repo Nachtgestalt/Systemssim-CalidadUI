@@ -53,10 +53,12 @@ export class OperacionconfeccionComponent implements OnInit, OnDestroy, AfterVie
   idOperacion;
   form: FormGroup;
   formFilter: FormGroup;
+
   constructor(
     private _confeccionService: ConfeccionService,
     private _toast: ToastrService
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
     $('.tooltipped').tooltip();
@@ -186,23 +188,33 @@ export class OperacionconfeccionComponent implements OnInit, OnDestroy, AfterVie
         }
       );
       this.form.controls['Defectos'].patchValue(defectos);
-      this._confeccionService.createOperacion(this.form.value)
+      this._confeccionService.validaOperacionExiste(this.form.get('Clave').value, this.form.get('Nombre').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Posición guardada con exito', '');
-              $('#modalNewOperacionConfeccion').modal('close');
-              this.obtenerOperaciones();
-              this.initFormGroup();
+          (existe: any) => {
+            if (!existe.Hecho) {
+              this._confeccionService.createOperacion(this.form.value)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Posición guardada con exito', '');
+                      $('#modalNewOperacionConfeccion').modal('close');
+                      this.obtenerOperaciones();
+                      this.initFormGroup();
+                    } else {
+                      this._toast.warning('Algo no ha salido bien', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  });
             } else {
-              this._toast.warning('Algo no ha salido bien', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
-          });
+          }
+        );
+
     }
   }
 
@@ -250,28 +262,72 @@ export class OperacionconfeccionComponent implements OnInit, OnDestroy, AfterVie
           x.IdDefecto = x.ID;
         }
       );
-      this._confeccionService.updateOperacion(payload)
+      this._confeccionService.validaOperacionExiste(this.form.get('Clave').value, this.form.get('Nombre').value, this.form.get('ID').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Se actualizo correctamente la operación', '');
-              $('#modalEditOperacionConfeccion').modal('close');
-              this.obtenerOperaciones();
+          (existe: any) => {
+            if (!existe.Hecho) {
+              this._confeccionService.updateOperacion(payload)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Se actualizo correctamente la operación', '');
+                      $('#modalEditOperacionConfeccion').modal('close');
+                      this.obtenerOperaciones();
+                    } else {
+                      this._toast.warning('Algo salio mal', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  }
+                );
             } else {
-              this._toast.warning('Algo salio mal', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           }
         );
     }
   }
 
   eliminar(operacion) {
-    // TODO: En cuanto el back termine, conectar este metodo
+    swal({
+      text: '¿Estas seguro de eliminar esta operación?',
+      buttons: {
+        cancel: {
+          text: 'Cancelar',
+          closeModal: true,
+          value: false,
+          visible: true
+        },
+        confirm: {
+          text: 'Aceptar',
+          value: true,
+        }
+      }
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+          this._confeccionService.deleteConfeccion(operacion.ID, 'Operacion')
+            .subscribe(
+              (res: any) => {
+                console.log(res);
+                if (res.Message.IsSuccessStatusCode) {
+                  this._toast.success('Defecto eliminado con exito', '');
+                  this.obtenerOperaciones();
+                } else {
+                  const mensaje = res.Hecho.split(',');
+                  this._toast.warning(mensaje[0], mensaje[2]);
+                }
+              },
+              error => {
+                console.log(error);
+                this._toast.error('Error al conectar a la base de datos', '');
+              }
+            );
+        }
+      });
   }
 
   isAllSelected() {

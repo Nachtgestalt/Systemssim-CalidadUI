@@ -142,7 +142,7 @@ export class MesaComponent implements OnInit, OnDestroy, AfterViewInit {
     swal(options)
       .then((willDelete) => {
         if (willDelete) {
-          this._cortadoresService.inactivaActivaDefecto(mesa.ID)
+          this._cortadoresService.inactivaActivaMesa(mesa.ID)
             .subscribe(
               res => {
                 console.log(res);
@@ -180,21 +180,29 @@ export class MesaComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if ($('#NOMBRE_NEW_CORTADOR').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de mesa', '');
     } else {
-      this._cortadoresService.createMesa(this.form.value)
+      this._cortadoresService.validaMesaExiste(this.form.get('Clave').value, this.form.get('Nombre').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Se agrego correctamente la mesa', '');
-              $('#modalNewMesa').modal('close');
-              this.obtenerMesas();
+          (existe: any) => {
+            if (!existe.Hecho) {
+              this._cortadoresService.createMesa(this.form.value)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Se agrego correctamente la mesa', '');
+                      $('#modalNewMesa').modal('close');
+                      this.obtenerMesas();
+                    } else {
+                      this._toast.warning('Algo salio mal', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  });
             } else {
-              this._toast.warning('Algo salio mal', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           });
     }
   }
@@ -205,22 +213,30 @@ export class MesaComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if ($('#NOMBRE_EDT_MESA').val() === '') {
       this._toast.warning('Se debe ingresar un nombre de cortador de mesa', '');
     } else {
-      this._cortadoresService.updateMesa(this.form.value)
+      this._cortadoresService.validaMesaExiste(this.form.get('Clave').value, this.form.get('Nombre').value, this.form.get('ID').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Se actualizo correctamente la mesa', '');
-              $('#modalEditMesa').modal('close');
-              this.reset();
-              this.obtenerMesas();
+          (existe: any) => {
+            if (!existe.Hecho) {
+              this._cortadoresService.updateMesa(this.form.value)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Se actualizo correctamente la mesa', '');
+                      $('#modalEditMesa').modal('close');
+                      this.reset();
+                      this.obtenerMesas();
+                    } else {
+                      this._toast.warning('Algo salio mal', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  });
             } else {
-              this._toast.warning('Algo salio mal', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           });
     }
   }

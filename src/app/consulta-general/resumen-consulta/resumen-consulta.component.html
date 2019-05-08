@@ -1,0 +1,82 @@
+<div class="card-panel">
+  <div class="row">
+    <table mat-table [dataSource]="dataSourceWIP" class="mat-elevation-z8">
+      <!-- Corte Column -->
+      <ng-container matColumnDef="Corte">
+        <th mat-header-cell *matHeaderCellDef> Corte</th>
+        <td mat-cell *matCellDef="let element"> {{element.Corte}} </td>
+      </ng-container>
+      <!-- Cliente Column -->
+      <ng-container matColumnDef="Cliente">
+        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+        <td mat-cell *matCellDef="let element; let i = index">
+          {{element.Cliente}}
+          <!--<a class="waves-effect waves-light btn tooltipped modal-trigger" data-target="modalEditDefectoTerminado"-->
+          <!--matTooltip="Edita el defecto  seleccionado">-->
+          <!--&lt;!&ndash;(click)="getInfoDefectoTerminado(defecto.ID)">&ndash;&gt;-->
+          <!--<i class="material-icons right">edit</i>-->
+          <!--</a>-->
+        </td>
+      </ng-container>
+
+      <!-- Marca Column -->
+      <ng-container matColumnDef="Marca">
+        <th mat-header-cell *matHeaderCellDef>Marca</th>
+        <td mat-cell *matCellDef="let element; let i = index"> {{element.Marca}} </td>
+      </ng-container>
+
+      <!-- PO Column -->
+      <ng-container matColumnDef="PO">
+        <th mat-header-cell *matHeaderCellDef> PO</th>
+        <td mat-cell *matCellDef="let element"> {{element.PO}} </td>
+      </ng-container>
+
+      <!-- POvsEmb Column -->
+      <ng-container matColumnDef="POvsEmb">
+        <th mat-header-cell *matHeaderCellDef> #PO vs #Emb</th>
+        <td mat-cell *matCellDef="let element"> {{element.Planta}} </td>
+      </ng-container>
+
+      <!-- Emb Column -->
+      <ng-container matColumnDef="Emb">
+        <th mat-header-cell *matHeaderCellDef> % Emb.</th>
+        <td mat-cell *matCellDef="let element"> {{element.Estilo}} </td>
+      </ng-container>
+
+      <!-- CortevsEmb Column -->
+      <ng-container matColumnDef="CortevsEmb">
+        <th mat-header-cell *matHeaderCellDef> #Corte vs #Emb</th>
+        <td mat-cell *matCellDef="let element"> </td>
+      </ng-container>
+
+      <!-- POvsCorte Column -->
+      <ng-container matColumnDef="POvsCorte">
+        <th mat-header-cell *matHeaderCellDef> #PO vs #Corte</th>
+        <td mat-cell *matCellDef="let element"> </td>
+      </ng-container>
+
+      <!-- Cortado Column-->
+      <ng-container matColumnDef="Cortado">
+        <th mat-header-cell *matHeaderCellDef> % Cortado</th>
+        <td mat-cell *matCellDef="let element"
+            matTooltip="Doble click para ver detalle"> {{element.pzas_c | numberFormat}} </td>
+      </ng-container>
+
+      <!-- TSeg Column-->
+      <ng-container matColumnDef="TSeg">
+        <th mat-header-cell *matHeaderCellDef> #T. Seg</th>
+        <td mat-cell *matCellDef="let element"
+            matTooltip="Doble click para ver detalle"> {{element.pzas_2 | numberFormat}} </td>
+      </ng-container>
+
+      <!-- TFaltantes Column -->
+      <ng-container matColumnDef="TFaltantes">
+        <th mat-header-cell *matHeaderCellDef> #T. Faltantes</th>
+        <td mat-cell *matCellDef="let element"> {{element.status}} </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumnsWIP"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumnsWIP;"></tr>
+    </table>
+  </div>
+</div>

@@ -225,22 +225,30 @@ export class PosicioncorteComponent implements OnInit, OnDestroy, AfterViewInit 
         }
       );
       this.form.controls['Defecto'].patchValue(defectos);
-      this._cortadoresService.createPosicion(this.form.value)
+      this._cortadoresService.validaPosicionExiste(this.form.get('Clave').value, this.form.get('Nombre').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Posición guardada con exito', '');
-              $('#modalNewPosicionCortador').modal('close');
-              this.obtenerPosiciones();
-              this.initFormGroup();
+          (existe: any) => {
+            if (!existe.Hecho) {
+              this._cortadoresService.createPosicion(this.form.value)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Posición guardada con exito', '');
+                      $('#modalNewPosicionCortador').modal('close');
+                      this.obtenerPosiciones();
+                      this.initFormGroup();
+                    } else {
+                      this._toast.warning('Algo no ha salido bien', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  });
             } else {
-              this._toast.warning('Algo no ha salido bien', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
           });
     }
   }
@@ -269,23 +277,31 @@ export class PosicioncorteComponent implements OnInit, OnDestroy, AfterViewInit 
           x.IdCortador = x.ID;
         }
       );
-      this._cortadoresService.updatePosicion(payload)
+      this._cortadoresService.validaPosicionExiste(this.form.get('Clave').value, this.form.get('Nombre').value, this.form.get('ID').value)
         .subscribe(
-          (res: any) => {
-            console.log(res);
-            if (res.Message.IsSuccessStatusCode) {
-              this._toast.success('Se actualizo correctamente la posición', '');
-              $('#modalEditPosicionCortador').modal('close');
-              this.obtenerPosiciones();
+          (existe: any) => {
+            if (!existe.Hecho) {
+              this._cortadoresService.updatePosicion(payload)
+                .subscribe(
+                  (res: any) => {
+                    console.log(res);
+                    if (res.Message.IsSuccessStatusCode) {
+                      this._toast.success('Se actualizo correctamente la posición', '');
+                      $('#modalEditPosicionCortador').modal('close');
+                      this.obtenerPosiciones();
+                    } else {
+                      this._toast.warning('Algo salio mal', '');
+                    }
+                  },
+                  error => {
+                    console.log(error);
+                    this._toast.error('No se pudo establecer conexión a la base de datos', '');
+                  }
+                );
             } else {
-              this._toast.warning('Algo salio mal', '');
+              this._toast.warning('Ya existe un registro con esa clave y/o nombre', '');
             }
-          },
-          error => {
-            console.log(error);
-            this._toast.error('No se pudo establecer conexión a la base de datos', '');
-          }
-        );
+          });
     }
   }
 

@@ -1,131 +1,10 @@
 <div class="card-panel">
-  <div class="row" style="text-align: right">
-    <div class="col s12">
-      <button class="btn waves-effect waves-light red lighten-2" [routerLink]="['/home']">Regresar
-        <i class="material-icons left">arrow_back</i>
-      </button>
-    </div>
-  </div>
   <div class="row">
-    <div class="col s4 center-align">
-      <span>Periodo</span>
-    </div>
-    <div class="col s2 center-align">
-      <span>Cliente</span>
-    </div>
-    <div class="col s2 center-align">
-      <span>Marca</span>
-    </div>
-    <div class="col s2 center-align">
-      <span># PO</span>
-    </div>
-    <div class="col s2 center-align">
-      <span># Corte</span>
-    </div>
-  </div>
-  <form [formGroup]="formFilter">
-    <div class="row">
-      <div class="col s2">
-        <div class="input-field">
-          <i class="material-icons prefix">date_range</i>
-          <input id="inicio" type="date" class="validate"
-                 formControlName="Fecha_i">
-          <label for="inicio">Inicio</label>
-        </div>
-      </div>
-
-      <div class="col s2">
-        <div class="input-field">
-          <i class="material-icons prefix">date_range</i>
-          <input id="fin" type="date" class="validate"
-                 formControlName="Fecha_f">
-          <label for="fin">Fin</label>
-        </div>
-      </div>
-
-      <div class="col s2">
-        <div class="input-field">
-          <input id="cliente" type="text" class="validate" [matAutocomplete]="cliente"
-                 formControlName="IdCliente"
-                 (focus)="obtenerMarcas(true)"
-                 (blur)="obtenerMarcas(true)">
-          <mat-autocomplete #cliente="matAutocomplete" [displayWith]="displayFn">
-            <mat-option *ngFor="let cliente of filteredOptions | async" [value]="cliente">
-              {{cliente.Descripcion}}
-            </mat-option>
-          </mat-autocomplete>
-          <label for="cliente">Buscar cliente</label>
-        </div>
-      </div>
-
-      <div class="col s2">
-        <div class="input-field">
-          <input id="marca" type="text" class="validate" [matAutocomplete]="marca"
-                 formControlName="Marca"
-                 (focus)="obtenerMarcas()"
-                 (blur)="obtenerPO()">
-          <mat-autocomplete #marca="matAutocomplete">
-            <mat-option *ngFor="let marca of filteredOptionsMarca | async" [value]="marca">
-              {{marca}}
-            </mat-option>
-          </mat-autocomplete>
-          <label for="marca">Buscar marca</label>
-        </div>
-      </div>
-
-      <div class="col s2">
-        <div class="input-field">
-          <input id="po" type="text" class="validate" [matAutocomplete]="po"
-                 formControlName="PO"
-                 (focus)="obtenerPO()"
-                 (blur)="obtenerCorte()">
-          <mat-autocomplete #po="matAutocomplete">
-            <mat-option *ngFor="let po of pos" [value]="po">
-              {{po}}
-            </mat-option>
-          </mat-autocomplete>
-          <label for="po">Buscar PO</label>
-        </div>
-      </div>
-
-      <div class="col s2">
-        <div class="input-field">
-          <input id="corte" type="text" class="validate" [matAutocomplete]="corte"
-                 formControlName="Corte"
-                 (focus)="obtenerCorte()">
-          <mat-autocomplete #corte="matAutocomplete">
-            <mat-option *ngFor="let corte of cortes" [value]="corte">
-              {{corte}}
-            </mat-option>
-          </mat-autocomplete>
-          <label for="corte">Buscar Corte</label>
-        </div>
-      </div>
-    </div>
-    <div class="row right-align">
-      <div class="col s12">
-        <button type="button" name="btnAddCortador"
-                style="margin-right: 1rem;"
-                class="btn light-blue darken-4 waves-effect waves-light"
-                (click)="reset()">Reiniciar
-          <!--<i class="material-icons right">search</i>-->
-        </button>
-        <button type="button" name="btnAddCortador"
-                class="btn light-blue darken-4 waves-effect waves-light"
-                (click)="buscar()">Buscar
-          <i class="material-icons right">search</i>
-        </button>
-      </div>
-    </div>
-  </form>
-
-  <!--TABLA DE RESULTADOS-->
-  <div class="row">
-    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    <table mat-table [dataSource]="dataSourceWIP" class="mat-elevation-z8">
       <!-- Corte Column -->
       <ng-container matColumnDef="Corte">
         <th mat-header-cell *matHeaderCellDef> Corte</th>
-        <td mat-cell *matCellDef="let element"> {{element.OT}} </td>
+        <td mat-cell *matCellDef="let element"> {{element.Corte}} </td>
       </ng-container>
 
       <!-- Cliente Column -->
@@ -153,12 +32,6 @@
         <td mat-cell *matCellDef="let element"> {{element.PO}} </td>
       </ng-container>
 
-      <!-- Corte Column -->
-      <ng-container matColumnDef="Cortadas">
-        <th mat-header-cell *matHeaderCellDef> Cant. Cortada</th>
-        <td mat-cell *matCellDef="let element"> {{element.Corte}} </td>
-      </ng-container>
-
       <!-- Fecha Inicio Column -->
       <ng-container matColumnDef="Fecha Inicio">
         <th mat-header-cell *matHeaderCellDef> Fecha Inicio</th>
@@ -178,19 +51,19 @@
         <th mat-header-cell *matHeaderCellDef> Defectos</th>
         <td mat-cell *matCellDef="let element"
             matTooltip="Doble click para ver detalle"
-            (dblclick)="openModalDetalle(element)"> {{element.pzas_r | numberFormat}} </td>
+            (dblclick)="openModalDetalle(element)"> {{element.Defectos | numberFormat}} </td>
       </ng-container>
 
       <!-- 2das terminado Column-->
       <ng-container matColumnDef="2das">
-        <th mat-header-cell *matHeaderCellDef> Sgdas. Term.</th>
-        <td mat-cell *matCellDef="let element"> {{element.pzas_2 | numberFormat}} </td>
+        <th mat-header-cell *matHeaderCellDef> Composturas</th>
+        <td mat-cell *matCellDef="let element"> {{element.Composturas | numberFormat}} </td>
       </ng-container>
 
       <!-- Status Finales Column -->
       <ng-container matColumnDef="Status">
         <th mat-header-cell *matHeaderCellDef> Status</th>
-        <td mat-cell *matCellDef="let element"> {{element.status}} </td>
+        <td mat-cell *matCellDef="let element"> {{element.Status}} </td>
       </ng-container>
 
       <!-- Status Finales Column -->
@@ -213,13 +86,13 @@
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      <tr mat-header-row *matHeaderRowDef="displayedColumnsWIP"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumnsWIP;"></tr>
     </table>
   </div>
 </div>
-
-<div id="modal-detalle" class="modal modal-fixed-footer modal-lg">
+<!--MODAL DETAIL-->
+<div id="modal-detalle" class="modal modal-fixed-footer modal-lg" #modalDetalle>
   <div class="modal-content">
     <div class="row">
       <span class="close" (click)="closeModalDetalle()">&times;</span>

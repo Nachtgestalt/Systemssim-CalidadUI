@@ -1,0 +1,227 @@
+<div class="card-panel">
+  <div class="row">
+    <table mat-table [dataSource]="dataSourceWIP" class="mat-elevation-z8">
+      <!-- Corte Column -->
+      <ng-container matColumnDef="Corte">
+        <th mat-header-cell *matHeaderCellDef> Corte</th>
+        <td mat-cell *matCellDef="let element"> {{element.Corte}} </td>
+      </ng-container>
+
+      <!-- Cliente Column -->
+      <ng-container matColumnDef="Cliente">
+        <th mat-header-cell *matHeaderCellDef>Cliente</th>
+        <td mat-cell *matCellDef="let element; let i = index">
+          {{element.Cliente}}
+        </td>
+      </ng-container>
+
+      <!-- Marca Column -->
+      <ng-container matColumnDef="Marca">
+        <th mat-header-cell *matHeaderCellDef>Marca</th>
+        <td mat-cell *matCellDef="let element; let i = index"> {{element.Marca}} </td>
+      </ng-container>
+
+      <!-- PO Column -->
+      <ng-container matColumnDef="PO">
+        <th mat-header-cell *matHeaderCellDef> PO</th>
+        <td mat-cell *matCellDef="let element"> {{element.PO}} </td>
+      </ng-container>
+
+
+      <!-- Cortadasa Column -->
+      <ng-container matColumnDef="Planta">
+        <th mat-header-cell *matHeaderCellDef> Planta</th>
+        <td mat-cell *matCellDef="let element"> {{element.Planta}} </td>
+      </ng-container>
+
+      <!-- Fecha Inicio Column -->
+      <ng-container matColumnDef="Fecha Inicio">
+        <th mat-header-cell *matHeaderCellDef> Fecha Inicio</th>
+        <td mat-cell *matCellDef="let element"> {{element.Fecha_i | date: 'dd/MM/yyyy'}} </td>
+      </ng-container>
+
+      <!-- Fecha fin de trabajo Column -->
+      <ng-container matColumnDef="Fecha fin">
+        <th mat-header-cell *matHeaderCellDef> Fecha fin</th>
+        <td mat-cell *matCellDef="let element">
+          {{element.Fecha_f === '0001-01-01T00:00:00' ? '' : element.Fecha_f | date: 'dd/MM/yyyy'}}
+        </td>
+      </ng-container>
+
+      <!-- Composturas-->
+      <ng-container matColumnDef="Defectos">
+        <th mat-header-cell *matHeaderCellDef> Defectos</th>
+        <td mat-cell *matCellDef="let element"
+            matTooltip="Doble click para ver detalle"
+            (dblclick)="openModalDetalle(element)"> {{element.Defectos | numberFormat}} </td>
+      </ng-container>
+
+      <!-- Composturas-->
+      <ng-container matColumnDef="Composturas">
+        <th mat-header-cell *matHeaderCellDef> Composturas</th>
+        <td mat-cell *matCellDef="let element"
+            matTooltip="Doble click para ver detalle"
+            (dblclick)="openModalDetalle(element)"> {{element.Composturas | numberFormat}} </td>
+      </ng-container>
+
+      <!-- Status Finales Column -->
+      <ng-container matColumnDef="Status">
+        <th mat-header-cell *matHeaderCellDef> Status</th>
+        <td mat-cell *matCellDef="let element"> {{element.Status}} </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumnsWIP"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumnsWIP;"></tr>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL DETAILS AUDITORIA-->
+<div id="modal-detalle" class="modal modal-fixed-footer modal-lg" #modalDetalle>
+  <div class="modal-content">
+    <div class="row">
+      <span class="close" (click)="closeModalDetalle()">&times;</span>
+      <h4 class="center-align">DEFECTOS CONFECCIÓN</h4>
+    </div>
+    <div class="row">
+      <div class="col s4">
+        <label class="encabezado-detalle f-w-bold">OT: </label>
+        <label class="encabezado-detalle">{{otDetalle?.OrdenTrabajo}}</label>
+      </div>
+    </div>
+    <hr class="border">
+    <div class="row">
+      <div class="row">
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">CLIENTE: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Descripcion}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">PO: </label>
+          <label class="encabezado-detalle">{{otDetalle?.PO}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">TELA: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Tela}}</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">MARCA: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Marca}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">#CORTADA: </label>
+          <label class="encabezado-detalle">{{otDetalle?.NumCortada}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">LAVADO: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Lavado}}</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">ESTILO: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Estilo}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">PLANTA: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Planta}}</label>
+        </div>
+        <div class="col s4">
+          <label class="encabezado-detalle f-w-bold">RUTA: </label>
+          <label class="encabezado-detalle">{{otDetalle?.Ruta}}</label>
+        </div>
+      </div>
+    </div>
+    <hr class="border">
+    <div class="row mt-3">
+      <div class="center-align f-w-bold mt-3"
+           style="font-size: 2rem"
+           *ngIf="dataSourceDetalle?.data.length === 0">
+        Esta auditoría no contiene defectos
+      </div>
+      <table mat-table [dataSource]="dataSourceDetalle" class="mat-elevation-z8"
+             *ngIf="dataSourceDetalle?.data.length > 0">
+        <!-- Area Column -->
+        <ng-container matColumnDef="Area">
+          <th mat-header-cell *matHeaderCellDef> ÁREA</th>
+          <td mat-cell *matCellDef="let element"> {{element.NombreArea}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Operacion Column -->
+        <ng-container matColumnDef="Operacion">
+          <th mat-header-cell *matHeaderCellDef> OPERACIÓN</th>
+          <td mat-cell *matCellDef="let element"> {{element.NombreOperacion}} </td>
+          <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold"></td>
+        </ng-container>
+
+        <!-- Defecto Column -->
+        <ng-container matColumnDef="Defecto">
+          <th mat-header-cell *matHeaderCellDef> DEFECTO</th>
+          <td mat-cell *matCellDef="let element"> {{element.NombreDefecto}} </td>
+          <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold">TOTAL:</td>
+        </ng-container>
+
+
+        <!-- Cantidad Column -->
+        <ng-container matColumnDef="Cantidad">
+          <th mat-header-cell *matHeaderCellDef> CANTIDAD</th>
+          <td mat-cell *matCellDef="let element"> {{element.Cantidad | numberFormat}} </td>
+          <td mat-footer-cell *matFooterCellDef class="encabezado-detalle f-w-bold">{{getTotalDetalle()}}</td>
+        </ng-container>
+
+        <!-- Nota column-->
+        <ng-container matColumnDef="Nota">
+          <th mat-header-cell *matHeaderCellDef> NOTA</th>
+          <td mat-cell *matCellDef="let element"> {{element.Nota}} </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Imagen Column -->
+        <ng-container matColumnDef="Imagen">
+          <th mat-header-cell *matHeaderCellDef> IMAGEN</th>
+          <td mat-cell *matCellDef="let element">
+            <img [src]="element.Imagen" alt="imagen" style="width:40px;height:40px;"
+                 class="cursor"
+                 matTooltip="Ver imagen"
+                 *ngIf="element.Imagen !== null && element.Imagen !== ''"
+                 (click)="openImage(element.Imagen)">
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+        <!-- Archivo Column -->
+        <ng-container matColumnDef="Archivo">
+          <th mat-header-cell *matHeaderCellDef class="alinear-der"> ARCHIVO</th>
+          <td mat-cell *matCellDef="let element" class="alinear-der">
+            <i class="material-icons prefix cursor" *ngIf="element.Archivo"
+               (click)="openPdfInTab(element.Archivo)"
+               matTooltip="Ver Archivo">
+              attach_file
+            </i>
+            <p *ngIf="!element.Archivo">No hay Archivo</p>
+          </td>
+          <td mat-footer-cell *matFooterCellDef></td>
+        </ng-container>
+
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsDetalle"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsDetalle;"></tr>
+        <tr mat-footer-row *matFooterRowDef="displayedColumnsDetalle"></tr>
+      </table>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="row">
+      <div class="col s6"></div>
+      <div class="col s6" style="text-align: right">
+        <button type="button" class="btn-flat mr-3" (click)="imprimirDetalle(otDetalle)">
+          <i class="material-icons left">print</i>
+          IMPRIMIR
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
