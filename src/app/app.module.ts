@@ -86,6 +86,7 @@ import {ResumenConsultaComponent} from './consulta-general/resumen-consulta/resu
 import {ReporteCorteComponent} from './reportes/reporte-corte/reporte-corte.component';
 import {ReporteConfeccionComponent} from './reportes/reporte-confeccion/reporte-confeccion.component';
 import {ReporteTerminadoComponent} from './reportes/reporte-terminado/reporte-terminado.component';
+import {ReporteCostoCotizadoComponent} from './reportes/reporte-costo-cotizado/reporte-costo-cotizado.component';
 
 // the second parameter 'fr' is optional
 registerLocaleData(localeMx);
@@ -165,6 +166,7 @@ registerLocaleData(localeMx);
     ReporteCorteComponent,
     ReporteConfeccionComponent,
     ReporteTerminadoComponent,
+    ReporteCostoCotizadoComponent,
   ],
   entryComponents: [
     AddEditOperacionTerminadoComponent
@@ -255,6 +257,7 @@ registerLocaleData(localeMx);
           {path: 'reporte-corte', component: ReporteCorteComponent},
           {path: 'reporte-confeccion', component: ReporteConfeccionComponent},
           {path: 'reporte-terminado', component: ReporteTerminadoComponent},
+          {path: 'costo-cotizado', component: ReporteCostoCotizadoComponent},
         ]
       },
       {

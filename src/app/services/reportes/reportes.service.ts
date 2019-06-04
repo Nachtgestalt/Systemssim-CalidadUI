@@ -134,4 +134,75 @@ export class ReportesService {
         })
       );
   }
+
+  limitesCtrlCorte(fechaInicial, fechaFinal) {
+    const url = `${this.URL_REPORTE_COMPOSTURAS}/Corte`;
+    let params = new HttpParams().append('Fecha_i', fechaInicial);
+    params = params.append('Fecha_f', fechaFinal);
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.get(url, {headers, params, responseType: 'arraybuffer' as 'json'})
+      .pipe(
+        map((res: any) => {
+          console.log(res);
+          return new Blob([res], { type: 'application/pdf' });
+        })
+      );
+  }
+
+  limitesCtrlCorteGrafico(fechaInicial, fechaFinal) {
+    const url = `${this.URL_REPORTE_COMPOSTURAS}/CorteGrafico`;
+    let params = new HttpParams().append('Fecha_i', fechaInicial);
+    params = params.append('Fecha_f', fechaFinal);
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.get(url, {headers, params, responseType: 'arraybuffer' as 'json'})
+      .pipe(
+        map((res: any) => {
+          console.log(res);
+          return new Blob([res], { type: 'application/pdf' });
+        })
+      );
+  }
+
+  refiladoCortador(fechaInicial, fechaFinal) {
+    const url = `${this.URL_REPORTE_COMPOSTURAS}/CorteCortadores`;
+    let params = new HttpParams().append('Fecha_i', fechaInicial);
+    params = params.append('Fecha_f', fechaFinal);
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.get(url, {headers, params, responseType: 'arraybuffer' as 'json'})
+      .pipe(
+        map((res: any) => {
+          console.log(res);
+          return new Blob([res], {type: 'application/pdf'});
+        })
+      );
+  }
+
+  refiladoCortadorGrafico(fechaInicial, fechaFinal) {
+    const url = `${this.URL_REPORTE_COMPOSTURAS}/CorteCortadoresGrafico`;
+    let params = new HttpParams().append('Fecha_i', fechaInicial);
+    params = params.append('Fecha_f', fechaFinal);
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.get(url, {headers, params, responseType: 'arraybuffer' as 'json'})
+      .pipe(
+        map((res: any) => {
+          console.log(res);
+          return new Blob([res], {type: 'application/pdf'});
+        })
+      );
+  }
+
+  costoCotizado(ot_i, ot_f, tipo_cambio) {
+    const url = `${this.URL_REPORTE_COMPOSTURAS}/CostoCotizado`;
+    let params = new HttpParams().append('OT_I', ot_i);
+    params = params.append('OT_F', ot_f);
+    params = params.append('tipo_cambio', tipo_cambio);
+    const headers = new HttpHeaders().append('content-type', 'application/json');
+    return this._http.get(url, {headers, params, responseType: 'arraybuffer' as 'json'})
+      .pipe(
+        map((res: any) => {
+          console.log(res);
+          return new Blob([res], {type: 'application/pdf'});
+        })
+      );
+  }
 }
