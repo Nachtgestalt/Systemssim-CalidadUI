@@ -38,7 +38,7 @@
     "jquery": "^2.2.4",
     "jspdf": "^1.5.3",
     "materialize-css": "^1.0.0-rc.2",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "ngx-toastr": "^8.8.0",
     "rxjs": "^6.4.0",
     "sweetalert": "^2.1.2",
